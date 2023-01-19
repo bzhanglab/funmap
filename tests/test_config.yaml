@@ -1,0 +1,10 @@
+seed: 42
+results_dir: results
+n_jobs: 40
+n_chunk: 4
+# minimum number of valid data point when computing correlation
+min_sample_count: 15
+# whether to output the edge list or not
+output_edgelist: True
+max_num_edges: 25000
+step_size: 1
