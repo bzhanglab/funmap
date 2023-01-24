@@ -1,4 +1,5 @@
 from os import path as osp
+from pathlib import Path
 import re
 import pandas as pd
 from importlib import resources
@@ -7,7 +8,7 @@ from importlib import resources
 def get_datafile_path(data_file):
     with resources.path('funmap.data', data_file) as f:
         data_file_path = f
-    return data_file_path
+    return Path(data_file_path)
 
 
 def remove_version_id(value):

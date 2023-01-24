@@ -17,11 +17,9 @@ from funmap.utils import get_datafile_path
 
 def arg_parse():
     parser = argparse.ArgumentParser(description='command line arguments.')
-    parser.add_argument('-c', '--config-file', required=True,
-                        type=argparse.FileType('r'),
+    parser.add_argument('-c', '--config-file', required=True, type=str,
                         help='path to experiment configuration yaml file')
-    parser.add_argument('-d', '--data-config-file', required=True,
-                        type=argparse.FileType('r'),
+    parser.add_argument('-d', '--data-config-file', required=True, type=str,
                         help='path to data configuration yaml file')
     args = parser.parse_args()
 
@@ -30,7 +28,14 @@ def arg_parse():
 
 # https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
 def dict_hash(dictionary: Dict[str, Any]) -> str:
-    """MD5 hash of a dictionary."""
+    """MD5 hash of a dictionary.
+
+    Args:
+        dictionary: Dictionary to hash.
+
+    Returns:
+        str: MD5 hash of the dictionary (first 8 characters).
+    """
     dhash = hashlib.sha256()
     encoded = json.dumps(dictionary, sort_keys=True).encode()
     dhash.update(encoded)
@@ -38,11 +43,22 @@ def dict_hash(dictionary: Dict[str, Any]) -> str:
 
 
 def get_config(cfg_file, data_cfg_file):
+    """create configuration dictionaries from yaml files.
+
+    Args:
+        cfg_file (str): path to the configuration file
+        data_cfg_file (str): path to the data configuration file
+
+    Returns:
+        dict: run time configuration dictionary
+        dict: model configuration dictionary
+        dict: data configuration dictionary
+    """
     run_cfg = {}
     model_cfg = {}
     data_cfg = {}
-    with open(cfg_file, 'r') as stream:
-        cfg_dict = yaml.load(stream, Loader=yaml.FullLoader)
+    with open(cfg_file, 'r') as fh:
+        cfg_dict = yaml.load(fh, Loader=yaml.FullLoader)
 
     # separte cfg into two parts.
     model_cfg['seed'] = cfg_dict['seed'] if 'seed' in cfg_dict else 42
@@ -77,7 +93,7 @@ def main():
     run_cfg, model_cfg, data_cfg = get_config(args.config_file,
                                             args.data_config_file)
     np.random.seed(model_cfg['seed'])
-    results_dir = 'results'
+    results_dir = Path('results')
     model_dir = 'saved_models'
     prediction_dir = 'saved_predictions'
     ml_type = model_cfg['ml_type']
@@ -104,33 +120,26 @@ def main():
     hash_str = dict_hash(res_cfg)
     # save configuration to results folder
     results_prefix = f'results-{hash_str}'
-    results_dir = os.path.join(results_dir, results_prefix)
-    data_dir = os.path.join(results_dir, 'saved_data')
-    model_dir = os.path.join(results_dir, model_dir)
-    prediction_dir = os.path.join(results_dir, prediction_dir)
+    results_dir = results_dir / results_prefix
+    data_dir = results_dir / 'saved_data'
+    model_dir = results_dir / model_dir
+    prediction_dir = results_dir / prediction_dir
 
-    if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
+    results_dir.mkdir(parents=True, exist_ok=True)
+    data_dir.mkdir(parents=True, exist_ok=True)
+    model_dir.mkdir(parents=True, exist_ok=True)
+    prediction_dir.mkdir(parents=True, exist_ok=True)
 
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-
-    if not os.path.exists(model_dir):
-        os.makedirs(model_dir)
-
-    if not os.path.exists(prediction_dir):
-        os.makedirs(prediction_dir)
-
-    with open(os.path.join(results_dir, 'config.json'), 'w') as fh:
+    with open(str(results_dir / 'config.json'), 'w') as fh:
         json.dump(all_cfg, fh, indent=4)
 
-    ml_model_file = os.path.join(model_dir, 'model.pkl.gz')
-    predicted_all_pairs_file = os.path.join(prediction_dir, 'predicted_all_pairs.pkl.gz')
+    ml_model_file = model_dir / 'model.pkl.gz'
+    predicted_all_pairs_file = prediction_dir / 'predicted_all_pairs.pkl.gz'
     blacklist_file = get_datafile_path('funmap_blacklist.txt')
 
     # if validation results are available, nothing to do here
-    llr_res_file = os.path.join(results_dir, 'llr_res.tsv')
-    if os.path.exists(llr_res_file):
+    llr_res_file = results_dir / 'llr_res.tsv'
+    if llr_res_file.exists():
         print(f'{llr_res_file} exists ... nothing to be done')
         return
 
@@ -140,14 +149,14 @@ def main():
 
     # check if models and predictions are available from previous run with the
     # same configuration
-    if os.path.exists(predicted_all_pairs_file):
+    if predicted_all_pairs_file.exists():
         print(f'Loading predicted all pairs from {predicted_all_pairs_file}')
         predicted_all_pairs = pd.read_pickle(predicted_all_pairs_file)
         print(f'Loading predicted all pairs ... done')
     else:
-        if os.path.exists(ml_model_file):
+        if ml_model_file.exists():
             print(f'Loading model from {ml_model_file} ...')
-            ml_model = load(ml_model_file)
+            ml_model = load(str(ml_model_file))
             print(f'Loading model ... done')
         else:
             # train an ML model to predict the label

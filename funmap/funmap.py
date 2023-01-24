@@ -5,6 +5,7 @@ import gc
 import itertools
 import warnings
 import csv
+from pathlib import Path
 from collections import defaultdict, Counter
 import pandas as pd
 import numpy as np
@@ -173,7 +174,8 @@ def compute_all_features(edge_df, valid_gene_list, data_config,
                                     min_sample_count, cor_func)
                     for edges in chunks(cur_chunk, job_size))
         for i in range(len(results)):
-            cor_df = cor_df.append(results[i])
+            # cor_df = cor_df.append(results[i])
+            cor_df = pd.concat([cor_df, results[i]], axis=0)
         del results
         gc.collect()
     print('computing CC done')
@@ -269,7 +271,7 @@ def train_xgboost_model(X, y, seed, n_jobs):
     }
 
     print(f'training xgboost model ...')
-    xgb_model = xgb.XGBClassifier(use_label_encoder=False, random_state=seed,
+    xgb_model = xgb.XGBClassifier(random_state=seed,
                             eval_metric='logloss', n_jobs=n_jobs)
     cv = StratifiedKFold(n_splits=5, random_state=seed, shuffle=True)
     clf = GridSearchCV(xgb_model, model_params, scoring='roc_auc', cv=cv,
@@ -305,17 +307,15 @@ def predict_all_pairs(model, all_feature_df, min_feature_count,
 
 def validation_llr(all_feature_df, predicted_all_pair, feature_type,
                 filter_after_prediction, filter_criterion, filter_threshold,
-                filter_blacklist, blacklist_file, max_num_edges, step_size,
+                filter_blacklist, blacklist_file: Path, max_num_edges, step_size,
                 output_edge_list, gs_test_pos_set,
-                gs_test_neg_set, output_dir):
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+                gs_test_neg_set, output_dir: Path):
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # final results
-    llr_res_file = os.path.join(output_dir,
-                            f'llr_results_{max_num_edges}.tsv')
+    llr_res_file = output_dir / f'llr_results_{max_num_edges}.tsv'
 
-    if os.path.exists(llr_res_file):
+    if llr_res_file.exists():
         # check if the file can be loaded successfully
         llr_res_dict = pd.read_csv(llr_res_file, sep='\t')
         print(f'{llr_res_file} exists ... nothing to be done')
@@ -361,7 +361,7 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
                 # f'are: {cur_results.iloc[k,:]}')
             # https://stackoverflow.com/a/7590970/410069
             common_pos_edges = selected_edges & gs_test_pos_set
-            common_neg_edges = selected_edges &  gs_test_neg_set
+            common_neg_edges = selected_edges & gs_test_neg_set
             try:
                 lr = len(common_pos_edges) / len(common_neg_edges) / (len(gs_test_pos_set) / len(gs_test_neg_set))
             except ZeroDivisionError:
@@ -378,10 +378,9 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
         # write edge list to file
         if output_edge_list:
             print(f'saving edges to file ...')
-            out_dir = os.path.join(output_dir, f'networks')
-            if not os.path.exists(out_dir):
-                os.makedirs(out_dir)
-            edge_list_file_out = os.path.join(out_dir, f'network_{k}.tsv')
+            out_dir = output_dir / 'networks'
+            out_dir.mkdir(parents=True, exist_ok=True)
+            edge_list_file_out = out_dir / f'network_{k}.tsv'
             selected_edges = list(cur_results.iloc[:k, :].index)
             with open(edge_list_file_out, 'w') as out_file:
                 tsv_writer = csv.writer(out_file, delimiter='\t')
@@ -392,9 +391,10 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
 
 
 # correlation coefficient data
-def load_features(data_config, feature_file, pair_file, valid_gene_file, cor_type,
-                    min_sample_count, n_jobs, n_chunks):
-    if os.path.isfile(feature_file) and os.path.isfile(valid_gene_file):
+def load_features(data_config: Path, feature_file: Path,
+                pair_file: Path, valid_gene_file: Path, cor_type: str,
+                min_sample_count: int, n_jobs: int, n_chunks: int):
+    if feature_file.exists() and valid_gene_file.exists():
             print(f'Loading all features from {feature_file}')
             all_feature_df = pd.read_feather(feature_file)
             all_feature_df['index'] = all_feature_df['index'].apply(lambda x: tuple(x))
@@ -408,7 +408,7 @@ def load_features(data_config, feature_file, pair_file, valid_gene_file, cor_typ
             print(f'Loading all {len(valid_gene_list)} valid gene from {valid_gene_file} ... done')
     else:
         print(f'Computing features for all pairs ...')
-        if not os.path.isfile(pair_file) or not os.path.isfile(valid_gene_file):
+        if not pair_file.exists() or not valid_gene_file.exists():
             print(f'Generating all pairs ...')
             edge_df, valid_gene_list = generate_all_pairs(data_config, min_sample_count)
             print(f'Saving all pairs ...')
@@ -439,19 +439,18 @@ def load_features(data_config, feature_file, pair_file, valid_gene_file, cor_typ
     return all_feature_df, valid_gene_list
 
 
-def prepare_gs_data(**args):
-    data_dir = args['data_dir']
-    all_feature_df = args['all_feature_df']
-    valid_gene_list = args['valid_gene_list']
-    test_size = args['test_size']
-    seed = args['seed']
+def prepare_gs_data(**kwargs):
+    data_dir = kwargs['data_dir']
+    all_feature_df = kwargs['all_feature_df']
+    valid_gene_list = kwargs['valid_gene_list']
+    test_size = kwargs['test_size']
+    seed = kwargs['seed']
 
-    gs_train_file = os.path.join(data_dir, f'gold_standard_train.pkl.gz')
-    gs_test_pos_file = os.path.join(data_dir, f'gold_standard_test_pos.pkl.gz')
-    gs_test_neg_file = os.path.join(data_dir, f'gold_standard_test_neg.pkl.gz')
+    gs_train_file = data_dir / 'gold_standard_train.pkl.gz'
+    gs_test_pos_file = data_dir / 'gold_standard_test_pos.pkl.gz'
+    gs_test_neg_file = data_dir / 'gold_standard_test_neg.pkl.gz'
 
-    if (os.path.isfile(gs_train_file) and os.path.isfile(gs_test_pos_file)
-        and os.path.isfile(gs_test_neg_file)):
+    if gs_train_file.exists() and gs_test_pos_file.exists() and gs_test_neg_file.exists():
         print(f'Loading existing data file from {gs_train_file}')
         gs_train_df = pd.read_pickle(gs_train_file)
         print(f'Loading existing data file from {gs_train_file} ... done')
@@ -484,16 +483,16 @@ def prepare_gs_data(**args):
 
 
 # input features for all pairs
-def prepare_features(**args):
-    data_dir = args['data_dir']
-    data_config = args['data_config']
-    min_sample_count = args['min_sample_count']
-    n_jobs = args['n_jobs']
-    n_chunks = args['n_chunks']
-    cor_type = args['cor_type']
-    pair_file = os.path.join(data_dir, 'all_pairs.tsv.gz')
-    valid_gene_file = os.path.join(data_dir, 'all_valid_gene.txt')
-    feature_file = os.path.join(data_dir, 'all_features.fth')
+def prepare_features(**kwargs):
+    data_dir = kwargs['data_dir']
+    data_config = kwargs['data_config']
+    min_sample_count = kwargs['min_sample_count']
+    n_jobs = kwargs['n_jobs']
+    n_chunks = kwargs['n_chunks']
+    cor_type = kwargs['cor_type']
+    pair_file =data_dir / 'all_pairs.tsv.gz'
+    valid_gene_file = data_dir / 'all_valid_gene.txt'
+    feature_file = data_dir / 'all_features.fth'
     feature_df, valid_gene_list = load_features(data_config, feature_file, pair_file,
             valid_gene_file, cor_type, min_sample_count, n_jobs, n_chunks)
     return feature_df, valid_gene_list
