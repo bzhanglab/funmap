@@ -23,6 +23,22 @@ from imblearn.under_sampling import RandomUnderSampler
 REACTOME_GOLD_STANDARD = 'https://tinyurl.com/547hdnzk'
 
 def get_valid_gs_data(gs_path: str, valid_gene_list: List[str]):
+    """
+    Get valid gene-gene pairs by removing non-valid genes and removing duplicate edges.
+
+    Parameters
+    ----------
+    gs_path : str
+        The path of the gene-gene pair file
+    valid_gene_list : List[str]
+        List of valid genes.
+
+    Returns
+    -------
+    gs_edge_df : pd.DataFrame
+        Dataframe containing valid gene-gene pairs
+    """
+
     gs_edge_df = pd.read_csv(gs_path, sep='\t')
     gs_edge_df = gs_edge_df.rename(columns={gs_edge_df.columns[0]: 'P1',
                                             gs_edge_df.columns[1]: 'P2'})
@@ -36,6 +52,26 @@ def get_valid_gs_data(gs_path: str, valid_gene_list: List[str]):
 
 
 def compute_cc(edges, data_dict, min_valid_count, cor_func):
+    """Compute the correlation coefficient for each edge in the list of edges and for each
+    feature in the data_dict.
+
+    Parameters
+    ----------
+    edges : List[Tuple[str, str]]
+        A list of edges for which the correlation coefficient will be computed.
+    data_dict : Dict[str, pd.DataFrame]
+        A dictionary where the keys are feature names and the values
+        are dataframes containing the feature values for each gene.
+    min_valid_count : int
+        The minimum number of valid data points required to compute the correlation coefficient.
+    cor_func : Callable
+        A function that takes in two arrays and returns the correlation coefficient.
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe containing the correlation coefficients
+    """
     all_features = [f'{ds}' for ds in data_dict.keys()]
     cor_list = []
     all_indices = []

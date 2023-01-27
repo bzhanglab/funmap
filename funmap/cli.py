@@ -5,14 +5,14 @@ import os
 import json
 import pandas as pd
 import numpy as np
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 import hashlib
 from IPython import embed
 from joblib import dump, load
 from pathlib import Path
 from funmap.funmap import validation_llr, predict_all_pairs
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
-from funmap.utils import get_datafile_path
+from funmap.utils import get_datafile_path, dict_hash
 
 
 def arg_parse():
@@ -26,33 +26,22 @@ def arg_parse():
     return args
 
 
-# https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
-def dict_hash(dictionary: Dict[str, Any]) -> str:
-    """MD5 hash of a dictionary.
-
-    Args:
-        dictionary: Dictionary to hash.
-
-    Returns:
-        str: MD5 hash of the dictionary (first 8 characters).
+def get_config(cfg_file: str, data_cfg_file: str) -> Tuple[Dict[str, Any],
+    Dict[str, Any], Dict[str, Any]]:
     """
-    dhash = hashlib.sha256()
-    encoded = json.dumps(dictionary, sort_keys=True).encode()
-    dhash.update(encoded)
-    return dhash.hexdigest()[:8]
+    Reads the configuration files and loads the configurations for the run, model, and data.
 
+    Parameters
+    ----------
+    cfg_file : str
+        Path to the run configuration file
+    data_cfg_file : str
+        Path to the data configuration file
 
-def get_config(cfg_file, data_cfg_file):
-    """create configuration dictionaries from yaml files.
-
-    Args:
-        cfg_file (str): path to the configuration file
-        data_cfg_file (str): path to the data configuration file
-
-    Returns:
-        dict: run time configuration dictionary
-        dict: model configuration dictionary
-        dict: data configuration dictionary
+    Returns
+    -------
+    Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]
+        A tuple containing the run configuration, model configuration, and data configuration
     """
     run_cfg = {}
     model_cfg = {}

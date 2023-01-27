@@ -5,13 +5,60 @@ import pandas as pd
 from importlib import resources
 
 
-def get_datafile_path(data_file):
+# https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
+def dict_hash(dictionary: Dict[str, Any]) -> str:
+    """
+    Calculate the hash of the given dictionary.
+
+    Parameters
+    ----------
+    dictionary: Dict[str, Any]
+        The input dictionary to be hashed.
+
+    Returns
+    -------
+    str
+        The 8-character hexadecimal hash of the dictionary.
+    """
+    dhash = hashlib.sha256()
+    encoded = json.dumps(dictionary, sort_keys=True).encode()
+    dhash.update(encoded)
+    return dhash.hexdigest()[:8]
+
+
+def get_datafile_path(data_file: str) -> Path:
+    """
+    Returns the full path of a data file in the package.
+
+    Parameters
+    ----------
+    data_file : str
+        The name of the data file.
+
+    Returns
+    -------
+    Path
+        The full path of the data file.
+    """
     with resources.path('funmap.data', data_file) as f:
         data_file_path = f
     return Path(data_file_path)
 
 
 def remove_version_id(value):
+    """
+    Remove ensembl version ID from value.
+
+    Parameters
+    ----------
+    value : str
+        The value, typically an ensembl ID, from which the version ID should be removed.
+
+    Returns
+    -------
+    str
+        The value with the version ID removed. If the value is NaN, it will be returned as is.
+    """
     if not pd.isna(value):
         return re.sub('\.\d+', '', value)
     else:
@@ -19,6 +66,33 @@ def remove_version_id(value):
 
 
 def gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id'):
+    """
+    Extract positive and negative edges from a gold standard file.
+
+    Parameters
+    ----------
+    gold_standard_file : str
+        Path to the gold standard file.
+    id_type : str, optional
+        Type of IDs used in the gold standard file. Supported values are 'ensembl_gene_id' (default) and 'uniprot'.
+
+    Returns
+    -------
+    gs_pos_edges : set
+        Set of positive edges.
+    gs_neg_edges : set
+        Set of negative edges.
+
+    Raises
+    ------
+    ValueError
+        If `id_type` is not supported.
+
+    Examples
+    --------
+    >>> gold_standard_file = 'path/to/gold_standard.tsv'
+    >>> gs_pos_edges, gs_neg_edges = gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id')
+    """
     if id_type == 'ensembl_gene_id':
         gs_df = pd.read_csv(gold_standard_file, sep='\t')
         cols = gs_df.columns[0:2]
@@ -40,6 +114,26 @@ def gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id'):
 
 
 def get_data_dict(data_config, min_sample_count):
+    """
+    Returns a dictionary of data from the provided data configuration, filtered to only include genes that are
+    coding and have at least `min_sample_count` samples.
+
+    Parameters
+    ----------
+    data_config : dict
+        A dictionary specifying the data file paths and names. It must contain the following keys:
+        - 'data_root': the root path to the data files
+        - 'data_files': a list of dictionaries, where each dictionary has keys 'name' and 'path'
+    min_sample_count : int
+        Minimum number of samples required for a gene to be included in the returned dictionary
+
+    Returns
+    -------
+    data_dict : dict
+        A dictionary where the keys are the names of the data files and the values are pandas DataFrames containing
+        the data from the corresponding file.
+
+    """
     data_dict = {}
     data_root = data_config['data_root']
     mapping_file = get_datafile_path('knowledge_based_isoform_selection.txt')
@@ -69,6 +163,20 @@ def get_data_dict(data_config, min_sample_count):
 
 # https://stackoverflow.com/a/312464/410069
 def chunks(lst, n):
-    """Yield successive n-sized chunks from lst."""
+    """
+    Yield successive n-sized chunks from lst.
+
+    Parameters
+    ----------
+    lst : list
+        The input list to be split into chunks.
+    n : int
+        The size of each chunk.
+
+    Yields
+    ------
+    list
+        A chunk of size n from the input list lst.
+    """
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
