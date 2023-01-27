@@ -110,6 +110,19 @@ def compute_cc(edges, data_dict, min_valid_count, cor_func):
 
 def extract_gs_features(gs_df: pd.DataFrame,
                 all_feature_df: pd.DataFrame):
+    """
+    Extracts the features from the all_feature_df DataFrame that correspond to the
+    pairs of columns in the gs_df DataFrame.
+
+    Parameters
+    ----------
+    gs_df (pd.DataFrame): DataFrame containing pairs of columns to be used as index.
+    all_feature_df (pd.DataFrame): DataFrame containing all features to be extracted.
+
+    Returns
+    -------
+    pd.DataFrame: DataFrame containing extracted features with index from gs_df.
+    """
     cols = gs_df.columns[0:2]
     gs_df.index = [tuple(sorted(x)) for x in zip(gs_df.pop(cols[0]), gs_df.pop(cols[1]))]
     l_tuple = list(gs_df.index)
@@ -119,8 +132,24 @@ def extract_gs_features(gs_df: pd.DataFrame,
     return feature_df
 
 
-# create all gene pairs
 def generate_all_pairs(data_config, min_sample_count):
+    """
+    Generates a list of all valid protein pairs, along with a list of all valid proteins,
+    based on the provided data configuration and minimum sample count.
+
+    Parameters
+    ----------
+    data_config :
+        Configuration for the data to be used in the function.
+    min_sample_count : int
+        The minimum number of valid samples required for a protein to be considered valid.
+
+    Returns
+    -------
+    tuple of (pandas.DataFrame, list)
+        A DataFrame containing all valid protein pairs, with columns 'P1' and 'P2',
+        and a list of all valid proteins.
+    """
     data_dict = get_data_dict(data_config, min_sample_count)
     all_valid_proteins = set()
     for i in data_dict:
@@ -150,6 +179,22 @@ def generate_all_pairs(data_config, min_sample_count):
 
 
 def compute_mr(cor_arr, gene_list):
+    """
+    Compute the mutual rank of all pairs of genes in the gene list.
+
+    Parameters
+    ----------
+    cor_arr : numpy.ndarray
+        A 1-D array of correlations between all pairs of genes in the gene list.
+    gene_list : list
+        A list of genes.
+
+    Returns
+    -------
+    numpy.ndarray
+        A 1-D array of mutual ranks of all pairs of genes in the gene list.
+
+    """
     n_genes = len(gene_list)
     res_arr = np.array([1]*len(cor_arr), dtype=np.float32)
 
@@ -184,6 +229,31 @@ def compute_mr(cor_arr, gene_list):
 
 def compute_all_features(edge_df, valid_gene_list, data_config,
                         cor_type, min_sample_count, n_jobs, n_chunks):
+    """
+    Compute feature dataframe for given edges dataframe and data configuration.
+
+    Parameters:
+    -----------
+    edge_df : pd.DataFrame
+        Dataframe containing edges between genes.
+    valid_gene_list : list
+        List of genes that are considered valid
+    data_config : dict
+        Configuration of data sources
+    cor_type : str
+        Type of correlation to use (only 'spearman' is supported)
+    min_sample_count : int
+        Minimum sample count required for a gene to be considered
+    n_jobs : int
+        Number of parallel jobs to use
+    n_chunks : int
+        Number of chunks to split edges into for processing
+
+    Returns:
+    --------
+    cor_df : pd.DataFrame
+        Dataframe containing computed features for edges.
+    """
     assert cor_type == 'spearman', 'correlation type must be spearman'
     cor_func = spearmanr
     data_dict = get_data_dict(data_config, min_sample_count)
@@ -270,6 +340,26 @@ def compute_all_features(edge_df, valid_gene_list, data_config,
 
 
 def train_ml_model(data_df, ml_type, seed, n_jobs):
+    """
+    Train a machine learning model.
+
+    Parameters
+    ----------
+    data_df : pd.DataFrame
+        Dataframe containing the input features and target variable.
+    ml_type : str
+        Type of machine learning model to use. Currently only 'xgboost' is supported.
+    seed : int
+        Seed for the random number generator for reproducibility.
+    n_jobs : int
+        Number of parallel jobs to run.
+
+    Returns
+    -------
+    model : object
+        Trained machine learning model
+
+    """
     X, y = under_sample(data_df)
     assert ml_type == 'xgboost', 'ML model must be xgboost'
     model = train_xgboost_model(X, y, seed, n_jobs)
@@ -278,6 +368,22 @@ def train_ml_model(data_df, ml_type, seed, n_jobs):
 
 
 def under_sample(df):
+    """
+    Randomly under-sample the majority class to balance the class distribution.
+
+    Parameters
+    ----------
+    df: pandas DataFrame
+        DataFrame containing the feature set and target variable 'Class'
+
+    Returns
+    -------
+    X_under: numpy array
+        The feature set after under-sampling
+    y_under: numpy array
+        The target variable after under-sampling
+    """
+
     # impute missing values sample wise
     X = df.drop('Class', axis=1)
     y = df['Class']
@@ -291,7 +397,20 @@ def under_sample(df):
 
 
 def feature_type_to_regex(feature_type):
-    # currently only support mutual rank
+    """
+    Convert feature type to regex string.
+
+    Parameters
+    ----------
+    feature_type : str
+        The feature type to be converted. Currently only support 'MR'
+
+    Returns
+    -------
+    regex_str : str
+        The regular expression string corresponding to the feature type.
+
+    """
     assert feature_type == 'MR'
     if feature_type == 'MR':
         regex_str = f'._MR$'
@@ -300,6 +419,27 @@ def feature_type_to_regex(feature_type):
 
 
 def train_xgboost_model(X, y, seed, n_jobs):
+    """
+    Train a XGBoost model using the input feature matrix X and target vector y.
+    The model is trained using GridSearchCV with a specified set of parameters,
+    and a 5-fold stratified cross validation.
+
+    Parameters
+    -----------
+    X : pd.DataFrame
+        The feature matrix
+    y : pd.Series
+        The target vector
+    seed : int
+        The random seed used for reproducibility
+    n_jobs : int
+        The number of CPU cores used for parallel computation
+
+    Returns
+    --------
+    model : sklearn.model_selection._search.GridSearchCV
+        The trained XGBoost model
+    """
     model_params = {
         'n_estimators': [50, 150, 250, 300],
         'max_depth': [2, 3, 4, 5, 6],
@@ -325,7 +465,28 @@ def train_xgboost_model(X, y, seed, n_jobs):
 
 def predict_all_pairs(model, all_feature_df, min_feature_count,
                     filter_before_prediction, out_name):
-    # remove rows with less than min_feature_count valid features
+    """
+    Predict the probability of all pairs of features in the input dataframe.
+
+    Parameters:
+    --------------
+    model: object
+        trained XGBoost model
+    all_feature_df: pandas dataframe
+        dataframe containing all feature pairs
+    min_feature_count: int
+        minimum number of valid feature counts for a pair
+    filter_before_prediction: bool
+        whether to filter pairs with less than min_feature_count features
+        before prediction
+    out_name: str
+        filename to save the prediction result
+
+    Returns:
+    --------------
+    pred_df: pandas dataframe
+        dataframe containing the prediction result
+    """
     if filter_before_prediction:
         all_feature_df = all_feature_df[all_feature_df.iloc[:, 1:].notna().sum(axis=1)
                                 >= min_feature_count]
@@ -346,6 +507,33 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
                 filter_blacklist, blacklist_file: Path, max_num_edges, step_size,
                 output_edge_list, gs_test_pos_set,
                 gs_test_neg_set, output_dir: Path):
+    """
+    Compute Log Likelihood Ratio (LLR) for a given set of edges and a given set of gold
+    standard positive and negative edges.
+    The function performs filtering and sorting on the input edges before computing LLR.
+
+    Parameters
+    ----------
+    all_feature_df (pd.DataFrame): Dataframe containing all features
+    predicted_all_pair (pd.DataFrame): Dataframe containing predicted values of edges
+    feature_type (str): type of feature used to filter edges
+    filter_after_prediction (bool): whether to filter edges after prediction
+    filter_criterion (str): criterion to filter edges
+    filter_threshold (float): threshold value to filter edges
+    filter_blacklist (bool): whether to filter edges incident on genes in blacklist
+    blacklist_file (Path): file containing blacklist genes
+    max_num_edges (int): maximum number of edges to compute LLR for
+    step_size (int): step size for iterating over edges
+    output_edge_list (Path): path to save selected edges
+    gs_test_pos_set (set): set of gold standard positive edges
+    gs_test_neg_set (set): set of gold standard negative edges
+    output_dir (Path): directory to save LLR results
+
+    Returns
+    -------
+    llr_res_dict (pd.DataFrame): Dataframe containing LLR results for all selected edges
+    """
+
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # final results
@@ -426,10 +614,37 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
         print('Calculating llr_res_dict ... done')
 
 
-# correlation coefficient data
 def load_features(data_config: Path, feature_file: Path,
                 pair_file: Path, valid_gene_file: Path, cor_type: str,
                 min_sample_count: int, n_jobs: int, n_chunks: int):
+    """Load feature data from feather file or compute if not exist.
+
+    Parameters
+    ----------
+    data_config : Path
+        Path to the data configuration file.
+    feature_file : Path
+        Path to the feather file that contains the feature data.
+    pair_file : Path
+        Path to the file that contains all pairs of valid genes.
+    valid_gene_file : Path
+        Path to the file that contains the valid genes.
+    cor_type : str
+        Type of correlation to use (e.g. 'pearson', 'spearman')
+    min_sample_count : int
+        Minimum number of samples a gene must be present in to be considered valid.
+    n_jobs : int
+        Number of parallel jobs to use when computing features.
+    n_chunks : int
+        Number of chunks to divide the data into for parallel computation.
+
+    Returns
+    -------
+    all_feature_df : DataFrame
+        DataFrame containing the features for all pairs of valid genes.
+    valid_gene_list : List[str]
+        List of valid genes.
+    """
     if feature_file.exists() and valid_gene_file.exists():
             print(f'Loading all features from {feature_file}')
             all_feature_df = pd.read_feather(feature_file)
@@ -476,6 +691,31 @@ def load_features(data_config: Path, feature_file: Path,
 
 
 def prepare_gs_data(**kwargs):
+    """
+    Prepare gold standard training and test data.
+
+    Parameters
+    ----------
+    data_dir : pathlib.Path
+        Directory where data files are stored
+    all_feature_df : pandas.DataFrame
+        Dataframe containing all features
+    valid_gene_list : list
+        List of valid genes
+    test_size : float
+        Test size
+    seed : int
+        Random seed
+
+    Returns
+    -------
+    gs_train_df : pandas.DataFrame
+        Dataframe containing gold standard training data
+    gs_test_pos_df : pandas.DataFrame
+        Dataframe containing positive gold standard test data
+    gs_test_neg_df : pandas.DataFrame
+        Dataframe containing negative gold standard test data
+    """
     data_dir = kwargs['data_dir']
     all_feature_df = kwargs['all_feature_df']
     valid_gene_list = kwargs['valid_gene_list']
@@ -518,8 +758,32 @@ def prepare_gs_data(**kwargs):
     return gs_train_df, gs_test_pos_df, gs_test_neg_df
 
 
-# input features for all pairs
 def prepare_features(**kwargs):
+    """
+    Prepare features for the given dataset and correlation type.
+
+    Parameters
+    ----------
+    data_dir : Path
+        Path to the directory containing the data files.
+    data_config : Dict
+        A dictionary containing the configuration for the dataset.
+    min_sample_count : int
+        Minimum number of samples required for a gene to be considered valid.
+    n_jobs : int
+        Number of parallel jobs to run.
+    n_chunks : int
+        Number of chunks to divide the data into for parallel processing.
+    cor_type : str
+        Type of correlation to use for computing feature values.
+
+    Returns
+    -------
+    feature_df : pd.DataFrame
+        Dataframe containing the computed features for all pairs of valid genes.
+    valid_gene_list : List[str]
+        List of valid genes.
+    """
     data_dir = kwargs['data_dir']
     data_config = kwargs['data_config']
     min_sample_count = kwargs['min_sample_count']
