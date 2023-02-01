@@ -1,5 +1,6 @@
 from typing import List, Union, Optional
 import os
+import re
 from tqdm import tqdm
 import gc
 import itertools
@@ -18,6 +19,7 @@ from joblib import Parallel, delayed
 from funmap.utils import chunks
 from funmap.utils import get_data_dict
 from imblearn.under_sampling import RandomUnderSampler
+import matplotlib.pyplot as plt
 
 # file hosted on figshare
 REACTOME_GOLD_STANDARD = 'https://tinyurl.com/547hdnzk'
@@ -160,8 +162,8 @@ def generate_all_pairs(data_config, min_sample_count):
         all_valid_proteins = all_valid_proteins.union(set(valid_p))
         print(f'{i} -- ')
         print(f'  # of samples: {len(cur_data.index)}')
-        print(f'  # of proteins: {len(cur_data.columns)}')
-        print(f'  # of proteins with at least {min_sample_count} valid samples: {valid_count}')
+        print(f'  # of genes: {len(cur_data.columns)}')
+        print(f'  # of genes with at least {min_sample_count} valid samples: {valid_count}')
 
 
     all_valid_proteins = list(all_valid_proteins)
@@ -796,3 +798,223 @@ def prepare_features(**kwargs):
     feature_df, valid_gene_list = load_features(data_config, feature_file, pair_file,
             valid_gene_file, cor_type, min_sample_count, n_jobs, n_chunks)
     return feature_df, valid_gene_list
+
+
+def dataset_llr(feature_df, gs_test_pos_set, gs_test_neg_set,
+                start_edge_num=10000, max_num_edge=250000, step_size=1000,
+                output_file='llr_dataset.tsv'):
+    """Calculate the Log-Likelihood Ratio (LLR) for a set of MR features.
+
+    Parameters
+    ----------
+    feature_df : pandas.DataFrame
+        DataFrame containing features for calculation.
+    gs_test_pos_set : set
+        A set of positive test edges.
+    gs_test_neg_set : set
+        A set of negative test edges.
+    start_edge_num : int, optional
+        Start number of edges, by default 10000.
+    max_num_edge : int, optional
+        Maximum number of edges, by default 250000.
+    step_size : int, optional
+        Step size, by default 1000.
+    output_file : str, optional
+        Output file name, by default 'llr_dataset.tsv'.
+
+    Returns
+    -------
+    None
+
+    Notes
+    -----
+    - feature_df should contain features ending with "_MR".
+    - Features ending with "_CC" will be removed from calculation.
+    - start_edge_num should be smaller than max_num_edge.
+    - max_num_edge should be smaller than the number of non-NA values.
+    """
+    mr_df = feature_df.filter(regex='_MR$', axis=1)
+    result_dict = defaultdict(list)
+    for col in mr_df:
+        dataset_name = re.sub('_MR$', '', col)
+        print(f'... processing {dataset_name}')
+        cur_results = mr_df[[col]].copy()
+        cur_results.sort_values(by=col, ascending=False, inplace=True)
+        cnt_notna = np.count_nonzero(~np.isnan(cur_results[col].values))
+        assert start_edge_num < max_num_edge, 'start_edge_num should be smaller than max_num_edge'
+        assert cnt_notna > start_edge_num, 'start_edge_num should be smaller than the number of non-NA values'
+        max_num_edge = min(max_num_edge, cnt_notna)
+        for k in range(start_edge_num, max_num_edge+step_size, step_size):
+            selected_edges = cur_results.iloc[:k, :].index.tolist()
+            all_nodes = { i for t in list(selected_edges) for i in t}
+            common_pos_edges = set(selected_edges) & gs_test_pos_set
+            common_neg_edges = set(selected_edges) & gs_test_neg_set
+            llr = np.log(len(common_pos_edges) / len(common_neg_edges) / (len(gs_test_pos_set) / len(gs_test_neg_set)))
+            n_node = len(all_nodes)
+            result_dict['k'].append(k)
+            result_dict['n'].append(n_node)
+            result_dict['llr'].append(llr)
+            result_dict['dataset'].append(dataset_name)
+            print(f'{dataset_name}, {k}, {n_node}, {llr}')
+
+    llr_ds = pd.DataFrame(result_dict)
+    llr_ds.to_csv(output_file, sep='\t', index=False)
+
+
+def edge_number(x, pos):
+    """
+    Formatter function to format the x-axis tick labels
+
+    Parameters
+    ----------
+    x : float
+        The value to be formatted.
+    pos : float
+        The tick position.
+
+    Returns
+    -------
+    s : str
+        The formatted string of the value.
+    """
+    if x >= 1e6:
+        s = '{:1.1f}M'.format(x*1e-6)
+    elif x == 0:
+        s = '0'
+    else:
+        s = '{:1.0f}K'.format(x*1e-3)
+    return s
+
+
+def plot_llr_comparison(llr_res, llr_ds, output_file='llr_comparison.pdf'):
+    """
+    Plot the comparison of log likelihood ratios (LLR) based on model prediction
+    using all datasets and LLR results for each dataset.
+
+    Parameters
+    ----------
+    llr_res : pandas DataFrame
+        LLR results based on model prediction using all datasets
+    llr_ds : pandas DataFrame
+        LLR results for each dataset
+    output_file : str/Path, optional
+        Output file name or path for saving the plot, by default 'llr_comparison.pdf'
+
+    Returns
+    -------
+    None
+
+    """
+    datasets = sorted(llr_ds['dataset'].unique().tolist())
+    fig, ax = plt.subplots(figsize=(5, 4))
+
+    start = -1
+    for ds in datasets:
+        cur_df = llr_ds[llr_ds['dataset'] == ds]
+        ax.plot(cur_df['k'], cur_df['llr'], label=ds)
+        if start == -1:
+            start = cur_df['k'].iloc[0]
+    # plot llr_res with the same start point
+    llr_res = llr_res[llr_res['k'] >= start]
+    ax.plot(llr_res['k'], llr_res['llr'], label='all datasets', color='black', linewidth=2)
+
+    ax.xaxis.set_major_formatter(edge_number)
+    ax.set_xlabel('number of gene pairs')
+    ax.set_ylabel('log likelihood ratio')
+    ax.yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.box(on=None)
+    plt.savefig(output_file, bbox_inches='tight')
+
+
+def explore_data(data_config: Path, min_sample_count: int,
+                output_dir: Path):
+    """
+    Generate plots to explore and visualize data
+
+    Parameters
+    ----------
+    data_config: Path
+        Path to the data configuration file
+    min_sample_count: int
+        The minimum number of samples required to consider a dataset
+    output_dir: Path
+        The directory to save the output plots
+
+    Returns
+    -------
+    None
+
+    """
+    data_dict = get_data_dict(data_config, min_sample_count)
+
+    # sample wise median expression plot for each dataset
+    data = []
+    data_keys = []
+
+    for ds in data_dict:
+        data_df = data_dict[ds]
+        fig, ax = plt.subplots(figsize=(10, 5))
+        cur_data = data_df.T
+        cur_data.dropna(inplace=True)
+        ax.boxplot(cur_data)
+        ax.set_ylabel('expression')
+        if data_df.shape[0] > 100:
+            ax.set_xlabel(f'sample (n={data_df.shape[0]})')
+            ax.set_xticklabels([])
+        else:
+            ax.set_xlabel('sample')
+        fig.tight_layout()
+        fig.savefig(output_dir/f'{ds}_sample_box_plot.pdf')
+        data_keys.append(ds)
+        data.append(data_df.median(axis=1).values)
+
+    # from IPython import embed; embed()
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.boxplot(data)
+    ax.set_xticklabels(data_keys, rotation=45)
+    ax.yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
+
+    ax.set_xlabel('dataset')
+    ax.set_ylabel('median expression')
+    plt.box(on=None)
+    fig.tight_layout()
+    fig.savefig(output_dir/f'data_box_plot.pdf')
+
+    # boxplot of the number of samples and genes
+    sample_count = pd.DataFrame(
+        {'count':[data_dict[ds].shape[0] for ds in data_dict],
+        'dataset': [ds for ds in data_dict]})
+    gene_count = pd.DataFrame({
+        'count':[data_dict[ds].shape[1] for ds in data_dict],
+        'dataset': [ds for ds in data_dict]})
+
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+
+    bars0 = ax[0].barh(sample_count['dataset'], sample_count['count'], color='#774FA0')
+    bars1 = ax[1].barh(gene_count['dataset'], gene_count['count'], color='#7DC462')
+
+    ax[0].spines['top'].set_visible(False)
+    # ax[0].spines['bottom'].set_position(('outward', 5))
+    ax[0].spines['left'].set_visible(False)
+    ax[0].spines['right'].set_visible(False)
+    ax[0].tick_params(axis='both', which='major', labelsize=12)
+    ax[0].bar_label(bars0, label_type='edge', fontsize=10)
+    ax[0].set_xlabel('number of samples')
+
+    ax[1].spines['top'].set_visible(False)
+    # ax[1].spines['bottom'].set_position(('outward', 5))
+    # ax[1].spines['bottom'].set_visible(True)
+    ax[1].spines['left'].set_visible(False)
+    ax[1].spines['right'].set_visible(False)
+    ax[1].set_yticklabels([])
+    ax[1].tick_params(axis='x', which='major', labelsize=12)
+    ax[1].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+
+    ax[1].bar_label(bars1, label_type='edge', fontsize=10)
+    ax[1].set_xlabel('number of genes')
+
+    fig.tight_layout()
+    fig.savefig(output_dir/f'sample_gene_count.pdf')

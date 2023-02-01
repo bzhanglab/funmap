@@ -1,8 +1,10 @@
-from os import path as osp
+import hashlib
+import json
 from pathlib import Path
 import re
-import pandas as pd
 from importlib import resources
+from typing import Dict, Any
+import pandas as pd
 
 
 # https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
@@ -113,7 +115,7 @@ def gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id'):
     return gs_pos_edges, gs_neg_edges
 
 
-def get_data_dict(data_config, min_sample_count):
+def get_data_dict(data_config, min_sample_count=15):
     """
     Returns a dictionary of data from the provided data configuration, filtered to only include genes that are
     coding and have at least `min_sample_count` samples.
@@ -124,8 +126,8 @@ def get_data_dict(data_config, min_sample_count):
         A dictionary specifying the data file paths and names. It must contain the following keys:
         - 'data_root': the root path to the data files
         - 'data_files': a list of dictionaries, where each dictionary has keys 'name' and 'path'
-    min_sample_count : int
-        Minimum number of samples required for a gene to be included in the returned dictionary
+    min_sample_count : int, optional
+        Minimum number of samples required for a gene to be included in the returned dictionary. Default is 15.
 
     Returns
     -------
@@ -142,7 +144,7 @@ def get_data_dict(data_config, min_sample_count):
     for dt in data_config['data_files']:
         print(f'... {dt["name"]}')
         cur_feature = dt['name']
-        cur_file = osp.join(data_root, dt['path'])
+        cur_file = Path(data_root) / dt['path']
         cur_data = pd.read_csv(cur_file, sep='\t', index_col=0,
                                 header=0)
         if cur_data.shape[1] < min_sample_count:

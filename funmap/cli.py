@@ -6,11 +6,10 @@ import json
 import pandas as pd
 import numpy as np
 from typing import Dict, Any, Tuple
-import hashlib
-from IPython import embed
 from joblib import dump, load
 from pathlib import Path
-from funmap.funmap import validation_llr, predict_all_pairs
+from funmap.funmap import validation_llr, predict_all_pairs, dataset_llr
+from funmap.funmap import plot_llr_comparison, explore_data
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
 from funmap.utils import get_datafile_path, dict_hash
 
@@ -113,11 +112,13 @@ def main():
     data_dir = results_dir / 'saved_data'
     model_dir = results_dir / model_dir
     prediction_dir = results_dir / prediction_dir
+    figure_dir = results_dir / 'figures'
 
     results_dir.mkdir(parents=True, exist_ok=True)
     data_dir.mkdir(parents=True, exist_ok=True)
     model_dir.mkdir(parents=True, exist_ok=True)
     prediction_dir.mkdir(parents=True, exist_ok=True)
+    figure_dir.mkdir(parents=True, exist_ok=True)
 
     with open(str(results_dir / 'config.json'), 'w') as fh:
         json.dump(all_cfg, fh, indent=4)
@@ -127,15 +128,33 @@ def main():
     blacklist_file = get_datafile_path('funmap_blacklist.txt')
 
     # if validation results are available, nothing to do here
-    llr_res_file = results_dir / 'llr_res.tsv'
-    if llr_res_file.exists():
-        print(f'{llr_res_file} exists ... nothing to be done')
-        return
+    llr_res_file = results_dir / f'llr_results_{max_num_edges}.tsv'
+    # llr obtained with each invividual dataset
+    llr_dataset_file = results_dir / 'llr_dataset.tsv'
 
+    explore_data(data_cfg, min_sample_count, figure_dir)
     all_feature_df = None
     gs_train = gs_test_pos = gs_test_neg = None
 
-
+    feature_args = {
+        'data_dir': data_dir,
+        'data_config': data_cfg,
+        'min_sample_count': min_sample_count,
+        'cor_type': cor_type,
+        'n_jobs': n_jobs,
+        'n_chunks': n_chunks
+    }
+    all_feature_df, valid_gene_list = prepare_features(**feature_args)
+    gs_args = {
+        'data_dir': data_dir,
+        'all_feature_df': all_feature_df,
+        'valid_gene_list': valid_gene_list,
+        'min_feature_count': min_feature_count,
+        'test_size': test_size,
+        'seed': seed,
+        'split_by': split_by
+    }
+    gs_train, gs_test_pos, gs_test_neg = prepare_gs_data(**gs_args)
     # check if models and predictions are available from previous run with the
     # same configuration
     if predicted_all_pairs_file.exists():
@@ -149,41 +168,11 @@ def main():
             print(f'Loading model ... done')
         else:
             # train an ML model to predict the label
-            cur_args = {
-                        'data_dir': data_dir,
-                        'data_config': data_cfg,
-                        'min_sample_count': min_sample_count,
-                        'cor_type': cor_type,
-                        'n_jobs': n_jobs,
-                        'n_chunks': n_chunks
-            }
-            all_feature_df, valid_gene_list = prepare_features(**cur_args)
-            cur_args = {
-                'data_dir': data_dir,
-                'all_feature_df': all_feature_df,
-                'valid_gene_list': valid_gene_list,
-                'min_feature_count': min_feature_count,
-                'test_size': test_size,
-                'seed': seed,
-                'split_by': split_by
-            }
-            gs_train, gs_test_pos, gs_test_neg = prepare_gs_data(**cur_args)
             ml_model = train_ml_model(gs_train, ml_type, seed, n_jobs)
             # save model
             dump(ml_model, ml_model_file, compress=True)
 
         print('Predicting for all pairs ...')
-        if all_feature_df is None:
-            cur_args = {
-                        'data_dir': data_dir,
-                        'data_config': data_cfg,
-                        'min_sample_count': min_sample_count,
-                        'cor_type': cor_type,
-                        'n_jobs': n_jobs,
-                        'n_chunks': n_chunks
-            }
-            all_feature_df, valid_gene_list = prepare_features(**cur_args)
-
         predicted_all_pairs = predict_all_pairs(ml_model, all_feature_df,
                                                 min_feature_count,
                                                 filter_before_prediction,
@@ -191,39 +180,28 @@ def main():
         print('Predicting for all pairs ... done.')
 
     predicted_all_pairs = predicted_all_pairs.astype('float32')
-
-    if all_feature_df is None:
-        cur_args = {
-            'data_dir': data_dir,
-            'data_config': data_cfg,
-            'min_sample_count': min_sample_count,
-            'cor_type': cor_type,
-            'n_jobs': n_jobs,
-            'n_chunks': n_chunks
-        }
-        all_feature_df, valid_gene_list = prepare_features(**cur_args)
-
-    if gs_train is None or gs_test_pos is None or gs_test_neg is None:
-        cur_args = {
-                'data_dir': data_dir,
-                'all_feature_df': all_feature_df,
-                'valid_gene_list': valid_gene_list,
-                'min_feature_count': min_feature_count,
-                'test_size': test_size,
-                'seed': seed,
-                'split_by': split_by
-            }
-        gs_train, gs_test_pos, gs_test_neg = prepare_gs_data(**cur_args)
-
     gs_test_pos_set = set(gs_test_pos.index)
     gs_test_neg_set = set(gs_test_neg.index)
-    validation_llr(all_feature_df, predicted_all_pairs, 'MR',
-                filter_after_prediction, filter_criterion, filter_threshold,
-                filter_blacklist, blacklist_file,
-                max_num_edges, step_size, output_edgelist,
-                gs_test_pos_set, gs_test_neg_set, results_dir)
 
-    print('Validating ... done.')
+    if not llr_res_file.exists():
+        print('Computing LLR with trained model ...')
+        validation_llr(all_feature_df, predicted_all_pairs, 'MR',
+                    filter_after_prediction, filter_criterion, filter_threshold,
+                    filter_blacklist, blacklist_file,
+                    max_num_edges, step_size, output_edgelist,
+                    gs_test_pos_set, gs_test_neg_set, results_dir)
+        print('Done.')
+    else:
+        llr_res = pd.read_csv(llr_res_file, sep='\t')
+    if not llr_dataset_file.exists():
+        print('Computing LLR for each dataset ...')
+        llr_ds = dataset_llr(all_feature_df, gs_test_pos_set, gs_test_neg_set,
+            10000, max_num_edges, 1000, results_dir / 'dataset_llr.tsv')
+        print('Done.')
+    else:
+        llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
+
+    plot_llr_comparison(llr_res, llr_ds, output_file=figure_dir / 'llr_comparison.pdf')
     return 0
 
 
