@@ -16,13 +16,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 import xgboost as xgb
 from joblib import Parallel, delayed
-from funmap.utils import chunks
-from funmap.utils import get_data_dict
+from funmap.utils import chunks, urls, get_data_dict
 from imblearn.under_sampling import RandomUnderSampler
 import matplotlib.pyplot as plt
 
-# file hosted on figshare
-REACTOME_GOLD_STANDARD = 'https://tinyurl.com/547hdnzk'
 
 def get_valid_gs_data(gs_path: str, valid_gene_list: List[str]):
     """
@@ -506,7 +503,7 @@ def predict_all_pairs(model, all_feature_df, min_feature_count,
 
 def validation_llr(all_feature_df, predicted_all_pair, feature_type,
                 filter_after_prediction, filter_criterion, filter_threshold,
-                filter_blacklist, blacklist_file: Path, max_num_edges, step_size,
+                filter_blacklist, blacklist_file: str, max_num_edges, step_size,
                 output_edge_list, gs_test_pos_set,
                 gs_test_neg_set, output_dir: Path):
     """
@@ -523,7 +520,7 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
     filter_criterion (str): criterion to filter edges
     filter_threshold (float): threshold value to filter edges
     filter_blacklist (bool): whether to filter edges incident on genes in blacklist
-    blacklist_file (Path): file containing blacklist genes
+    blacklist_file (str): url to blacklist file
     max_num_edges (int): maximum number of edges to compute LLR for
     step_size (int): step size for iterating over edges
     output_edge_list (Path): path to save selected edges
@@ -740,7 +737,7 @@ def prepare_gs_data(**kwargs):
         print(f'Loading existing data file from {gs_test_neg_file} ... done')
     else:
         print('Preparing gs data ...')
-        gs_df = get_valid_gs_data(REACTOME_GOLD_STANDARD, valid_gene_list)
+        gs_df = get_valid_gs_data(urls['reactome_gold_standard'], valid_gene_list)
         gs_X_y_train, gs_X_y_test = train_test_split(gs_df,
                                                     test_size=test_size,
                                                     random_state=seed,

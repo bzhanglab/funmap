@@ -11,7 +11,7 @@ from pathlib import Path
 from funmap.funmap import validation_llr, predict_all_pairs, dataset_llr
 from funmap.funmap import plot_llr_comparison, explore_data
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
-from funmap.utils import get_datafile_path, dict_hash
+from funmap.utils import dict_hash, urls
 
 
 def arg_parse():
@@ -125,7 +125,7 @@ def main():
 
     ml_model_file = model_dir / 'model.pkl.gz'
     predicted_all_pairs_file = prediction_dir / 'predicted_all_pairs.pkl.gz'
-    blacklist_file = get_datafile_path('funmap_blacklist.txt')
+    blacklist_file = urls['funmap_blacklist']
 
     # if validation results are available, nothing to do here
     llr_res_file = results_dir / f'llr_results_{max_num_edges}.tsv'

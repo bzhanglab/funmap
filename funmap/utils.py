@@ -2,10 +2,15 @@ import hashlib
 import json
 from pathlib import Path
 import re
-from importlib import resources
 from typing import Dict, Any
 import pandas as pd
 
+# file hosted on figshare
+urls = {
+    'reactome_gold_standard': 'https://figshare.com/ndownloader/files/38647601',
+    'funmap_blacklist': 'https://figshare.com/ndownloader/files/39033977',
+    'mapping_file': 'https://figshare.com/ndownloader/files/39033971'
+}
 
 # https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
 def dict_hash(dictionary: Dict[str, Any]) -> str:
@@ -26,25 +31,6 @@ def dict_hash(dictionary: Dict[str, Any]) -> str:
     encoded = json.dumps(dictionary, sort_keys=True).encode()
     dhash.update(encoded)
     return dhash.hexdigest()[:8]
-
-
-def get_datafile_path(data_file: str) -> Path:
-    """
-    Returns the full path of a data file in the package.
-
-    Parameters
-    ----------
-    data_file : str
-        The name of the data file.
-
-    Returns
-    -------
-    Path
-        The full path of the data file.
-    """
-    with resources.path('funmap.data', data_file) as f:
-        data_file_path = f
-    return Path(data_file_path)
 
 
 def remove_version_id(value):
@@ -138,11 +124,10 @@ def get_data_dict(data_config, min_sample_count=15):
     """
     data_dict = {}
     data_root = data_config['data_root']
-    mapping_file = get_datafile_path('knowledge_based_isoform_selection.txt')
-    mapping = pd.read_csv(mapping_file, sep='\t')
+    mapping = pd.read_csv(urls['mapping_file'], sep='\t')
     # gene ids are gene symbols
     for dt in data_config['data_files']:
-        print(f'... {dt["name"]}')
+        print(f"... {dt['name']}")
         cur_feature = dt['name']
         cur_file = Path(data_root) / dt['path']
         cur_data = pd.read_csv(cur_file, sep='\t', index_col=0,
