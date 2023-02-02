@@ -13,13 +13,15 @@ from funmap.funmap import plot_llr_comparison, explore_data
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
 from funmap.utils import dict_hash, urls
 
-
+# add option for user to specify results directory
 def arg_parse():
     parser = argparse.ArgumentParser(description='command line arguments.')
     parser.add_argument('-c', '--config-file', required=True, type=str,
                         help='path to experiment configuration yaml file')
     parser.add_argument('-d', '--data-config-file', required=True, type=str,
                         help='path to data configuration yaml file')
+    parser.add_argument('-o', '--output-dir', required=False, type=str,
+                        help='path to output directory')
     args = parser.parse_args()
 
     return args
@@ -81,7 +83,6 @@ def main():
     run_cfg, model_cfg, data_cfg = get_config(args.config_file,
                                             args.data_config_file)
     np.random.seed(model_cfg['seed'])
-    results_dir = Path('results')
     model_dir = 'saved_models'
     prediction_dir = 'saved_predictions'
     ml_type = model_cfg['ml_type']
@@ -105,10 +106,12 @@ def main():
     all_cfg = {**model_cfg, **data_cfg, **run_cfg}
     # results will only be affected by model_cfg and data_cfg
     res_cfg = {**model_cfg, **data_cfg}
-    hash_str = dict_hash(res_cfg)
-    # save configuration to results folder
-    results_prefix = f'results-{hash_str}'
-    results_dir = results_dir / results_prefix
+    if args.output_dir is None:
+        results_dir = Path('results')
+        hash_str = dict_hash(res_cfg)
+        results_dir = results_dir / f'results-{hash_str}'
+    else: # user specified output directory
+        results_dir = Path(args.output_dir)
     data_dir = results_dir / 'saved_data'
     model_dir = results_dir / model_dir
     prediction_dir = results_dir / prediction_dir
@@ -120,6 +123,7 @@ def main():
     prediction_dir.mkdir(parents=True, exist_ok=True)
     figure_dir.mkdir(parents=True, exist_ok=True)
 
+    # save configuration to results folder
     with open(str(results_dir / 'config.json'), 'w') as fh:
         json.dump(all_cfg, fh, indent=4)
 

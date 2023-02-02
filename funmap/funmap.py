@@ -994,7 +994,6 @@ def explore_data(data_config: Path, min_sample_count: int,
     bars1 = ax[1].barh(gene_count['dataset'], gene_count['count'], color='#7DC462')
 
     ax[0].spines['top'].set_visible(False)
-    # ax[0].spines['bottom'].set_position(('outward', 5))
     ax[0].spines['left'].set_visible(False)
     ax[0].spines['right'].set_visible(False)
     ax[0].tick_params(axis='both', which='major', labelsize=12)
@@ -1002,8 +1001,6 @@ def explore_data(data_config: Path, min_sample_count: int,
     ax[0].set_xlabel('number of samples')
 
     ax[1].spines['top'].set_visible(False)
-    # ax[1].spines['bottom'].set_position(('outward', 5))
-    # ax[1].spines['bottom'].set_visible(True)
     ax[1].spines['left'].set_visible(False)
     ax[1].spines['right'].set_visible(False)
     ax[1].set_yticklabels([])
