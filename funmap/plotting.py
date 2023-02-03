@@ -165,6 +165,28 @@ def explore_data(data_config: Path, min_sample_count: int,
 
 
 def plot_1d_llr(ax, feature_df, feature_name, feature_type, data_type, n_bins):
+    """
+    Plot the 1D histogram of the likelihood ratio for each feature
+
+    Parameters
+    ----------
+    ax : matplotlib.axes._subplots.AxesSubplot
+        The subplot where the histogram is to be plotted.
+    feature_df : pd.DataFrame
+        DataFrame containing all features and their values.
+    feature_name : str
+        The name of the feature for which histogram is to be plotted.
+    feature_type : str
+        The type of the feature, either 'CC' or 'MR'.
+    data_type : str
+        The type of data, either 'RNA' or 'PRO'.
+    n_bins : int
+        The number of bins for the histogram.
+
+    Returns
+    -------
+    None
+    """
     df = feature_df.loc[:, [feature_name]]
     cur_df = df.dropna()
     cur_df_vals = cur_df.values.reshape(-1)
@@ -194,6 +216,32 @@ def plot_1d_llr(ax, feature_df, feature_name, feature_type, data_type, n_bins):
 
 
 def plot_2d_llr(ax, feature_df, feature_type, pair_name, rna_feature, pro_feature, n_bins):
+    """
+    Plots a 2D log likelihood ratio between two features in a scatter plot.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes._subplots.AxesSubplot
+        The subplot to plot the log likelihood ratio on.
+    feature_df : pandas.DataFrame
+        DataFrame containing all features and target variables.
+    feature_type : str
+        Type of feature, either "CC" (correlation coefficient) or "MR" (mutual rank).
+    pair_name : str
+        Name of the feature pair.
+    rna_feature : str
+        Name of the RNA feature in `feature_df`.
+    pro_feature : str
+        Name of the protein feature in `feature_df`.
+    n_bins : int
+        Number of bins in the 2D histogram.
+
+    Returns
+    -------
+    fig : matplotlib.collections.QuadMesh
+        The mesh plot of the log likelihood ratio.
+
+    """
     data_types = ['RNA', 'PRO']
     label_mapping = {'PRO': 'Protein', 'RNA': 'mRNA'}
     feature_label_mapping = {'CC': 'correlation coefficient',
