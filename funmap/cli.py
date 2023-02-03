@@ -9,7 +9,7 @@ from typing import Dict, Any, Tuple
 from joblib import dump, load
 from pathlib import Path
 from funmap.funmap import validation_llr, predict_all_pairs, dataset_llr
-from funmap.funmap import plot_llr_comparison, explore_data
+from funmap.plotting import plot_llr_comparison, explore_data, plot_pair_llr
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
 from funmap.utils import dict_hash, urls
 
@@ -189,7 +189,7 @@ def main():
 
     if not llr_res_file.exists():
         print('Computing LLR with trained model ...')
-        validation_llr(all_feature_df, predicted_all_pairs, 'MR',
+        llr_res = validation_llr(all_feature_df, predicted_all_pairs, 'MR',
                     filter_after_prediction, filter_criterion, filter_threshold,
                     filter_blacklist, blacklist_file,
                     max_num_edges, step_size, output_edgelist,
@@ -199,6 +199,7 @@ def main():
         llr_res = pd.read_csv(llr_res_file, sep='\t')
     if not llr_dataset_file.exists():
         print('Computing LLR for each dataset ...')
+        # TODO: adjust the starting number of edges and step size automatically
         llr_ds = dataset_llr(all_feature_df, gs_test_pos_set, gs_test_neg_set,
             10000, max_num_edges, 1000, results_dir / 'dataset_llr.tsv')
         print('Done.')
@@ -206,6 +207,8 @@ def main():
         llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
 
     plot_llr_comparison(llr_res, llr_ds, output_file=figure_dir / 'llr_comparison.pdf')
+    if 'rp_pairs' in data_cfg:
+        plot_pair_llr(gs_train, output_dir=figure_dir, rp_pairs=data_cfg['rp_pairs'])
     return 0
 
 
