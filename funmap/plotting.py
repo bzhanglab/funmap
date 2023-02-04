@@ -1,10 +1,9 @@
 from typing import List, Union, Optional, Dict
-import os
-import re
 from pathlib import Path
 import pandas as pd
 import numpy as np
-from funmap.utils import chunks, urls, get_data_dict
+from funmap.utils import get_data_dict
+import matplotlib
 import matplotlib.pyplot as plt
 
 
@@ -353,3 +352,108 @@ def plot_pair_llr(feature_df: pd.DataFrame, output_dir: Path, rp_pairs: List[Dic
             plt.box(on=None)
             plt.savefig(output_dir/f"{rp_pair['name']}_rna_pro_{ft}_llr.pdf",
                         bbox_inches='tight')
+
+
+def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
+    # sort the llr_res dataframe by the llr value
+    llr_res = llr_res.sort_values(by=['llr'], ascending=False)
+
+    # if the smallest llr value is larger than the cutoff, then we don't need to plot
+    if llr_res['llr'].iloc[0] < np.log(cutoff):
+        print('The largest llr value is smaller than the cutoff, no plot will be generated.')
+        return
+
+    # select the rows that have llr value larger than the cutoff
+    llr_res = llr_res[llr_res['llr'] >= np.log(cutoff)]
+    # the last row correspond the network we want
+    funmap = llr_res.iloc[-1]
+
+    all_networks = [
+        ('FunMap', 'FunMap', int(funmap['n']), int(funmap['k']),
+            funmap['llr'], np.exp(funmap['llr']))
+    ]
+
+    # these are pre-computed values
+    all_networks.extend(
+    [
+        # name, type, n, e, llr, lr
+        ('HuRI', 'HI', 8272, 52548, 2.3139014130648827, 10.11),
+        ('HI-union', 'HI', 9094, 64006, 2.298975841813893, 9.96),
+        ('ProHD', 'ProHD', 2680, 61580, 4.039348296, 56.78),
+        #  this is combined_score_700
+        ('STRING', 'STRING', 16351, 240314,  5.229377563059293, 186.676572955849),
+        ('BioGRID', 'BioGRID', 17259, 654490, 2.6524642147396182, 14.18896024552041),
+        ('BioPlex', 'BioPlex', 13854, 154428, 3.3329858940888375, 28.021887299660047)
+    ]
+    )
+    print(all_networks)
+
+    cols = ['name', 'group', 'n', 'e', 'llr', 'lr']
+    network_data = pd.DataFrame(all_networks, columns=cols)
+    x = np.array(network_data['n'])
+    y = np.array(network_data['llr'])
+    e = np.array(network_data['e'])
+    z = network_data['name']
+
+    fig, ax = plt.subplots(figsize=(10, 10))
+    ax.set_axisbelow(True)
+    ax.xaxis.grid(color = 'gainsboro', linestyle = 'dotted')
+    ax.yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
+    ax.get_ygridlines()[4].set_color('salmon')
+    ax.get_yticklabels()[4].set_color('red')
+    ax2 = ax.twinx()
+
+    mycmap = matplotlib.colors.ListedColormap(['#de2d26', '#8B6CAF', '#0D95D0',
+                                            '#69A953', '#F1C36B', '#DC6C43'])
+    scatter = ax.scatter(x, y, c=[0, 1, 1, 2, 3, 4, 5], cmap=mycmap,
+                        s=e/1000)
+    ax.set_ylim(2, 6)
+    ax2.set_ylim(np.exp(2.0), np.exp(6))
+    ax.set_xlabel('number of genes')
+    ax.set_yticks([2.0, 2.5, 3, 3.5, 3.91, 4, 4.5, 5, 5.5, 6])
+    ax.set_ylabel('log likelihood ratio')
+    ax.spines['top'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    # ax.spines['bottom'].set_visible(False)
+    ax2.set_ylabel('likelihood ratio')
+    ax2.set_yscale('log', base=np.e)
+    ax2.set_yticks([np.exp(2), np.exp(2.5), np.exp(3), np.exp(3.5),
+                    50, np.exp(4), np.exp(4.5), np.exp(5),
+                    np.exp(5.5), np.exp(6)])
+    ax.tick_params(axis='x', labelsize=12)
+    ax.tick_params(axis='y', labelsize=12)
+    ax2.tick_params(axis='y', labelsize=12)
+    ax2.get_yticklabels()[4].set_color('red')
+    ax2.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    ax2.spines['top'].set_visible(False)
+    ax2.spines['left'].set_visible(False)
+    ax2.spines['right'].set_visible(False)
+    # ax2.spines['bottom'].set_visible(False)
+
+    handles1, labels1 = scatter.legend_elements(prop='sizes', num=4, alpha=1,
+                                                fmt='{x:.0f} K')
+    # legend1 = ax.legend(handles1, labels1, bbox_to_anchor=(1.1, 1.0),
+    legend1 = ax.legend(handles1, labels1,
+                        loc='upper left', labelspacing=1.8, borderpad=1.0,
+                        title='number of gene\npairs', frameon=True)
+
+    ax.add_artist(legend1)
+    leg = ax.get_legend()
+    for i in range(len(leg.legendHandles)):
+        leg.legendHandles[i].set_color('gray')
+
+    ax.xaxis.set_major_formatter(edge_number)
+    print(z)
+    for i, txt in enumerate(z):
+        if txt == 'STRING':
+            ax.annotate(txt, (x[i]-500, y[i]+0.18), color='gray', fontsize=10)
+        elif txt == 'HI-union':
+            ax.annotate(txt, (x[i]-100, y[i]+0.1), color='gray', fontsize=10)
+        elif txt == 'BioGRID':
+            ax.annotate(txt, (x[i]-800, y[i]-0.25), color='gray', fontsize=10)
+        else:
+            ax.annotate(txt, (x[i]-100, y[i]-0.2), color='gray', fontsize=10)
+
+    fig.tight_layout()
+    fig.savefig(output_file, bbox_inches='tight')
