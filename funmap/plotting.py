@@ -346,7 +346,7 @@ def plot_pair_llr(feature_df: pd.DataFrame, output_dir: Path, rp_pairs: List[Dic
 
             # add colorbar to the right of the plot
             cax = fig.add_axes([1.05, 0.25, 0.03, 0.5])
-            cb = fig.colorbar(heatmap2d, cax=cax)
+            fig.colorbar(heatmap2d, cax=cax)
 
             plt.tight_layout()
             plt.box(on=None)
@@ -355,6 +355,23 @@ def plot_pair_llr(feature_df: pd.DataFrame, output_dir: Path, rp_pairs: List[Dic
 
 
 def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
+    """
+    Plot a scatter plot to compare log likelihood ratio of different networks.
+
+    Parameters:
+    ----------
+    llr_res : pd.DataFrame
+        A dataframe containing log likelihood ratio values.
+    cutoff : float
+        Cutoff value to exclude log likelihood ratio values lower than this cutoff.
+    output_file : Path
+        Path to save the output plot file.
+
+    Returns:
+    -------
+    None
+    """
+
     # sort the llr_res dataframe by the llr value
     llr_res = llr_res.sort_values(by=['llr'], ascending=False)
 
@@ -410,16 +427,15 @@ def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
     ax.set_ylim(2, 6)
     ax2.set_ylim(np.exp(2.0), np.exp(6))
     ax.set_xlabel('number of genes')
-    ax.set_yticks([2.0, 2.5, 3, 3.5, 3.91, 4, 4.5, 5, 5.5, 6])
+    ax.set_yticks([2.0, 2.5, 3, 3.5, np.log(cutoff), 4, 4.5, 5, 5.5, 6])
     ax.set_ylabel('log likelihood ratio')
     ax.spines['top'].set_visible(False)
     ax.spines['left'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    # ax.spines['bottom'].set_visible(False)
     ax2.set_ylabel('likelihood ratio')
     ax2.set_yscale('log', base=np.e)
     ax2.set_yticks([np.exp(2), np.exp(2.5), np.exp(3), np.exp(3.5),
-                    50, np.exp(4), np.exp(4.5), np.exp(5),
+                    cutoff, np.exp(4), np.exp(4.5), np.exp(5),
                     np.exp(5.5), np.exp(6)])
     ax.tick_params(axis='x', labelsize=12)
     ax.tick_params(axis='y', labelsize=12)
@@ -429,11 +445,9 @@ def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
     ax2.spines['top'].set_visible(False)
     ax2.spines['left'].set_visible(False)
     ax2.spines['right'].set_visible(False)
-    # ax2.spines['bottom'].set_visible(False)
 
     handles1, labels1 = scatter.legend_elements(prop='sizes', num=4, alpha=1,
                                                 fmt='{x:.0f} K')
-    # legend1 = ax.legend(handles1, labels1, bbox_to_anchor=(1.1, 1.0),
     legend1 = ax.legend(handles1, labels1,
                         loc='upper left', labelspacing=1.8, borderpad=1.0,
                         title='number of gene\npairs', frameon=True)

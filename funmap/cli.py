@@ -137,7 +137,7 @@ def main():
     # llr obtained with each invividual dataset
     llr_dataset_file = results_dir / 'llr_dataset.tsv'
 
-    # explore_data(data_cfg, min_sample_count, figure_dir)
+    explore_data(data_cfg, min_sample_count, figure_dir)
     all_feature_df = None
     gs_train = gs_test_pos = gs_test_neg = None
 
