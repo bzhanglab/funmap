@@ -17,7 +17,9 @@ requirements = [
     'joblib',
     'scikit-learn',
     'imblearn',
-    'tqdm'
+    'tqdm',
+    'PyPDF2',
+    'matplotlib_venn'
     ]
 
 test_requirements = [ ]

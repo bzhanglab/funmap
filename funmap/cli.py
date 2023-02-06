@@ -9,8 +9,8 @@ from typing import Dict, Any, Tuple
 from joblib import dump, load
 from pathlib import Path
 from funmap.funmap import validation_llr, predict_all_pairs, dataset_llr
-from funmap.plotting import plot_llr_comparison, explore_data, plot_pair_llr
-from funmap.plotting import plot_llr_compare_networks
+from funmap.plotting import explore_data, plot_results, merge_and_delete
+
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
 from funmap.utils import dict_hash, urls
 
@@ -136,8 +136,9 @@ def main():
     llr_res_file = results_dir / f'llr_results_{max_num_edges}.tsv'
     # llr obtained with each invividual dataset
     llr_dataset_file = results_dir / 'llr_dataset.tsv'
-
-    explore_data(data_cfg, min_sample_count, figure_dir)
+    all_fig_names = []
+    fig_names = explore_data(data_cfg, min_sample_count, figure_dir)
+    all_fig_names.extend(fig_names)
     all_feature_df = None
     gs_train = gs_test_pos = gs_test_neg = None
 
@@ -207,17 +208,10 @@ def main():
     else:
         llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
 
-    plot_llr_comparison(llr_res, llr_ds, output_file=figure_dir / 'llr_compare_dataset.pdf')
+    fig_names = plot_results(data_cfg, run_cfg, llr_res, llr_ds, gs_train, figure_dir)
+    all_fig_names.extend(fig_names)
 
-    if 'rp_pairs' in data_cfg:
-        plot_pair_llr(gs_train, output_dir=figure_dir, rp_pairs=data_cfg['rp_pairs'])
-
-    # note that the cutoff is for LR, not LLR (log of LR)
-    if 'cutoff' in run_cfg:
-        cutoff = run_cfg['cutoff']
-    else:
-        cutoff = 50
-    plot_llr_compare_networks(llr_res, cutoff, output_file=figure_dir / 'llr_compare_networks.pdf')
+    merge_and_delete(figure_dir, all_fig_names, 'all_figures.pdf')
 
     return 0
 
