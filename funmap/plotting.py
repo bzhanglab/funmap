@@ -7,6 +7,9 @@ from funmap.utils import get_data_dict, get_node_edge_overlap
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.cbook import flatten
+from matplotlib.ticker import MaxNLocator
+import matplotlib.ticker as mticker
+import seaborn as sns
 import PyPDF2
 from matplotlib_venn import venn2, venn2_circles
 import networkx as nx
@@ -111,22 +114,36 @@ def explore_data(data_config: Path, min_sample_count: int,
 
     for ds in data_dict:
         data_df = data_dict[ds]
-        fig, ax = plt.subplots(figsize=(10, 5))
+        fig, ax = plt.subplots(1, 2, figsize=(20, 5))
         cur_data = data_df.T
         cur_data.dropna(inplace=True)
         if cur_data.shape[1] > max_col_to_plot:
             cur_data = cur_data.sample(max_col_to_plot, axis=1)
-        ax.boxplot(cur_data)
-        ax.set_ylabel('expression')
+        ax[0].boxplot(cur_data)
+        ax[0].set_ylabel('expression')
         if data_df.shape[0] > max_col_to_plot:
-            ax.set_xlabel(f'random selected {max_col_to_plot} samples (total n={data_df.shape[0]})')
-            ax.set_xticklabels([])
-            ax.set_xticks([])
+            ax[0].set_xlabel(f'random selected {max_col_to_plot} samples (total n={data_df.shape[0]})')
+            ax[0].set_xticklabels([])
+            ax[0].set_xticks([])
         else:
-            ax.set_xlabel('sample')
-        ax.set_title(ds)
+            ax[0].set_xlabel('sample')
+            ax[0].set_xticklabels(cur_data.columns, rotation=45, ha='right')
+
+        # density plot for each sample in each dataset
+        for i in range(data_df.shape[0]):
+            sns.kdeplot(data_df.iloc[i, :], linewidth=1, ax=ax[1])
+        locator=MaxNLocator(60)
+        ax[1].xaxis.set_major_locator(locator)
+        ax[1].set_xlabel('values')
+        ax[1].set_ylabel('density')
+        ticks_loc = ax[1].get_xticks().tolist()
+        ax[1].xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
+        ax[1].set_xticklabels(ax[1].get_xticklabels(), rotation=45, ha='right')
+
+        # set title for the figu
+        fig.suptitle(f'{ds}', fontsize=16)
         fig.tight_layout()
-        cur_file_name = f'{ds}_sample_box_plot.pdf'
+        cur_file_name = f'{ds}_sample_plot.pdf'
         fig_names.append(cur_file_name)
         fig.savefig(output_dir / cur_file_name)
         data_keys.append(ds)
@@ -739,7 +756,9 @@ def plot_network_stats(network_info, output_dir):
     ax[1].spines['left'].set_visible(False)
     ax[1].spines['right'].set_visible(False)
     ax[1].set_ylabel('Average clustering coefficient')
-    ax[1].set_xticklabels(network_list, rotation=-45)
+    ticks_loc = ax[1].get_xticks()
+    ax[1].xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
+    ax[1].set_xticklabels(network_list, rotation=45, ha='right')
     ax[1].yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
     ax[1].set_axisbelow(True)
 
@@ -752,7 +771,9 @@ def plot_network_stats(network_info, output_dir):
     ax[2].spines['left'].set_visible(False)
     ax[2].spines['right'].set_visible(False)
     ax[2].set_ylabel('Density')
-    ax[2].set_xticklabels(network_list, rotation=-45)
+    ticks_loc = ax[2].get_xticks()
+    ax[2].xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
+    ax[2].set_xticklabels(network_list, rotation=45, ha='right')
     ax[2].yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
     ax[2].set_axisbelow(True)
 
@@ -765,7 +786,9 @@ def plot_network_stats(network_info, output_dir):
     ax[3].spines['left'].set_visible(False)
     ax[3].spines['right'].set_visible(False)
     ax[3].set_ylabel('Average shortest path length')
-    ax[3].set_xticklabels(network_list, rotation=-45)
+    ticks_loc = ax[3].get_xticks()
+    ax[3].xaxis.set_major_locator(mticker.FixedLocator(ticks_loc))
+    ax[3].set_xticklabels(network_list, rotation=45, ha='right')
     ax[3].yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
     ax[3].set_axisbelow(True)
 

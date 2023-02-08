@@ -15,6 +15,8 @@ requirements = [
     'scipy',
     'pandas',
     'joblib',
+    'matplotlib',
+    'seaborn',
     'scikit-learn',
     'imblearn',
     'tqdm',
