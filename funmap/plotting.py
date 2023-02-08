@@ -3,11 +3,14 @@ import os
 from pathlib import Path
 import pandas as pd
 import numpy as np
-from funmap.utils import get_data_dict
+from funmap.utils import get_data_dict, get_node_edge_overlap
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.cbook import flatten
 import PyPDF2
 from matplotlib_venn import venn2, venn2_circles
+import networkx as nx
+import powerlaw
 
 
 def edge_number(x, pos):
@@ -181,6 +184,7 @@ def explore_data(data_config: Path, min_sample_count: int,
 
 def plot_results(data_cfg: dict, run_cfg: dict, llr_res: pd.DataFrame,
                 llr_ds: pd.DataFrame, gs_train: pd.DataFrame,
+                edge_file_path: Path,
                 figure_dir: Path) -> List[str]:
     """
     Plot the results of the analysis.
@@ -197,6 +201,8 @@ def plot_results(data_cfg: dict, run_cfg: dict, llr_res: pd.DataFrame,
         The log-likelihood ratio for the dataset.
     gs_train : pandas.DataFrame
         The training data for the analysis.
+    edge_file_path : Path
+        The path to the file containing the edges.
     figure_dir : Path
         The directory where the figures will be saved.
 
@@ -210,7 +216,6 @@ def plot_results(data_cfg: dict, run_cfg: dict, llr_res: pd.DataFrame,
     plot_llr_comparison(llr_res, llr_ds, output_file=figure_dir / file_name)
     fig_names.append(file_name)
 
-
     if 'rp_pairs' in data_cfg:
         file_names = plot_pair_llr(gs_train, output_dir=figure_dir, rp_pairs=data_cfg['rp_pairs'])
         fig_names.extend(file_names)
@@ -221,8 +226,39 @@ def plot_results(data_cfg: dict, run_cfg: dict, llr_res: pd.DataFrame,
     else:
         cutoff = 50
     file_name = 'llr_compare_networks.pdf'
-    plot_llr_compare_networks(llr_res, cutoff, output_file=figure_dir / file_name)
+    n_edge = plot_llr_compare_networks(llr_res, cutoff, output_file=figure_dir / file_name)
     fig_names.append(file_name)
+
+    # for funmap, create a dataframe
+    funmap_el = pd.read_csv(edge_file_path, sep='\t', header=None)
+    funmap_el = funmap_el.iloc[:n_edge, :]
+
+    # the information about other networks is fixed for now
+    other_network_info = {
+        'name': ['BioGRID', 'BioPlex', 'HI-union', 'STRING'],
+        'type': ['BioGRID', 'BioPlex', 'HI', 'STRING'],
+        'url': ['https://figshare.com/ndownloader/files/39125054',
+                'https://figshare.com/ndownloader/files/39125051',
+                'https://figshare.com/ndownloader/files/39125093',
+                'https://figshare.com/ndownloader/files/39125090'
+            ]
+    }
+
+    # convert the info to a data frame where the url is read as a dataframe also
+    network_info = pd.DataFrame(other_network_info)
+    network_info['el'] = network_info['url'].apply(lambda x: pd.read_csv(x,
+                                                    sep='\t', header=None))
+    network_info = network_info.drop(columns=['url'])
+    funmap_df = pd.DataFrame({'name': ['FunMap'], 'type': ['FunMap'], 'el': [funmap_el]})
+    network_info = pd.concat([network_info, funmap_df], ignore_index=True)
+    overlap_info = get_node_edge_overlap(network_info)
+    node_color, edge_color = '#7DC462', '#774FA0'
+    for (type, color) in zip(['node', 'edge'], [node_color, edge_color]):
+        fig_name = plot_overlap_venn(overlap_info[type], type, color, figure_dir)
+        fig_names.append(fig_name)
+
+    fig_name = plot_network_stats(network_info, figure_dir)
+    fig_names.append(fig_name)
 
     return fig_names
 
@@ -437,7 +473,7 @@ def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
 
     Returns:
     -------
-    None
+    n_edge:  number of edges in the network that satisfies the cutoff
     """
 
     # sort the llr_res dataframe by the llr value
@@ -452,6 +488,8 @@ def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
     llr_res = llr_res[llr_res['llr'] >= np.log(cutoff)]
     # the last row correspond the network we want
     funmap = llr_res.iloc[-1]
+    # this is the number of edges in the network that satisfies the cutoff
+    n_edge = int(funmap['k'])
 
     all_networks = [
         ('FunMap', 'FunMap', int(funmap['n']), int(funmap['k']),
@@ -539,6 +577,201 @@ def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
 
     fig.tight_layout()
     fig.savefig(output_file, bbox_inches='tight')
+    return n_edge
+
+
+def plot_overlap_venn(overlap, node_or_edge, color, output_dir):
+    """
+    Plot the Venn diagrams for the overlap between different datasets.
+
+    Parameters
+    ----------
+    overlap : dict
+        A dictionary containing the overlap between the datasets.
+        The keys are the names of the datasets, and the values are the sets
+        representing the overlap.
+    node_or_edge : str
+        A string indicating whether to plot the overlap of nodes or edges.
+        Must be one of 'node' or 'edge'.
+    color : str
+        The color to use for the FunMap dataset in the Venn diagrams.
+    output_dir : path-like
+        The directory to save the output figure in.
+
+    Returns
+    -------
+    file_name : str
+        The name of the file that the figure was saved as.
+
+    """
+    data = []
+    for nw in overlap:
+        data.append(overlap[nw])
+    max_area = max(map(sum, data))
+
+    def set_venn_scale(ax, true_area, reference_area=max_area):
+        s = np.sqrt(float(reference_area)/true_area)
+        ax.set_xlim(-s, s)
+        ax.set_ylim(-s, s)
+
+    all_axes = []
+
+    n_plot = len(overlap)
+    fig, ax = plt.subplots(1, n_plot, figsize=(5*n_plot, 5))
+
+    for i, nw in enumerate(overlap):
+        cur_ax = ax[i]
+        all_axes.append(cur_ax)
+        labels = ('FunMap', nw)
+        out = venn2(overlap[nw],
+                            set_labels=labels, alpha=1.0,
+                            ax=cur_ax, set_colors=[color, 'white'])
+        venn2_circles(overlap[nw], ax=cur_ax, linestyle='solid',
+                    color='gray',
+                    linewidth=1)
+        if out.set_labels:
+            for text in out.set_labels:
+                text.set_fontsize(12)
+
+        for text in out.subset_labels:
+            text.set_fontsize(10)
+
+    # add title to the figure
+    name = 'genes' if node_or_edge == 'node' else 'edges'
+    fig.suptitle(f'Overlap of {name}', fontsize=16)
+
+    for a, d in zip(flatten(ax), data):
+        set_venn_scale(a, sum(d)*1.5)
+
+    file_name = f'overlap_{node_or_edge}.pdf'
+    fig.savefig(output_dir / file_name, bbox_inches='tight')
+    return file_name
+
+
+def plot_network_stats(network_info, output_dir):
+    """
+    Plot the network statistics for a list of networks.
+
+    This function takes in network information and an output directory, and
+    creates plots showing the degree distribution, average clustering coefficient,
+    network density, and average shortest path length.
+
+    Parameters
+    ----------
+    network_info : pandas.DataFrame
+        A DataFrame containing information about the networks to be plotted.
+    output_dir : str
+        The directory where the plots will be saved.
+
+    Returns
+    -------
+    Name of the file that the figure was saved as.
+    """
+
+    fig, ax = plt.subplots(1, 4, figsize=(20, 5))
+    density = {}
+    average_shortest_path = {}
+    # these are pre-calculated since they take a long time to compute and
+    # the network is fixed
+    average_shortest_path ={
+        'BioGRID': 2.74,
+        'BioPlex': 3.60,
+        'HI-union': 3.70,
+        'STRING': 3.95
+    }
+    network_list = ['FunMap']
+    for n in network_list:
+        network_el = network_info.loc[network_info['name'] == n, 'el'].values[0]
+        cur_network = nx.from_pandas_edgelist(network_el, source=0, target=1)
+        cur_density = nx.density(cur_network)
+        density[n] = cur_density
+        largest_cc = max(nx.connected_components(cur_network), key=len)
+        cur_cc = cur_network.subgraph(largest_cc).copy()
+        print(n)
+        cur_average_shortest_path = nx.average_shortest_path_length(cur_cc)
+        average_shortest_path[n] = cur_average_shortest_path
+        print(cur_average_shortest_path)
+        cur_degrees = [val for (node, val) in cur_network.degree()]
+        if n == 'FunMap': # only fit for FunMap
+            fit = powerlaw.Fit(cur_degrees, discrete=True, xmax=250, estimate_discrete=False)
+            powerlaw.plot_pdf(cur_degrees, linear_bins=True, linestyle='None', marker='o',
+                        markerfacecolor='None', color='#de2d26',
+                        linewidth=3, ax=ax[0])
+            fit.power_law.plot_pdf(linestyle='--',color='black', ax=ax[0])
+
+    # all the networks in network_info minus FunMap
+    other_networks = list(set(network_info['name'].tolist()) - set(['FunMap']))
+    for n in other_networks:
+        network_el = network_info.loc[network_info['name'] == n, 'el'].values[0]
+        cur_network = nx.from_pandas_edgelist(network_el, source=0, target=1)
+        cur_density = nx.density(cur_network)
+        density[n] = cur_density
+
+    ax[0].set_xlabel('degree')
+    ax[0].set_ylabel('p(x)')
+    ax[0].spines['top'].set_visible(False)
+    ax[0].spines['right'].set_visible(False)
+    ax[0].yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
+    ax[0].set_axisbelow(True)
+
+    # global average clustering coefficient
+    # these are pre-calculated since they take a long time to compute and
+    # the network is fixed
+    avg_cc = {
+            'BioGRID': 0.125,
+            'BioPlex': 0.103,
+            'HI-union': 0.06,
+            'STRING': 0.335
+        }
+    for n in network_list:
+        network_el = network_info.loc[network_info['name'] == n, 'el'].values[0]
+        cur_network = nx.from_pandas_edgelist(network_el, source=0, target=1)
+        cur_cc = nx.average_clustering(cur_network)
+        avg_cc[n] = cur_cc
+        print(n, cur_cc)
+
+    network_list = network_info['name'].tolist()
+    ax[1].bar(network_list, [avg_cc[i] for i in network_list], width=0.5, align='center',
+            color='#E4C89A')
+    ax[1].spines['left'].set_position(('outward', 8))
+    ax[1].spines['bottom'].set_position(('outward', 5))
+    ax[1].spines['top'].set_visible(False)
+    ax[1].spines['left'].set_visible(False)
+    ax[1].spines['right'].set_visible(False)
+    ax[1].set_ylabel('Average clustering coefficient')
+    ax[1].set_xticklabels(network_list, rotation=-45)
+    ax[1].yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
+    ax[1].set_axisbelow(True)
+
+    ax[2].bar(network_list, [density[i] for i in network_list], width=0.5, align='center',
+            color = '#D8B2C6'
+            )
+    ax[2].spines['left'].set_position(('outward', 8))
+    ax[2].spines['bottom'].set_position(('outward', 5))
+    ax[2].spines['top'].set_visible(False)
+    ax[2].spines['left'].set_visible(False)
+    ax[2].spines['right'].set_visible(False)
+    ax[2].set_ylabel('Density')
+    ax[2].set_xticklabels(network_list, rotation=-45)
+    ax[2].yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
+    ax[2].set_axisbelow(True)
+
+    ax[3].bar(network_list, [average_shortest_path[i] for i in network_list], width=0.5, align='center',
+            color = '#B6D8A6'
+            )
+    ax[3].spines['left'].set_position(('outward', 8))
+    ax[3].spines['bottom'].set_position(('outward', 5))
+    ax[3].spines['top'].set_visible(False)
+    ax[3].spines['left'].set_visible(False)
+    ax[3].spines['right'].set_visible(False)
+    ax[3].set_ylabel('Average shortest path length')
+    ax[3].set_xticklabels(network_list, rotation=-45)
+    ax[3].yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
+    ax[3].set_axisbelow(True)
+
+    file_name = 'network_properties.pdf'
+    fig.savefig(output_dir / file_name, bbox_inches='tight')
+    return file_name
 
 
 def merge_and_delete(fig_dir, file_list, output_file):

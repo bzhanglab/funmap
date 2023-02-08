@@ -191,7 +191,7 @@ def main():
 
     if not llr_res_file.exists():
         print('Computing LLR with trained model ...')
-        llr_res = validation_llr(all_feature_df, predicted_all_pairs, 'MR',
+        llr_res, edge_file_path = validation_llr(all_feature_df, predicted_all_pairs, 'MR',
                     filter_after_prediction, filter_criterion, filter_threshold,
                     filter_blacklist, blacklist_file,
                     max_num_edges, step_size, output_edgelist,
@@ -199,6 +199,7 @@ def main():
         print('Done.')
     else:
         llr_res = pd.read_csv(llr_res_file, sep='\t')
+        edge_file_path = results_dir / 'networks'/ f'network_{max_num_edges}.tsv'
     if not llr_dataset_file.exists():
         print('Computing LLR for each dataset ...')
         # TODO: adjust the starting number of edges and step size automatically
@@ -208,7 +209,8 @@ def main():
     else:
         llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
 
-    fig_names = plot_results(data_cfg, run_cfg, llr_res, llr_ds, gs_train, figure_dir)
+    fig_names = plot_results(data_cfg, run_cfg, llr_res, llr_ds, gs_train,
+                            edge_file_path, figure_dir)
     all_fig_names.extend(fig_names)
 
     merge_and_delete(figure_dir, all_fig_names, 'all_figures.pdf')

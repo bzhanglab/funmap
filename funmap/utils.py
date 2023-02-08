@@ -167,3 +167,123 @@ def chunks(lst, n):
     """
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
+
+
+def get_node_edge(edge_list):
+    """
+    Calculate the number of nodes and edges, and the ratio of edges per node,
+    and return the results in a dictionary format.
+
+    Parameters
+    ----------
+    edge_list : pandas DataFrame
+        The input DataFrame containing edge information.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the number of nodes, the number of edges,
+        the ratio of edges per node, a list of nodes, and the edge_list.
+
+        The keys of the dictionary are:
+        * n_node: int
+            The number of nodes in the network.
+
+        * n_edge: int
+            The number of edges in the network.
+
+        * edge_per_node: float
+            The ratio of edges per node in the network.
+
+        * nodes: list
+            A list of nodes in the network.
+
+        * edges: pandas DataFrame
+            The edge_list input DataFrame.
+
+    """
+    # remove duplidated rows in edge_list
+    edge_list = edge_list.drop_duplicates()
+    n_edge = len(edge_list)
+    nodes = set(edge_list.iloc[:,0].to_list()) | set(edge_list.iloc[:,1].to_list())
+    return(dict(n_node = len(nodes), n_edge = n_edge,
+        edge_per_node = n_edge / len(nodes),
+        nodes = list(nodes),
+        edges = edge_list))
+
+
+def get_node_edge_overlap(network_info):
+    """
+    Computes the node and edge overlap between networks.
+
+    Parameters
+    ----------
+    network_info : pandas DataFrame
+        A DataFrame with information about the networks.
+
+    Returns
+    -------
+    overlap : dict
+        A dictionary with the node and edge overlap between networks.
+    """
+    networks = pd.DataFrame(columns = ['name', 'type', 'n_node',
+                                    'n_edge', 'edge_per_node',
+                                    'nodes', 'edges'])
+
+    for _, row in network_info.iterrows():
+        network_name = row['name']
+        network_type = row['type']
+        network_el = row['el']
+        res = get_node_edge(network_el)
+        cur_df = pd.DataFrame({'name': [network_name],
+                                'type': [network_type],
+                                'n_node': [int(res['n_node'])],
+                                'n_edge': [int(res['n_edge'])],
+                                'edge_per_node': [res['edge_per_node']],
+                                'nodes': [res['nodes']],
+                                'edges': [res['edges']]})
+        networks = pd.concat([networks, cur_df], ignore_index=True)
+    # overlap of nodes and edges
+    overlap = {}
+
+    # node overlap
+    target = 'FunMap'
+    cur_res = {}
+    target_node_set = set(networks.loc[networks['name'] == target,
+                                    'nodes'].tolist()[0])
+    target_size = len(target_node_set)
+    for _, row in networks.iterrows():
+        if row['name'] == target:
+            continue
+        cur_node_set = set(row['nodes'])
+        cur_size = len(cur_node_set)
+        overlap_size = len(target_node_set & cur_node_set)
+        cur_res[row['name']] = tuple([
+                target_size - overlap_size,
+                cur_size - overlap_size,
+                overlap_size])
+
+    overlap['node'] = cur_res
+
+    # edge overlap
+    cur_res = {}
+    target_edge_df = networks.loc[networks['name'] == target, 'edges'].tolist()[0]
+    target_edge_set = set(tuple(sorted(x)) for x in zip(target_edge_df.pop(0),
+                                                    target_edge_df.pop(1)))
+    target_size = len(target_edge_set)
+
+    for _, row in networks.iterrows():
+        if row['name'] == target:
+            continue
+        edge_df = row['edges']
+        edges = [tuple(sorted(x)) for x in zip(edge_df.pop(0), edge_df.pop(1))]
+        cur_edge_set = set(edges)
+        cur_size = len(cur_edge_set)
+        overlap_size = len(target_edge_set & cur_edge_set)
+        cur_res[row['name']] = tuple([
+            target_size - overlap_size,
+            cur_size - overlap_size,
+            overlap_size])
+
+    overlap['edge'] = cur_res
+    return overlap

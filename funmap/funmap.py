@@ -531,6 +531,7 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
     Returns
     -------
     llr_res_dict (pd.DataFrame): Dataframe containing LLR results for all selected edges
+    edge_list_file_out (Path): path to save selected edges
     """
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -603,7 +604,7 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
             print(f'saving edges to file ...')
             out_dir = output_dir / 'networks'
             out_dir.mkdir(parents=True, exist_ok=True)
-            edge_list_file_out = out_dir / f'network_{k}.tsv'
+            edge_list_file_out = out_dir / f'network_{max_num_edges}.tsv'
             selected_edges = list(cur_results.iloc[:k, :].index)
             with open(edge_list_file_out, 'w') as out_file:
                 tsv_writer = csv.writer(out_file, delimiter='\t')
@@ -611,7 +612,7 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
                     tsv_writer.writerow(row)
 
         print('Calculating llr_res_dict ... done')
-        return llr_res_dict
+        return llr_res_dict, edge_list_file_out
 
 
 def load_features(data_config: Path, feature_file: Path,

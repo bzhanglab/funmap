@@ -19,7 +19,9 @@ requirements = [
     'imblearn',
     'tqdm',
     'PyPDF2',
-    'matplotlib_venn'
+    'matplotlib_venn',
+    'networkx',
+    'powerlaw'
     ]
 
 test_requirements = [ ]
