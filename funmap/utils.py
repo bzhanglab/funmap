@@ -33,26 +33,6 @@ def dict_hash(dictionary: Dict[str, Any]) -> str:
     return dhash.hexdigest()[:8]
 
 
-def remove_version_id(value):
-    """
-    Remove ensembl version ID from value.
-
-    Parameters
-    ----------
-    value : str
-        The value, typically an ensembl ID, from which the version ID should be removed.
-
-    Returns
-    -------
-    str
-        The value with the version ID removed. If the value is NaN, it will be returned as is.
-    """
-    if not pd.isna(value):
-        return re.sub('\.\d+', '', value)
-    else:
-        return value
-
-
 def gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id'):
     """
     Extract positive and negative edges from a gold standard file.
