@@ -17,8 +17,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 import xgboost as xgb
 from joblib import Parallel, delayed
-from funmap.utils import chunks, misc_urls as urls, get_data_dict
-from funmap.data_urls import network_info
+from funmap.utils import chunks, get_data_dict
+from funmap.data_urls import network_info, misc_urls as urls
 from imblearn.under_sampling import RandomUnderSampler
 
 # what type of features are we using to train the model?

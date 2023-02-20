@@ -11,6 +11,8 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
+    'pyyaml',
+    'xgboost',
     'numpy',
     'scipy',
     'pandas',
@@ -23,7 +25,7 @@ requirements = [
     'PyPDF2',
     'matplotlib_venn',
     'networkx',
-    'powerlaw'
+    'powerlaw',
     ]
 
 test_requirements = [ ]

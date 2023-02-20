@@ -1,16 +1,10 @@
 import hashlib
 import json
 from pathlib import Path
-import re
 from typing import Dict, Any
 import pandas as pd
+from funmap.data_urls import misc_urls as urls
 
-# file hosted on figshare
-urls = {
-    'reactome_gold_standard': 'https://figshare.com/ndownloader/files/38647601',
-    'funmap_blacklist': 'https://figshare.com/ndownloader/files/39033977',
-    'mapping_file': 'https://figshare.com/ndownloader/files/39033971'
-}
 
 # https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
 def dict_hash(dictionary: Dict[str, Any]) -> str:

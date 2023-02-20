@@ -15,7 +15,7 @@ from funmap.plotting import explore_data, plot_results, merge_and_delete
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
 from funmap.funmap import feature_mapping
 from funmap.utils import dict_hash
-from funmap.utils import misc_urls as urls
+from funmap.data_urls import misc_urls as urls
 
 # add option for user to specify results directory
 def arg_parse():
