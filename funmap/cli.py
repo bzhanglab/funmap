@@ -7,12 +7,15 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Any, Tuple
 from joblib import dump, load
+import gzip
+import pickle
 from pathlib import Path
 from funmap.funmap import validation_llr, predict_all_pairs, dataset_llr
 from funmap.plotting import explore_data, plot_results, merge_and_delete
-
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
-from funmap.utils import dict_hash, urls
+from funmap.funmap import feature_mapping
+from funmap.utils import dict_hash
+from funmap.utils import misc_urls as urls
 
 # add option for user to specify results directory
 def arg_parse():
@@ -70,8 +73,6 @@ def get_config(cfg_file: str, data_cfg_file: str) -> Tuple[Dict[str, Any],
     run_cfg['n_chunks'] = cfg_dict['n_chunks'] if 'n_chunks' in cfg_dict else 4
     run_cfg['max_num_edges'] = cfg_dict['max_num_edges'] if 'max_num_edges' in cfg_dict else 250000
     run_cfg['step_size'] = cfg_dict['step_size'] if 'step_size' in cfg_dict else 100
-    run_cfg['output_edgelist'] = cfg_dict['output_edgelist'] if 'output_edgelist' \
-                                in cfg_dict else False
 
     with open(data_cfg_file, 'r') as stream:
         data_cfg = yaml.load(stream, Loader=yaml.FullLoader)
@@ -102,7 +103,6 @@ def main():
     n_chunks = run_cfg['n_chunks']
     max_num_edges = run_cfg['max_num_edges']
     step_size = run_cfg['step_size']
-    output_edgelist = run_cfg['output_edgelist']
 
     all_cfg = {**model_cfg, **data_cfg, **run_cfg}
     # results will only be affected by model_cfg and data_cfg
@@ -118,6 +118,7 @@ def main():
     prediction_dir = results_dir / prediction_dir
     figure_dir = results_dir / 'figures'
 
+    print(f'Output directory: {results_dir}')
     results_dir.mkdir(parents=True, exist_ok=True)
     data_dir.mkdir(parents=True, exist_ok=True)
     model_dir.mkdir(parents=True, exist_ok=True)
@@ -132,8 +133,10 @@ def main():
     predicted_all_pairs_file = prediction_dir / 'predicted_all_pairs.pkl.gz'
     blacklist_file = urls['funmap_blacklist']
 
-    # if validation results are available, nothing to do here
-    llr_res_file = results_dir / f'llr_results_{max_num_edges}.tsv'
+    llr_res_files = {feature: results_dir / f'llr_results_{feature}_{max_num_edges}.tsv'
+                        for feature in feature_mapping }
+    edge_list_paths = {feature: results_dir / 'networks'/ f'network_{feature}_{max_num_edges}.tsv'
+                        for feature in feature_mapping }
     # llr obtained with each invividual dataset
     llr_dataset_file = results_dir / 'llr_dataset.tsv'
     all_fig_names = []
@@ -165,52 +168,65 @@ def main():
     # same configuration
     if predicted_all_pairs_file.exists():
         print(f'Loading predicted all pairs from {predicted_all_pairs_file}')
-        predicted_all_pairs = pd.read_pickle(predicted_all_pairs_file)
+        with gzip.open(predicted_all_pairs_file, 'rb') as fh:
+            predicted_all_pairs = pickle.load(fh)
         print(f'Loading predicted all pairs ... done')
     else:
         if ml_model_file.exists():
             print(f'Loading model from {ml_model_file} ...')
-            ml_model = load(str(ml_model_file))
+            with gzip.open(ml_model_file, 'rb') as fh:
+                ml_model = pickle.load(fh)
             print(f'Loading model ... done')
         else:
-            # train an ML model to predict the label
             ml_model = train_ml_model(gs_train, ml_type, seed, n_jobs)
-            # save model
-            dump(ml_model, ml_model_file, compress=True)
+            with gzip.open(ml_model_file, 'wb') as fh:
+                pickle.dump(ml_model, fh)
 
         print('Predicting for all pairs ...')
         predicted_all_pairs = predict_all_pairs(ml_model, all_feature_df,
                                                 min_feature_count,
                                                 filter_before_prediction,
                                                 predicted_all_pairs_file)
+        with gzip.open(predicted_all_pairs_file, 'wb') as fh:
+            pickle.dump(predicted_all_pairs, fh)
         print('Predicting for all pairs ... done.')
 
-    predicted_all_pairs = predicted_all_pairs.astype('float32')
+    for i in predicted_all_pairs:
+        predicted_all_pairs[i] = predicted_all_pairs[i].astype('float32')
     gs_test_pos_set = set(gs_test_pos.index)
     gs_test_neg_set = set(gs_test_neg.index)
 
-    if not llr_res_file.exists():
+    # check to see if all files in the llr_res_files list exist
+    llr_res_exist = [llr_res_files[f].exists() for f in llr_res_files]
+    edge_list_path_exist = [edge_list_paths[f].exists() for f in edge_list_paths]
+
+    if all(llr_res_exist) and all(edge_list_path_exist):
+        print('validation results already exist.')
+        validation_res = {}
+        for ft in feature_mapping:
+            validation_res[ft] = {
+                'llr_res_path': llr_res_files[ft],
+                'edge_list_path': edge_list_paths[ft]
+            }
+    else:
         print('Computing LLR with trained model ...')
-        llr_res, edge_file_path = validation_llr(all_feature_df, predicted_all_pairs, 'MR',
+        validation_res = validation_llr(all_feature_df, predicted_all_pairs,
                     filter_after_prediction, filter_criterion, filter_threshold,
                     filter_blacklist, blacklist_file,
-                    max_num_edges, step_size, output_edgelist,
-                    gs_test_pos_set, gs_test_neg_set, results_dir)
+                    max_num_edges, step_size, gs_test_pos_set, gs_test_neg_set, results_dir)
         print('Done.')
-    else:
-        llr_res = pd.read_csv(llr_res_file, sep='\t')
-        edge_file_path = results_dir / 'networks'/ f'network_{max_num_edges}.tsv'
+
     if not llr_dataset_file.exists():
         print('Computing LLR for each dataset ...')
         # TODO: adjust the starting number of edges and step size automatically
         llr_ds = dataset_llr(all_feature_df, gs_test_pos_set, gs_test_neg_set,
-            10000, max_num_edges, 1000, results_dir / 'dataset_llr.tsv')
+            10000, max_num_edges, 1000,  llr_dataset_file)
         print('Done.')
     else:
         llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
 
-    fig_names = plot_results(data_cfg, run_cfg, llr_res, llr_ds, gs_train,
-                            edge_file_path, figure_dir)
+    fig_names = plot_results(data_cfg, run_cfg, validation_res, llr_ds, gs_train,
+                            figure_dir)
     all_fig_names.extend(fig_names)
 
     merge_and_delete(figure_dir, all_fig_names, 'all_figures.pdf')

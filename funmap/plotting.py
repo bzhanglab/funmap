@@ -41,15 +41,15 @@ def edge_number(x, pos):
     return s
 
 
-def plot_llr_comparison(llr_res, llr_ds, output_file='llr_comparison.pdf'):
+def plot_llr_comparison(validation_results, llr_ds, output_file='llr_comparison.pdf'):
     """
     Plot the comparison of log likelihood ratios (LLR) based on model prediction
     using all datasets and LLR results for each dataset.
 
     Parameters
     ----------
-    llr_res : pandas DataFrame
-        LLR results based on model prediction using all datasets
+    validation_results : dict
+        a dictionary containing the validation results
     llr_ds : pandas DataFrame
         LLR results for each dataset
     output_file : str/Path, optional
@@ -61,7 +61,7 @@ def plot_llr_comparison(llr_res, llr_ds, output_file='llr_comparison.pdf'):
 
     """
     datasets = sorted(llr_ds['dataset'].unique().tolist())
-    fig, ax = plt.subplots(figsize=(5, 4))
+    fig, ax = plt.subplots(figsize=(20, 16))
 
     start = -1
     for ds in datasets:
@@ -70,14 +70,16 @@ def plot_llr_comparison(llr_res, llr_ds, output_file='llr_comparison.pdf'):
         if start == -1:
             start = cur_df['k'].iloc[0]
     # plot llr_res with the same start point
-    llr_res = llr_res[llr_res['k'] >= start]
-    ax.plot(llr_res['k'], llr_res['llr'], label='all datasets', color='black', linewidth=2)
+    for ft in validation_results:
+        llr_res = pd.read_csv(validation_results[ft]['llr_res_path'], sep='\t')
+        llr_res = llr_res[llr_res['k'] >= start]
+        ax.plot(llr_res['k'], llr_res['llr'], label=f'funmap_{ft}', linewidth=3)
 
     ax.xaxis.set_major_formatter(edge_number)
-    ax.set_xlabel('number of gene pairs')
-    ax.set_ylabel('log likelihood ratio')
+    ax.set_xlabel('number of gene pairs', fontsize=16)
+    ax.set_ylabel('log likelihood ratio', fontsize=16)
     ax.yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
-    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=16)
     plt.tight_layout()
     plt.box(on=None)
     plt.savefig(output_file, bbox_inches='tight')
@@ -103,6 +105,7 @@ def explore_data(data_config: Path, min_sample_count: int,
     A list of file names of the generated plots
 
     """
+    print('Generating plots to explore and visualize data ...')
     data_dict = get_data_dict(data_config, min_sample_count)
     fig_names = []
 
@@ -199,9 +202,8 @@ def explore_data(data_config: Path, min_sample_count: int,
     return fig_names
 
 
-def plot_results(data_cfg: dict, run_cfg: dict, llr_res: pd.DataFrame,
+def plot_results(data_cfg: dict, run_cfg: dict, validation_results: dict,
                 llr_ds: pd.DataFrame, gs_train: pd.DataFrame,
-                edge_file_path: Path,
                 figure_dir: Path) -> List[str]:
     """
     Plot the results of the analysis.
@@ -212,14 +214,12 @@ def plot_results(data_cfg: dict, run_cfg: dict, llr_res: pd.DataFrame,
         A dictionary containing the configuration for the data being analyzed.
     run_cfg : dict
         A dictionary containing the configuration for the analysis.
-    llr_res : pandas.DataFrame
-        The log-likelihood ratio results of the analysis.
+    validation_results : dict
+        A dictionary containing the results of the validation.
     llr_ds : pandas.DataFrame
         The log-likelihood ratio for the dataset.
     gs_train : pandas.DataFrame
         The training data for the analysis.
-    edge_file_path : Path
-        The path to the file containing the edges.
     figure_dir : Path
         The directory where the figures will be saved.
 
@@ -230,7 +230,7 @@ def plot_results(data_cfg: dict, run_cfg: dict, llr_res: pd.DataFrame,
     """
     fig_names = []
     file_name = 'llr_compare_dataset.pdf'
-    plot_llr_comparison(llr_res, llr_ds, output_file=figure_dir / file_name)
+    plot_llr_comparison(validation_results, llr_ds, output_file=figure_dir / file_name)
     fig_names.append(file_name)
 
     if 'rp_pairs' in data_cfg:
@@ -243,12 +243,8 @@ def plot_results(data_cfg: dict, run_cfg: dict, llr_res: pd.DataFrame,
     else:
         cutoff = 50
     file_name = 'llr_compare_networks.pdf'
-    n_edge = plot_llr_compare_networks(llr_res, cutoff, output_file=figure_dir / file_name)
+    n_edge_dict = plot_llr_compare_networks(validation_results, cutoff, output_file=figure_dir / file_name)
     fig_names.append(file_name)
-
-    # for funmap, create a dataframe
-    funmap_el = pd.read_csv(edge_file_path, sep='\t', header=None)
-    funmap_el = funmap_el.iloc[:n_edge, :]
 
     # the information about other networks is fixed for now
     other_network_info = {
@@ -260,22 +256,29 @@ def plot_results(data_cfg: dict, run_cfg: dict, llr_res: pd.DataFrame,
                 'https://figshare.com/ndownloader/files/39125090'
             ]
     }
-
-    # convert the info to a data frame where the url is read as a dataframe also
+    # convert the info to a data frame where the url is read as a dataframe
     network_info = pd.DataFrame(other_network_info)
     network_info['el'] = network_info['url'].apply(lambda x: pd.read_csv(x,
                                                     sep='\t', header=None))
     network_info = network_info.drop(columns=['url'])
-    funmap_df = pd.DataFrame({'name': ['FunMap'], 'type': ['FunMap'], 'el': [funmap_el]})
-    network_info = pd.concat([network_info, funmap_df], ignore_index=True)
-    overlap_info = get_node_edge_overlap(network_info)
-    node_color, edge_color = '#7DC462', '#774FA0'
-    for (type, color) in zip(['node', 'edge'], [node_color, edge_color]):
-        fig_name = plot_overlap_venn(overlap_info[type], type, color, figure_dir)
-        fig_names.append(fig_name)
 
-    fig_name = plot_network_stats(network_info, figure_dir)
-    fig_names.append(fig_name)
+    # for each funmap, create a dataframe
+    for ft in validation_results:
+        edge_file_path = validation_results[ft]['edge_list_path']
+        funmap_el = pd.read_csv(edge_file_path, sep='\t', header=None)
+        n_edge = n_edge_dict[ft]
+        funmap_el = funmap_el.iloc[:n_edge, :]
+
+        funmap_df = pd.DataFrame({'name': ['FunMap'], 'type': ['FunMap'], 'el': [funmap_el]})
+        all_network_info = pd.concat([network_info, funmap_df], ignore_index=True)
+        overlap_info = get_node_edge_overlap(all_network_info)
+        node_color, edge_color = '#7DC462', '#774FA0'
+        for (type, color) in zip(['node', 'edge'], [node_color, edge_color]):
+            fig_name = plot_overlap_venn(f'funmap_{ft}', overlap_info[type], type, color, figure_dir)
+            fig_names.append(fig_name)
+
+        fig_name = plot_network_stats(all_network_info, ft, figure_dir)
+        fig_names.append(fig_name)
 
     return fig_names
 
@@ -475,14 +478,14 @@ def plot_pair_llr(feature_df: pd.DataFrame, output_dir: Path, rp_pairs: List[Dic
     return file_names
 
 
-def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
+def plot_llr_compare_networks(validaton_results, cutoff, output_file: Path):
     """
     Plot a scatter plot to compare log likelihood ratio of different networks.
 
     Parameters:
     ----------
-    llr_res : pd.DataFrame
-        A dataframe containing log likelihood ratio values.
+    validaton_results : dict
+        A dictionary contains validation results
     cutoff : float
         Cutoff value to exclude log likelihood ratio values lower than this cutoff.
     output_file : Path
@@ -490,28 +493,33 @@ def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
 
     Returns:
     -------
-    n_edge:  number of edges in the network that satisfies the cutoff
+    n_edge:  dict
+        a dictionary that contains the number of edges in the network that satisfies the cutoff
     """
+    all_networks = []
+    n_edge = {}
 
-    # sort the llr_res dataframe by the llr value
-    llr_res = llr_res.sort_values(by=['llr'], ascending=False)
+    for ft in validaton_results:
+        llr_res = pd.read_csv(validaton_results[ft]['llr_res_path'], sep='\t')
+        # sort the llr_res dataframe by the llr value
+        llr_res = llr_res.sort_values(by=['llr'], ascending=False)
 
-    # if the smallest llr value is larger than the cutoff, then we don't need to plot
-    if llr_res['llr'].iloc[0] < np.log(cutoff):
-        print('The largest llr value is smaller than the cutoff, no plot will be generated.')
-        return
+        # if the smallest llr value is larger than the cutoff, then we don't need to plot
+        if llr_res['llr'].iloc[0] < np.log(cutoff):
+            print('The largest llr value is smaller than the cutoff, no plot will be generated.')
+            return
 
-    # select the rows that have llr value larger than the cutoff
-    llr_res = llr_res[llr_res['llr'] >= np.log(cutoff)]
-    # the last row correspond the network we want
-    funmap = llr_res.iloc[-1]
-    # this is the number of edges in the network that satisfies the cutoff
-    n_edge = int(funmap['k'])
+        # select the rows that have llr value larger than the cutoff
+        llr_res = llr_res[llr_res['llr'] >= np.log(cutoff)]
+        # the last row correspond the network we want
+        funmap = llr_res.iloc[-1]
+        # this is the number of edges in the network that satisfies the cutoff
+        n_edge[ft] = int(funmap['k'])
 
-    all_networks = [
-        ('FunMap', 'FunMap', int(funmap['n']), int(funmap['k']),
-            funmap['llr'], np.exp(funmap['llr']))
-    ]
+        all_networks.extend([
+            (f'FunMap_{ft}', 'FunMap', int(funmap['n']), int(funmap['k']),
+                funmap['llr'], np.exp(funmap['llr']))
+        ])
 
     # these are pre-computed values
     all_networks.extend(
@@ -543,9 +551,14 @@ def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
     ax.get_yticklabels()[4].set_color('red')
     ax2 = ax.twinx()
 
+    # we have 6 groups, so we need 6 colors
     mycmap = matplotlib.colors.ListedColormap(['#de2d26', '#8B6CAF', '#0D95D0',
                                             '#69A953', '#F1C36B', '#DC6C43'])
-    scatter = ax.scatter(x, y, c=[0, 1, 1, 2, 3, 4, 5], cmap=mycmap,
+    # group 0 is FunMap, group 1 is HI, group 2 is ProHD, group 3 is STRING,
+    # group 4 is BioGRID, group 5 is BioPlex
+    # the length of gro
+    color_group = [0] * len(validaton_results) + [1] * 2 + [2] * 1 + [3] * 1 + [4] * 1 + [5] * 1
+    scatter = ax.scatter(x, y, c=color_group, cmap=mycmap,
                         s=e/1000)
     ax.set_ylim(2, 6)
     ax2.set_ylim(np.exp(2.0), np.exp(6))
@@ -597,12 +610,14 @@ def plot_llr_compare_networks(llr_res, cutoff, output_file: Path):
     return n_edge
 
 
-def plot_overlap_venn(overlap, node_or_edge, color, output_dir):
+def plot_overlap_venn(network_name, overlap, node_or_edge, color, output_dir):
     """
     Plot the Venn diagrams for the overlap between different datasets.
 
     Parameters
     ----------
+    network_name : str
+        The name of the network to plot the overlap for.
     overlap : dict
         A dictionary containing the overlap between the datasets.
         The keys are the names of the datasets, and the values are the sets
@@ -655,17 +670,17 @@ def plot_overlap_venn(overlap, node_or_edge, color, output_dir):
 
     # add title to the figure
     name = 'genes' if node_or_edge == 'node' else 'edges'
-    fig.suptitle(f'Overlap of {name}', fontsize=16)
+    fig.suptitle(f'Overlap of {name} ({network_name})', fontsize=16)
 
     for a, d in zip(flatten(ax), data):
         set_venn_scale(a, sum(d)*1.5)
 
-    file_name = f'overlap_{node_or_edge}.pdf'
+    file_name = f'{network_name}_overlap_{node_or_edge}.pdf'
     fig.savefig(output_dir / file_name, bbox_inches='tight')
     return file_name
 
 
-def plot_network_stats(network_info, output_dir):
+def plot_network_stats(network_info, feature_type, output_dir):
     """
     Plot the network statistics for a list of networks.
 
@@ -677,6 +692,8 @@ def plot_network_stats(network_info, output_dir):
     ----------
     network_info : pandas.DataFrame
         A DataFrame containing information about the networks to be plotted.
+    feature_type : str
+        The type of feature used to create the networks, e.g 'ex', 'ei'
     output_dir : str
         The directory where the plots will be saved.
 
@@ -696,6 +713,8 @@ def plot_network_stats(network_info, output_dir):
         'HI-union': 3.70,
         'STRING': 3.95
     }
+    # if you want to recompute the average shortest path length,
+    # add the network name to this list
     network_list = ['FunMap']
     for n in network_list:
         network_el = network_info.loc[network_info['name'] == n, 'el'].values[0]
@@ -708,13 +727,14 @@ def plot_network_stats(network_info, output_dir):
         cur_average_shortest_path = nx.average_shortest_path_length(cur_cc)
         average_shortest_path[n] = cur_average_shortest_path
         print(cur_average_shortest_path)
-        cur_degrees = [val for (node, val) in cur_network.degree()]
+        cur_degrees = [val for (_, val) in cur_network.degree()]
         if n == 'FunMap': # only fit for FunMap
             fit = powerlaw.Fit(cur_degrees, discrete=True, xmax=250, estimate_discrete=False)
             powerlaw.plot_pdf(cur_degrees, linear_bins=True, linestyle='None', marker='o',
                         markerfacecolor='None', color='#de2d26',
                         linewidth=3, ax=ax[0])
-            fit.power_law.plot_pdf(linestyle='--',color='black', ax=ax[0])
+            # not plotting the power law fit
+            # fit.power_law.plot_pdf(linestyle='--',color='black', ax=ax[0])
 
     # all the networks in network_info minus FunMap
     other_networks = list(set(network_info['name'].tolist()) - set(['FunMap']))
@@ -792,7 +812,8 @@ def plot_network_stats(network_info, output_dir):
     ax[3].yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
     ax[3].set_axisbelow(True)
 
-    file_name = 'network_properties.pdf'
+    fig.suptitle(f'Network properties of Funmap ({feature_type})', fontsize=16)
+    file_name = f'Funmap_{feature_type}_network_properties.pdf'
     fig.savefig(output_dir / file_name, bbox_inches='tight')
     return file_name
 

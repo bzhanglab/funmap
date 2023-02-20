@@ -6,6 +6,7 @@ import gc
 import itertools
 import warnings
 import csv
+import gzip, pickle
 from pathlib import Path
 from collections import defaultdict, Counter
 import pandas as pd
@@ -16,10 +17,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 import xgboost as xgb
 from joblib import Parallel, delayed
-from funmap.utils import chunks, urls, get_data_dict
+from funmap.utils import chunks, misc_urls as urls, get_data_dict
+from funmap.data_urls import network_info
 from imblearn.under_sampling import RandomUnderSampler
-import matplotlib.pyplot as plt
 
+# what type of features are we using to train the model?
+feature_mapping = {
+    'ex': ['MR'], # expression - mutal rank of CC
+    'ei': ['MR', 'PPI'] # expression and interaction
+}
 
 def get_valid_gs_data(gs_path: str, valid_gene_list: List[str]):
     """
@@ -329,6 +335,14 @@ def compute_all_features(edge_df, valid_gene_list, data_config,
     feature_df = pd.DataFrame(0, index=cor_df.index, columns=col_name_all, dtype=np.float32)
     feature_df.iloc[:, :len(col_name_cc)] = cor_df.values
     feature_df.iloc[:, len(col_name_cc):] = mr_df.values
+
+    # add ppi features
+    ppi_feature = get_ppi_feature()
+    for feature in ppi_feature:
+        cur_edgelist = ppi_feature[feature]
+        feature_df[feature] = 0
+        feature_df.loc[feature_df.index.isin(cur_edgelist), feature] = 1
+
     del mr_df
     del cor_df
     gc.collect()
@@ -336,6 +350,35 @@ def compute_all_features(edge_df, valid_gene_list, data_config,
     print('merging results ... done')
 
     return feature_df
+
+
+def get_ppi_feature():
+    """
+    Returns a dictionary of protein-protein interaction (PPI) features.
+
+    The PPI features are extracted from data in the "network_info" dictionary and are specified by the
+    "feature_names" list. The URLs of the relevant data are extracted from "network_info" and read
+    using the Pandas library. The resulting PPI data is stored in the "ppi_features" dictionary and
+    returned by the function.
+
+    Returns:
+    ppi_features: dict
+        A dictionary with PPI features, where the keys are the feature names and the values are lists of tuples
+        representing the protein interactions.
+    """
+    feature_names = ['BioGRID', 'BioPlex', 'HI-union']
+    urls = [network_info['url'][i] for i in range(len(network_info['name']))
+                if network_info['name'][i] in feature_names]
+
+    ppi_features = {}
+    # use pandas to read the file
+    for (i, url) in enumerate(urls):
+        data = pd.read_csv(url, sep='\t', header=None)
+        data = data.apply(lambda x: tuple(sorted(x)), axis=1)
+        ppi_name = f'{feature_names[i]}_PPI'
+        ppi_features[ppi_name] = data.tolist()
+
+    return ppi_features
 
 
 def train_ml_model(data_df, ml_type, seed, n_jobs):
@@ -355,15 +398,16 @@ def train_ml_model(data_df, ml_type, seed, n_jobs):
 
     Returns
     -------
-    model : object
-        Trained machine learning model
+    models: dict
+        A dictionary of trained models, where the keys are the target
+        variables and the values are the
 
     """
     X, y = under_sample(data_df)
     assert ml_type == 'xgboost', 'ML model must be xgboost'
-    model = train_xgboost_model(X, y, seed, n_jobs)
+    models = train_xgboost_model(X, y, seed, n_jobs)
 
-    return model
+    return models
 
 
 def under_sample(df):
@@ -402,7 +446,7 @@ def feature_type_to_regex(feature_type):
     Parameters
     ----------
     feature_type : str
-        The feature type to be converted. Currently only support 'MR'
+        The feature type to be converted.
 
     Returns
     -------
@@ -410,9 +454,15 @@ def feature_type_to_regex(feature_type):
         The regular expression string corresponding to the feature type.
 
     """
-    assert feature_type == 'MR'
-    if feature_type == 'MR':
-        regex_str = f'._MR$'
+
+    # create a regex string to match the feature type
+    # should match anthing ends with one of the items in the list
+    # the list is from feature_mapping['feature_type']
+    regex_str = '|'.join([f'_{ft}' for ft in feature_mapping[feature_type]])
+    if len(feature_mapping[feature_type]) > 1:
+        regex_str = f'[{regex_str}]$'
+    else:
+        regex_str = f'{regex_str}$'
 
     return regex_str
 
@@ -436,8 +486,9 @@ def train_xgboost_model(X, y, seed, n_jobs):
 
     Returns
     --------
-    model : sklearn.model_selection._search.GridSearchCV
-        The trained XGBoost model
+    models: dict
+        A dictionary of trained models, where the keys are the feature types
+        and the values are the trained models.
     """
     model_params = {
         'n_estimators': [50, 150, 250, 300],
@@ -445,21 +496,25 @@ def train_xgboost_model(X, y, seed, n_jobs):
         'learning_rate': [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
     }
 
-    print(f'training xgboost model ...')
-    xgb_model = xgb.XGBClassifier(random_state=seed,
-                            eval_metric='logloss', n_jobs=n_jobs)
-    cv = StratifiedKFold(n_splits=5, random_state=seed, shuffle=True)
-    clf = GridSearchCV(xgb_model, model_params, scoring='roc_auc', cv=cv,
-                    n_jobs=1, verbose=1)
-    # use only mutual rank
-    feature_type = 'MR'
-    regex_str = feature_type_to_regex(feature_type)
-    X_sel = X.filter(regex=regex_str)
-    print('X_sel shape: ', X_sel.shape)
-    print('y shape: ', y.shape)
-    model = clf.fit(X_sel, y)
-    print(f'training xgboost model ... done')
-    return model
+    models = {}
+
+    for ft in feature_mapping:
+        # use only mutual rank
+        print(f'training xgboost model ({ft}) ...')
+        xgb_model = xgb.XGBClassifier(random_state=seed,
+                                eval_metric='logloss', n_jobs=n_jobs)
+        cv = StratifiedKFold(n_splits=5, random_state=seed, shuffle=True)
+        clf = GridSearchCV(xgb_model, model_params, scoring='roc_auc', cv=cv,
+                        n_jobs=1, verbose=1)
+        regex_str = feature_type_to_regex(ft)
+        X_sel = X.filter(regex=regex_str)
+        print('X_sel shape: ', X_sel.shape)
+        print('y shape: ', y.shape)
+        model = clf.fit(X_sel, y)
+        # expression based features
+        models[ft] = model
+        print(f'training xgboost model ({ft}) ... done')
+    return models
 
 
 def predict_all_pairs(model, all_feature_df, min_feature_count,
@@ -469,10 +524,10 @@ def predict_all_pairs(model, all_feature_df, min_feature_count,
 
     Parameters:
     --------------
-    model: object
-        trained XGBoost model
-    all_feature_df: pandas dataframe
-        dataframe containing all feature pairs
+    model: dict
+        dictionary of trained models, where the keys are the feature types
+    use_ppi_feature: bool
+        whether to use PPI features
     min_feature_count: int
         minimum number of valid feature counts for a pair
     filter_before_prediction: bool
@@ -489,23 +544,28 @@ def predict_all_pairs(model, all_feature_df, min_feature_count,
     if filter_before_prediction:
         all_feature_df = all_feature_df[all_feature_df.iloc[:, 1:].notna().sum(axis=1)
                                 >= min_feature_count]
+    pred = {}
+    for ft in model:
+        print(f'predicting ({ft}) ...')
+        pred_df = pd.DataFrame(columns=['prediction'], index=all_feature_df.index)
+        regex_str = feature_type_to_regex(ft)
+        all_feature_df_sel = all_feature_df.filter(regex=regex_str)
+        predictions = model[ft].predict_proba(all_feature_df_sel)
+        pred_df['prediction'] = predictions[:, 1]
+        print(f'predicting ({ft}) ... done')
+        pred[ft] = pred_df
 
-    pred_df = pd.DataFrame(columns=['prediction'], index=all_feature_df.index)
+    # save dictionary of dataframes to pickle
+    with gzip.open(out_name, 'wb') as f:
+        pickle.dump(pred, f)
 
-    regex_str = feature_type_to_regex('MR')
-    all_feature_df_imp_sel = all_feature_df.filter(regex=regex_str)
-    predictions = model.predict_proba(all_feature_df_imp_sel)
-    pred_df['prediction'] = predictions[:, 1]
-
-    pred_df.to_pickle(out_name)
-    return pred_df
+    return pred
 
 
-def validation_llr(all_feature_df, predicted_all_pair, feature_type,
+def validation_llr(all_feature_df, predicted_all_pairs,
                 filter_after_prediction, filter_criterion, filter_threshold,
                 filter_blacklist, blacklist_file: str, max_num_edges, step_size,
-                output_edge_list, gs_test_pos_set,
-                gs_test_neg_set, output_dir: Path):
+                gs_test_pos_set, gs_test_neg_set, output_dir: Path):
     """
     Compute Log Likelihood Ratio (LLR) for a given set of edges and a given set of gold
     standard positive and negative edges.
@@ -515,7 +575,6 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
     ----------
     all_feature_df (pd.DataFrame): Dataframe containing all features
     predicted_all_pair (pd.DataFrame): Dataframe containing predicted values of edges
-    feature_type (str): type of feature used to filter edges
     filter_after_prediction (bool): whether to filter edges after prediction
     filter_criterion (str): criterion to filter edges
     filter_threshold (float): threshold value to filter edges
@@ -523,7 +582,6 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
     blacklist_file (str): url to blacklist file
     max_num_edges (int): maximum number of edges to compute LLR for
     step_size (int): step size for iterating over edges
-    output_edge_list (Path): path to save selected edges
     gs_test_pos_set (set): set of gold standard positive edges
     gs_test_neg_set (set): set of gold standard negative edges
     output_dir (Path): directory to save LLR results
@@ -535,29 +593,44 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
     """
 
     output_dir.mkdir(parents=True, exist_ok=True)
+    ret = {}
 
-    # final results
-    llr_res_file = output_dir / f'llr_results_{max_num_edges}.tsv'
+    for ft in predicted_all_pairs:
+        # final results
+        llr_res_file = output_dir / f'llr_results_{ft}_{max_num_edges}.tsv'
 
-    if llr_res_file.exists():
-        # check if the file can be loaded successfully
-        llr_res_dict = pd.read_csv(llr_res_file, sep='\t')
-        print(f'{llr_res_file} exists ... nothing to be done')
-    else:
-        print('Calculating llr_res_dict ...')
+        print(f'Calculating llr_res_dict ({ft})...')
         llr_res_dict = {}
         cur_col_name = 'prediction'
-        cur_results = predicted_all_pair[[cur_col_name]].copy()
+        cur_results = predicted_all_pairs[ft][[cur_col_name]].copy()
         cur_results.sort_values(by=cur_col_name, ascending=False,
                                 inplace=True)
-        if filter_after_prediction and feature_type == 'MR':
+        # for this filter criterion, only based on 'MR'
+        if filter_after_prediction:
             if filter_criterion != 'max':
                 raise ValueError('Filter criterion must be "max" for MR')
-            regex_str = feature_type_to_regex(feature_type)
-            all_feature_df_sel = all_feature_df.filter(regex=regex_str)
-            all_feature_df_sel = all_feature_df_sel.drop(all_feature_df_sel[all_feature_df_sel.max(axis=1)
-                                < filter_threshold].index)
-            cur_results = cur_results[cur_results.index.isin(all_feature_df_sel.index)]
+            # filter edges with MR < filter_threshold
+            if ft == 'ex':
+                regex_str = feature_type_to_regex(ft)
+                all_feature_df_sel = all_feature_df.filter(regex=regex_str)
+                all_feature_df_sel = all_feature_df_sel.drop(all_feature_df_sel[all_feature_df_sel.max(axis=1)
+                                    < filter_threshold].index)
+                cur_results = cur_results[cur_results.index.isin(all_feature_df_sel.index)]
+            elif ft == 'ei':
+                # the filter is still based on 'ex', but we need to add back
+                # _PPI columns back after the filtering
+                regex_str = feature_type_to_regex('ex')
+                all_feature_df_sel = all_feature_df.filter(regex=regex_str)
+                all_feature_df_sel = all_feature_df_sel.drop(all_feature_df_sel[all_feature_df_sel.max(axis=1)
+                                    < filter_threshold].index)
+
+                regex_str2 = feature_type_to_regex('ei')
+                all_feature_df_sel_2 = all_feature_df.filter(regex=regex_str2)
+                # only keep indices that are in all_feature_df_sel
+                all_feature_df_sel_2 = all_feature_df_sel_2[all_feature_df_sel_2.index.isin(all_feature_df_sel.index)]
+                cur_results = cur_results[cur_results.index.isin(all_feature_df_sel_2.index)]
+            else:
+                raise ValueError(f'Filtering not supported for {ft}')
 
         # remove any edge that is incident on any genes in the black list
         if filter_blacklist:
@@ -580,9 +653,6 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
         for k in tqdm(range(step_size, max_num_edges+step_size, step_size)):
             selected_edges = set(cur_results.iloc[:k, :].index)
             all_nodes = set(itertools.chain.from_iterable(selected_edges))
-            # print the smallest values
-            # print(f'the smallest values for k = {k}'
-                # f'are: {cur_results.iloc[k,:]}')
             # https://stackoverflow.com/a/7590970/410069
             common_pos_edges = selected_edges & gs_test_pos_set
             common_neg_edges = selected_edges & gs_test_neg_set
@@ -600,19 +670,24 @@ def validation_llr(all_feature_df, predicted_all_pair, feature_type,
         llr_res_dict.to_csv(llr_res_file, sep='\t', index=False)
 
         # write edge list to file
-        if output_edge_list:
-            print(f'saving edges to file ...')
-            out_dir = output_dir / 'networks'
-            out_dir.mkdir(parents=True, exist_ok=True)
-            edge_list_file_out = out_dir / f'network_{max_num_edges}.tsv'
-            selected_edges = list(cur_results.iloc[:k, :].index)
-            with open(edge_list_file_out, 'w') as out_file:
-                tsv_writer = csv.writer(out_file, delimiter='\t')
-                for row in list(selected_edges):
-                    tsv_writer.writerow(row)
+        print(f'saving edges to file ...')
+        out_dir = output_dir / 'networks'
+        out_dir.mkdir(parents=True, exist_ok=True)
+        edge_list_file = out_dir / f'network_{ft}_{max_num_edges}.tsv'
+        selected_edges = list(cur_results.iloc[:k, :].index)
+        with open(edge_list_file, 'w') as out_file:
+            tsv_writer = csv.writer(out_file, delimiter='\t')
+            for row in list(selected_edges):
+                tsv_writer.writerow(row)
 
-        print('Calculating llr_res_dict ... done')
-        return llr_res_dict, edge_list_file_out
+        print(f'Calculating llr_res_dict ({ft})... done')
+
+        ret[ft] = {
+            'llr_res_path': llr_res_file,
+            'edge_list_path': edge_list_file
+        }
+
+    return ret
 
 
 def load_features(data_config: Path, feature_file: Path,
