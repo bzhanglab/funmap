@@ -22,8 +22,6 @@ def arg_parse():
     parser = argparse.ArgumentParser(description='command line arguments.')
     parser.add_argument('-c', '--config-file', required=True, type=str,
                         help='path to experiment configuration yaml file')
-    parser.add_argument('-d', '--data-config-file', required=True, type=str,
-                        help='path to data configuration yaml file')
     parser.add_argument('-o', '--output-dir', required=False, type=str,
                         help='path to output directory')
     args = parser.parse_args()
@@ -31,7 +29,7 @@ def arg_parse():
     return args
 
 
-def get_config(cfg_file: str, data_cfg_file: str) -> Tuple[Dict[str, Any],
+def get_config(cfg_file: str) -> Tuple[Dict[str, Any],
     Dict[str, Any], Dict[str, Any]]:
     """
     Reads the configuration files and loads the configurations for the run, model, and data.
@@ -39,9 +37,7 @@ def get_config(cfg_file: str, data_cfg_file: str) -> Tuple[Dict[str, Any],
     Parameters
     ----------
     cfg_file : str
-        Path to the run configuration file
-    data_cfg_file : str
-        Path to the data configuration file
+        Path to the configuration file
 
     Returns
     -------
@@ -74,16 +70,22 @@ def get_config(cfg_file: str, data_cfg_file: str) -> Tuple[Dict[str, Any],
     run_cfg['max_num_edges'] = cfg_dict['max_num_edges'] if 'max_num_edges' in cfg_dict else 250000
     run_cfg['step_size'] = cfg_dict['step_size'] if 'step_size' in cfg_dict else 100
 
-    with open(data_cfg_file, 'r') as stream:
-        data_cfg = yaml.load(stream, Loader=yaml.FullLoader)
+    data_cfg['dataset_name'] = cfg_dict['dataset_name'] if 'dataset_name' in cfg_dict else 'unknown'
+    if 'data_root' not in cfg_dict:
+        raise ValueError('data_root not specified in config file')
+    data_cfg['data_root'] = cfg_dict['data_root']
+    if 'data_files' not in cfg_dict:
+        raise ValueError('data_files not specified in config file')
+    data_cfg['data_files'] = cfg_dict['data_files']
+    if 'rp_pairs' in cfg_dict:
+        data_cfg['rp_pairs'] = cfg_dict['rp_pairs']
 
     return run_cfg, model_cfg, data_cfg
 
 
 def main():
     args = arg_parse()
-    run_cfg, model_cfg, data_cfg = get_config(args.config_file,
-                                            args.data_config_file)
+    run_cfg, model_cfg, data_cfg = get_config(args.config_file)
     np.random.seed(model_cfg['seed'])
     model_dir = 'saved_models'
     prediction_dir = 'saved_predictions'

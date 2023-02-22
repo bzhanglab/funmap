@@ -15,6 +15,7 @@ requirements = [
     'xgboost',
     'numpy',
     'scipy',
+    'pyarrow',
     'pandas',
     'joblib',
     'matplotlib',
