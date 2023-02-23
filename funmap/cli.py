@@ -3,10 +3,10 @@ import sys
 import yaml
 import os
 import json
+import tarfile
 import pandas as pd
 import numpy as np
 from typing import Dict, Any, Tuple
-from joblib import dump, load
 import gzip
 import pickle
 from pathlib import Path
@@ -16,28 +16,35 @@ from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
 from funmap.funmap import feature_mapping
 from funmap.utils import dict_hash
 from funmap.data_urls import misc_urls as urls
+from funmap import __version__
 
 # add option for user to specify results directory
 def arg_parse():
     parser = argparse.ArgumentParser(description='command line arguments.')
-    parser.add_argument('-c', '--config-file', required=True, type=str,
+    parser.add_argument('-c', '--config-file', required=True, type=Path,
                         help='path to experiment configuration yaml file')
+    parser.add_argument('-d', '--data-file', required=True, type=Path,
+                        help='path to tar gzipped data file')
     parser.add_argument('-o', '--output-dir', required=False, type=str,
                         help='path to output directory')
+    parser.add_argument('--version', action='version', version=f'{__version__}')
+
     args = parser.parse_args()
 
     return args
 
 
-def get_config(cfg_file: str) -> Tuple[Dict[str, Any],
+def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any],
     Dict[str, Any], Dict[str, Any]]:
     """
     Reads the configuration files and loads the configurations for the run, model, and data.
 
     Parameters
     ----------
-    cfg_file : str
+    cfg_file : Path
         Path to the configuration file
+    data_file : Path
+        Path to the data file
 
     Returns
     -------
@@ -49,6 +56,19 @@ def get_config(cfg_file: str) -> Tuple[Dict[str, Any],
     data_cfg = {}
     with open(cfg_file, 'r') as fh:
         cfg_dict = yaml.load(fh, Loader=yaml.FullLoader)
+
+    # check all file listed under data_files are also in the tar.gz file
+    data_files = cfg_dict['data_files']
+    # list all the files in the tar.gz file
+    with tarfile.open(data_file, "r:gz") as tar:
+        tar_files = tar.getnames()
+        # get the file names only without the path prefix
+        tar_files = [Path(file).name for file in tar_files]
+
+    # check if all files in data_files are in tar_files
+    if not all(file['path'] in tar_files for file in data_files):
+        print(f'Files listed under data_files are not in the tar.gz file!')
+        raise ValueError('Files listed under data_files are not in the tar.gz file!')
 
     # separte cfg into two parts.
     model_cfg['seed'] = cfg_dict['seed'] if 'seed' in cfg_dict else 42
@@ -71,9 +91,6 @@ def get_config(cfg_file: str) -> Tuple[Dict[str, Any],
     run_cfg['step_size'] = cfg_dict['step_size'] if 'step_size' in cfg_dict else 100
 
     data_cfg['dataset_name'] = cfg_dict['dataset_name'] if 'dataset_name' in cfg_dict else 'unknown'
-    if 'data_root' not in cfg_dict:
-        raise ValueError('data_root not specified in config file')
-    data_cfg['data_root'] = cfg_dict['data_root']
     if 'data_files' not in cfg_dict:
         raise ValueError('data_files not specified in config file')
     data_cfg['data_files'] = cfg_dict['data_files']
@@ -85,7 +102,7 @@ def get_config(cfg_file: str) -> Tuple[Dict[str, Any],
 
 def main():
     args = arg_parse()
-    run_cfg, model_cfg, data_cfg = get_config(args.config_file)
+    run_cfg, model_cfg, data_cfg = get_config(args.config_file, args.data_file)
     np.random.seed(model_cfg['seed'])
     model_dir = 'saved_models'
     prediction_dir = 'saved_predictions'
@@ -142,7 +159,7 @@ def main():
     # llr obtained with each invividual dataset
     llr_dataset_file = results_dir / 'llr_dataset.tsv'
     all_fig_names = []
-    fig_names = explore_data(data_cfg, min_sample_count, figure_dir)
+    fig_names = explore_data(data_cfg, args.data_file, min_sample_count, figure_dir)
     all_fig_names.extend(fig_names)
     all_feature_df = None
     gs_train = gs_test_pos = gs_test_neg = None
@@ -150,6 +167,7 @@ def main():
     feature_args = {
         'data_dir': data_dir,
         'data_config': data_cfg,
+        'data_file': args.data_file,
         'min_sample_count': min_sample_count,
         'cor_type': cor_type,
         'n_jobs': n_jobs,

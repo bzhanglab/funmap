@@ -137,7 +137,7 @@ def extract_gs_features(gs_df: pd.DataFrame,
     return feature_df
 
 
-def generate_all_pairs(data_config, min_sample_count):
+def generate_all_pairs(data_config, data_file, min_sample_count):
     """
     Generates a list of all valid protein pairs, along with a list of all valid proteins,
     based on the provided data configuration and minimum sample count.
@@ -146,6 +146,8 @@ def generate_all_pairs(data_config, min_sample_count):
     ----------
     data_config :
         Configuration for the data to be used in the function.
+    data_file: Path
+        Path to the data file.
     min_sample_count : int
         The minimum number of valid samples required for a protein to be considered valid.
 
@@ -155,7 +157,7 @@ def generate_all_pairs(data_config, min_sample_count):
         A DataFrame containing all valid protein pairs, with columns 'P1' and 'P2',
         and a list of all valid proteins.
     """
-    data_dict = get_data_dict(data_config, min_sample_count)
+    data_dict = get_data_dict(data_config, data_file, min_sample_count)
     all_valid_proteins = set()
     for i in data_dict:
         cur_data = data_dict[i]
@@ -232,7 +234,7 @@ def compute_mr(cor_arr, gene_list):
     return res_arr
 
 
-def compute_all_features(edge_df, valid_gene_list, data_config,
+def compute_all_features(edge_df, valid_gene_list, data_config, data_file,
                         cor_type, min_sample_count, n_jobs, n_chunks):
     """
     Compute feature dataframe for given edges dataframe and data configuration.
@@ -245,6 +247,8 @@ def compute_all_features(edge_df, valid_gene_list, data_config,
         List of genes that are considered valid
     data_config : dict
         Configuration of data sources
+    data_file : Path
+        Path to data file
     cor_type : str
         Type of correlation to use (only 'spearman' is supported)
     min_sample_count : int
@@ -261,7 +265,7 @@ def compute_all_features(edge_df, valid_gene_list, data_config,
     """
     assert cor_type == 'spearman', 'correlation type must be spearman'
     cor_func = spearmanr
-    data_dict = get_data_dict(data_config, min_sample_count)
+    data_dict = get_data_dict(data_config, data_file, min_sample_count)
     col_name_cc = [f'{ds}_CC' for ds in data_dict.keys()]
     cor_df = pd.DataFrame(columns=col_name_cc)
     all_edges = edge_df.rename(columns={edge_df.columns[0]: 'P1',
@@ -690,7 +694,8 @@ def validation_llr(all_feature_df, predicted_all_pairs,
     return ret
 
 
-def load_features(data_config: Path, feature_file: Path,
+def load_features(data_config: Path, data_file:Path,
+                feature_file: Path,
                 pair_file: Path, valid_gene_file: Path, cor_type: str,
                 min_sample_count: int, n_jobs: int, n_chunks: int):
     """Load feature data from feather file or compute if not exist.
@@ -699,6 +704,8 @@ def load_features(data_config: Path, feature_file: Path,
     ----------
     data_config : Path
         Path to the data configuration file.
+    data_file: Path
+        Path to the data file.
     feature_file : Path
         Path to the feather file that contains the feature data.
     pair_file : Path
@@ -737,7 +744,7 @@ def load_features(data_config: Path, feature_file: Path,
         print(f'Computing features for all pairs ...')
         if not pair_file.exists() or not valid_gene_file.exists():
             print(f'Generating all pairs ...')
-            edge_df, valid_gene_list = generate_all_pairs(data_config, min_sample_count)
+            edge_df, valid_gene_list = generate_all_pairs(data_config, data_file, min_sample_count)
             print(f'Saving all pairs ...')
             edge_df.to_csv(pair_file, sep='\t', header=False, index=False)
             with open(valid_gene_file, 'w') as fp:
@@ -757,7 +764,7 @@ def load_features(data_config: Path, feature_file: Path,
             print(f'Loading all valid gene from {valid_gene_file} ... done')
 
         all_feature_df = compute_all_features(edge_df, valid_gene_list,
-                data_config, cor_type, min_sample_count, n_jobs, n_chunks)
+                data_config, data_file, cor_type, min_sample_count, n_jobs, n_chunks)
         all_feature_df.reset_index(inplace=True)
         all_feature_df.to_feather(feature_file)
         all_feature_df.set_index('index', inplace=True)
@@ -840,10 +847,10 @@ def prepare_features(**kwargs):
 
     Parameters
     ----------
-    data_dir : Path
-        Path to the directory containing the data files.
     data_config : Dict
         A dictionary containing the configuration for the dataset.
+    data_file: Path
+        Path to the data file.
     min_sample_count : int
         Minimum number of samples required for a gene to be considered valid.
     n_jobs : int
@@ -862,6 +869,7 @@ def prepare_features(**kwargs):
     """
     data_dir = kwargs['data_dir']
     data_config = kwargs['data_config']
+    data_file = kwargs['data_file']
     min_sample_count = kwargs['min_sample_count']
     n_jobs = kwargs['n_jobs']
     n_chunks = kwargs['n_chunks']
@@ -869,7 +877,7 @@ def prepare_features(**kwargs):
     pair_file =data_dir / 'all_pairs.tsv.gz'
     valid_gene_file = data_dir / 'all_valid_gene.txt'
     feature_file = data_dir / 'all_features.fth'
-    feature_df, valid_gene_list = load_features(data_config, feature_file, pair_file,
+    feature_df, valid_gene_list = load_features(data_config, data_file, feature_file, pair_file,
             valid_gene_file, cor_type, min_sample_count, n_jobs, n_chunks)
     return feature_df, valid_gene_list
 

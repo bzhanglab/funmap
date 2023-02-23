@@ -86,7 +86,9 @@ def plot_llr_comparison(validation_results, llr_ds, output_file='llr_comparison.
     return output_file
 
 
-def explore_data(data_config: Path, min_sample_count: int,
+def explore_data(data_config: Path,
+                data_file: Path,
+                min_sample_count: int,
                 output_dir: Path):
     """
     Generate plots to explore and visualize data
@@ -95,6 +97,8 @@ def explore_data(data_config: Path, min_sample_count: int,
     ----------
     data_config: Path
         Path to the data configuration file
+    data_file: Path
+        Path to the data file
     min_sample_count: int
         The minimum number of samples required to consider a dataset
     output_dir: Path
@@ -106,7 +110,7 @@ def explore_data(data_config: Path, min_sample_count: int,
 
     """
     print('Generating plots to explore and visualize data ...')
-    data_dict = get_data_dict(data_config, min_sample_count)
+    data_dict = get_data_dict(data_config, data_file, min_sample_count)
     fig_names = []
 
     # sample wise median expression plot for each dataset

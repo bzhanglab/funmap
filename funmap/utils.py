@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from typing import Dict, Any
 import pandas as pd
+import tarfile
 from funmap.data_urls import misc_urls as urls
 
 
@@ -75,7 +76,7 @@ def gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id'):
     return gs_pos_edges, gs_neg_edges
 
 
-def get_data_dict(data_config, min_sample_count=15):
+def get_data_dict(data_config, data_file, min_sample_count=15):
     """
     Returns a dictionary of data from the provided data configuration, filtered to only include genes that are
     coding and have at least `min_sample_count` samples.
@@ -86,6 +87,8 @@ def get_data_dict(data_config, min_sample_count=15):
         A dictionary specifying the data file paths and names. It must contain the following keys:
         - 'data_root': the root path to the data files
         - 'data_files': a list of dictionaries, where each dictionary has keys 'name' and 'path'
+    data_file : str/Path
+        Path to the data file.
     min_sample_count : int, optional
         Minimum number of samples required for a gene to be included in the returned dictionary. Default is 15.
 
@@ -97,13 +100,12 @@ def get_data_dict(data_config, min_sample_count=15):
 
     """
     data_dict = {}
-    data_root = data_config['data_root']
     mapping = pd.read_csv(urls['mapping_file'], sep='\t')
     # gene ids are gene symbols
     for dt in data_config['data_files']:
         print(f"... {dt['name']}")
         cur_feature = dt['name']
-        cur_file = Path(data_root) / dt['path']
+        cur_file = get_obj_from_tgz(data_file, dt['path'])
         cur_data = pd.read_csv(cur_file, sep='\t', index_col=0,
                                 header=0)
         if cur_data.shape[1] < min_sample_count:
@@ -261,3 +263,31 @@ def get_node_edge_overlap(network_info):
 
     overlap['edge'] = cur_res
     return overlap
+
+
+# write a function that read a specific file from a tar gz file and return
+# the file object
+def get_obj_from_tgz(tar_file, file_name):
+    """
+    Read a specific file from a tar gz file and return the file object.
+
+    Parameters
+    ----------
+    tar_file : str
+        The path to the tar gz file.
+
+    file_name : str
+        The name of the file to be read.
+
+    Returns
+    -------
+    f
+        The file object of the file to be read.
+    """
+
+    tar = tarfile.open(tar_file, "r:gz")
+    for member in tar.getmembers():
+        if member.name.endswith(file_name):
+            f = tar.extractfile(member)
+            if f is not None:
+                return f
