@@ -83,6 +83,7 @@ def plot_llr_comparison(validation_results, llr_ds, output_file='llr_comparison.
     plt.tight_layout()
     plt.box(on=None)
     plt.savefig(output_file, bbox_inches='tight')
+    plt.close(fig)
     return output_file
 
 
@@ -153,6 +154,7 @@ def explore_data(data_config: Path,
         cur_file_name = f'{ds}_sample_plot.pdf'
         fig_names.append(cur_file_name)
         fig.savefig(output_dir / cur_file_name)
+        plt.close(fig)
         data_keys.append(ds)
         data.append(data_df.median(axis=1).values)
 
@@ -168,6 +170,7 @@ def explore_data(data_config: Path,
     file_name = 'data_box_plot.pdf'
     fig_names.append(file_name)
     fig.savefig(output_dir / file_name)
+    plt.close(fig)
 
     # boxplot of the number of samples and genes
     sample_count = pd.DataFrame(
@@ -202,6 +205,7 @@ def explore_data(data_config: Path,
     fig.tight_layout()
     file_name = 'sample_gene_count.pdf'
     fig.savefig(output_dir / file_name)
+    plt.close(fig)
     fig_names.append(file_name)
     return fig_names
 
@@ -242,10 +246,7 @@ def plot_results(data_cfg: dict, run_cfg: dict, validation_results: dict,
         fig_names.extend(file_names)
 
     # note that the cutoff is for LR, not LLR (log of LR)
-    if 'cutoff' in run_cfg:
-        cutoff = run_cfg['cutoff']
-    else:
-        cutoff = 50
+    cutoff = run_cfg['lr_cutoff']
     file_name = 'llr_compare_networks.pdf'
     n_edge_dict = plot_llr_compare_networks(validation_results, cutoff, output_file=figure_dir / file_name)
     fig_names.append(file_name)
@@ -271,7 +272,7 @@ def plot_results(data_cfg: dict, run_cfg: dict, validation_results: dict,
         edge_file_path = validation_results[ft]['edge_list_path']
         funmap_el = pd.read_csv(edge_file_path, sep='\t', header=None)
         n_edge = n_edge_dict[ft]
-        funmap_el = funmap_el.iloc[:n_edge, :]
+        funmap_el = funmap_el.iloc[:n_edge, :2]
 
         funmap_df = pd.DataFrame({'name': ['FunMap'], 'type': ['FunMap'], 'el': [funmap_el]})
         all_network_info = pd.concat([network_info, funmap_df], ignore_index=True)
@@ -478,6 +479,7 @@ def plot_pair_llr(feature_df: pd.DataFrame, output_dir: Path, rp_pairs: List[Dic
             file_name = f"{rp_pair['name']}_rna_pro_{ft}_llr.pdf"
             file_names.append(file_name)
             plt.savefig(output_dir / file_name, bbox_inches='tight')
+            plt.close(fig)
 
     return file_names
 
@@ -611,6 +613,7 @@ def plot_llr_compare_networks(validaton_results, cutoff, output_file: Path):
 
     fig.tight_layout()
     fig.savefig(output_file, bbox_inches='tight')
+    plt.close(fig)
     return n_edge
 
 
@@ -681,6 +684,7 @@ def plot_overlap_venn(network_name, overlap, node_or_edge, color, output_dir):
 
     file_name = f'{network_name}_overlap_{node_or_edge}.pdf'
     fig.savefig(output_dir / file_name, bbox_inches='tight')
+    plt.close(fig)
     return file_name
 
 
@@ -819,6 +823,7 @@ def plot_network_stats(network_info, feature_type, output_dir):
     fig.suptitle(f'Network properties of Funmap ({feature_type})', fontsize=16)
     file_name = f'Funmap_{feature_type}_network_properties.pdf'
     fig.savefig(output_dir / file_name, bbox_inches='tight')
+    plt.close(fig)
     return file_name
 
 

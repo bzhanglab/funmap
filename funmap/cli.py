@@ -13,7 +13,7 @@ from pathlib import Path
 from funmap.funmap import validation_llr, predict_all_pairs, dataset_llr
 from funmap.plotting import explore_data, plot_results, merge_and_delete
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
-from funmap.funmap import feature_mapping
+from funmap.funmap import feature_mapping, set_funmap
 from funmap.utils import dict_hash
 from funmap.data_urls import misc_urls as urls
 from funmap import __version__
@@ -89,6 +89,7 @@ def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any],
     run_cfg['n_chunks'] = cfg_dict['n_chunks'] if 'n_chunks' in cfg_dict else 4
     run_cfg['max_num_edges'] = cfg_dict['max_num_edges'] if 'max_num_edges' in cfg_dict else 250000
     run_cfg['step_size'] = cfg_dict['step_size'] if 'step_size' in cfg_dict else 100
+    run_cfg['lr_cutoff'] = cfg_dict['lr_cutoff'] if 'lr_cutoff' in cfg_dict else 50
 
     data_cfg['dataset_name'] = cfg_dict['dataset_name'] if 'dataset_name' in cfg_dict else 'unknown'
     if 'data_files' not in cfg_dict:
@@ -136,6 +137,7 @@ def main():
     model_dir = results_dir / model_dir
     prediction_dir = results_dir / prediction_dir
     figure_dir = results_dir / 'figures'
+    network_dir = results_dir / 'networks'
 
     print(f'Output directory: {results_dir}')
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -143,6 +145,7 @@ def main():
     model_dir.mkdir(parents=True, exist_ok=True)
     prediction_dir.mkdir(parents=True, exist_ok=True)
     figure_dir.mkdir(parents=True, exist_ok=True)
+    network_dir.mkdir(parents=True, exist_ok=True)
 
     # save configuration to results folder
     with open(str(results_dir / 'config.json'), 'w') as fh:
@@ -154,7 +157,7 @@ def main():
 
     llr_res_files = {feature: results_dir / f'llr_results_{feature}_{max_num_edges}.tsv'
                         for feature in feature_mapping }
-    edge_list_paths = {feature: results_dir / 'networks'/ f'network_{feature}_{max_num_edges}.tsv'
+    edge_list_paths = {feature: network_dir/ f'network_{feature}_{max_num_edges}.tsv'
                         for feature in feature_mapping }
     # llr obtained with each invividual dataset
     llr_dataset_file = results_dir / 'llr_dataset.tsv'
@@ -233,7 +236,8 @@ def main():
         validation_res = validation_llr(all_feature_df, predicted_all_pairs,
                     filter_after_prediction, filter_criterion, filter_threshold,
                     filter_blacklist, blacklist_file,
-                    max_num_edges, step_size, gs_test_pos_set, gs_test_neg_set, results_dir)
+                    max_num_edges, step_size, gs_test_pos_set,
+                    gs_test_neg_set, results_dir, network_dir)
         print('Done.')
 
     if not llr_dataset_file.exists():
@@ -245,6 +249,7 @@ def main():
     else:
         llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
 
+    set_funmap(validation_res, run_cfg, network_dir)
     fig_names = plot_results(data_cfg, run_cfg, validation_res, llr_ds, gs_train,
                             figure_dir)
     all_fig_names.extend(fig_names)

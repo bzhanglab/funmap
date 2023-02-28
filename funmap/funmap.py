@@ -5,7 +5,6 @@ from tqdm import tqdm
 import gc
 import itertools
 import warnings
-import csv
 import gzip, pickle
 from pathlib import Path
 from collections import defaultdict, Counter
@@ -569,7 +568,8 @@ def predict_all_pairs(model, all_feature_df, min_feature_count,
 def validation_llr(all_feature_df, predicted_all_pairs,
                 filter_after_prediction, filter_criterion, filter_threshold,
                 filter_blacklist, blacklist_file: str, max_num_edges, step_size,
-                gs_test_pos_set, gs_test_neg_set, output_dir: Path):
+                gs_test_pos_set, gs_test_neg_set, output_dir: Path,
+                network_out_dir: Path):
     """
     Compute Log Likelihood Ratio (LLR) for a given set of edges and a given set of gold
     standard positive and negative edges.
@@ -589,6 +589,7 @@ def validation_llr(all_feature_df, predicted_all_pairs,
     gs_test_pos_set (set): set of gold standard positive edges
     gs_test_neg_set (set): set of gold standard negative edges
     output_dir (Path): directory to save LLR results
+    network_out_dir (Path): directory to save selected edges
 
     Returns
     -------
@@ -673,17 +674,16 @@ def validation_llr(all_feature_df, predicted_all_pairs,
         llr_res_dict = pd.DataFrame(result_dict)
         llr_res_dict.to_csv(llr_res_file, sep='\t', index=False)
 
-        # write edge list to file
+        # write edge list to file, also include the prediction score
         print(f'saving edges to file ...')
-        out_dir = output_dir / 'networks'
-        out_dir.mkdir(parents=True, exist_ok=True)
-        edge_list_file = out_dir / f'network_{ft}_{max_num_edges}.tsv'
-        selected_edges = list(cur_results.iloc[:k, :].index)
-        with open(edge_list_file, 'w') as out_file:
-            tsv_writer = csv.writer(out_file, delimiter='\t')
-            for row in list(selected_edges):
-                tsv_writer.writerow(row)
-
+        edge_list_file = network_out_dir / f'network_{ft}_{max_num_edges}.tsv'
+        cur_results = cur_results.reset_index()
+        cur_results[['e1', 'e2']] = pd.DataFrame(cur_results['index'].tolist(),
+                                    index=cur_results.index)
+        cur_results.drop(columns=['index'], axis=1, inplace=True)
+        cur_results = cur_results.reindex(columns=['e1', 'e2', cur_col_name])
+        selected_edges = cur_results.iloc[:max_num_edges, :]
+        selected_edges.to_csv(edge_list_file, sep='\t', index=False, header=False)
         print(f'Calculating llr_res_dict ({ft})... done')
 
         ret[ft] = {
@@ -692,6 +692,52 @@ def validation_llr(all_feature_df, predicted_all_pairs,
         }
 
     return ret
+
+
+# set the final funmap edge list file based on the cutoff
+def set_funmap(validation_res, run_config, output_dir):
+    """Set the final funmap edge list file based on the likelihood ratio cutoff.
+    we will use results from "ei" to generate the final edge list.
+
+    Parameters
+    ----------
+    validation_res : dict
+        A dictionary containing the validation results. It should have a key 'ei' which
+        should be a dictionary containing the paths to the likelihood ratio test results
+        and the edge list file.
+    run_config : dict
+        A dictionary containing the configuration for running the function. It should have
+        a key 'lr_cutoff' which specifies the likelihood ratio cutoff value.
+    output_dir : Path
+        A Path object specifying the output directory where the final funmap edge list file
+        will be saved.
+
+    Returns
+    -------
+    None
+        This function does not return anything, but it saves the final funmap edge list file
+        to the output directory specified by `output_dir`.
+
+    Raises
+    ------
+    UserWarning
+        If the largest llr value is smaller than the cutoff, no funmap will be generated.
+    """
+    llr_res_path = validation_res['ei']['llr_res_path']
+    edge_list_path = validation_res['ei']['edge_list_path']
+    llr_res = pd.read_csv(llr_res_path, sep='\t')
+    llr_res = llr_res.sort_values(by=['llr'], ascending=False)
+    cutoff = run_config['lr_cutoff']
+
+    if llr_res['llr'].iloc[0] < np.log(cutoff):
+        warnings.warn('The largest llr value is smaller than the cutoff, no funmap will be generated.')
+        return
+    llr_res = llr_res[llr_res['llr'] >= np.log(cutoff)]
+    funmap = llr_res.iloc[-1]
+    n_edge = int(funmap['k'])
+    funmap_el = pd.read_csv(edge_list_path, sep='\t', header=None)
+    funmap_el = funmap_el.iloc[:n_edge, :2]
+    funmap_el.to_csv(output_dir / 'funmap.tsv', sep='\t', header=False, index=False)
 
 
 def load_features(data_config: Path, data_file:Path,

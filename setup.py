@@ -45,9 +45,6 @@ setup(
     license='MIT license',
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    package_data={
-        'funmap': ['data/*.tsv', 'data/*.txt']
-    },
     keywords=['funmap', 'bioinformatics', 'biological-network'],
     name='funmap',
     packages=find_packages(include=['funmap', 'funmap.*']),
