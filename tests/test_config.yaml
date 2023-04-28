@@ -1,6 +1,6 @@
 seed: 42
 results_dir: results
-n_jobs: 40
+n_jobs: 8
 n_chunk: 4
 # minimum number of valid data point when computing correlation
 min_sample_count: 15
@@ -8,3 +8,35 @@ min_sample_count: 15
 output_edgelist: True
 max_num_edges: 25000
 step_size: 1
+lr_cutoff: 10
+dataset_name: aml
+# path to the root directory of the data files
+data_root: 'tests/aml_test'
+data_files:
+  - name: 'BeatAMl-T'
+    type: 'rna'
+    path: 'BeatAMl-T.tsv'
+  - name: 'Blood2022-P-T'
+    type: 'rna'
+    path: 'Blood2022-P-T.tsv'
+  - name: 'CCLE-P-T'
+    type: 'rna'
+    path: 'CCLE-P-T.tsv'
+  - name: 'CCLE-T'
+    type: 'rna'
+    path: 'CCLE-T.tsv'
+  - name: 'ClinseqAML-T'
+    type: 'rna'
+    path: 'ClinseqAML-T.tsv'
+  - name: 'TCGA_2013-T'
+    type: 'rna'
+    path: 'TCGA_2013-T.tsv'
+  - name: 'target-C'
+    type: 'rna'
+    path: 'target-C.tsv'
+  - name: 'target-N'
+    type: 'rna'
+    path: 'target-N.tsv'
+  - name: 'target-T'
+    type: 'rna'
+    path: 'target-T.tsv'
