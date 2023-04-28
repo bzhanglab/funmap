@@ -1,6 +1,5 @@
 # funmap
-`funmap` integrates multiple omics data types (such as proteomics and RNASeq) to predict a functional network. The predicted network can provide insights into known and novel protein complexes, as well as identifying new somatic drivers and understudied proteins.
-
+`funmap` integrates multiple omics data sets (such as proteomics and RNASeq) to construct a functional network using supervised machine learning (xgboost).
 
 ## Installation
 
