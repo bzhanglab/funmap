@@ -21,12 +21,14 @@ from funmap import __version__
 # add option for user to specify results directory
 def arg_parse():
     parser = argparse.ArgumentParser(description='command line arguments.')
+    parser.add_argument('--qc-only', required=False, type=Path,
+                        help='if true, plot the data qc plots and quit, default: False')
     parser.add_argument('-c', '--config-file', required=True, type=Path,
                         help='path to experiment configuration yaml file')
     parser.add_argument('-d', '--data-file', required=True, type=Path,
                         help='path to tar gzipped data file')
     parser.add_argument('-o', '--output-dir', required=False, type=str,
-                        help='path to output directory')
+                        help='path to output directory, default: ./results')
     parser.add_argument('--version', action='version', version=f'{__version__}')
 
     args = parser.parse_args()
@@ -139,6 +141,13 @@ def main():
     figure_dir = results_dir / 'figures'
     network_dir = results_dir / 'networks'
 
+    all_fig_names = []
+    fig_names = explore_data(data_cfg, args.data_file, min_sample_count, figure_dir)
+    all_fig_names.extend(fig_names)
+    if args.qc_only:
+        merge_and_delete(figure_dir, all_fig_names, 'all_figures.pdf')
+        return 0
+
     print(f'Output directory: {results_dir}')
     results_dir.mkdir(parents=True, exist_ok=True)
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -161,9 +170,6 @@ def main():
                         for feature in feature_mapping }
     # llr obtained with each invividual dataset
     llr_dataset_file = results_dir / 'llr_dataset.tsv'
-    all_fig_names = []
-    fig_names = explore_data(data_cfg, args.data_file, min_sample_count, figure_dir)
-    all_fig_names.extend(fig_names)
     all_feature_df = None
     gs_train = gs_test_pos = gs_test_neg = None
 
