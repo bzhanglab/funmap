@@ -74,7 +74,7 @@ def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any],
 
     # separte cfg into two parts.
     model_cfg['seed'] = cfg_dict['seed'] if 'seed' in cfg_dict else 42
-    model_cfg['cor_type'] = 'spearman'
+    model_cfg['cor_type'] = 'pearson'
     model_cfg['split_by'] = 'edge'
     model_cfg['test_size'] = 0.5
     model_cfg['ml_type'] = 'xgboost'
@@ -127,14 +127,7 @@ def main():
     step_size = run_cfg['step_size']
 
     all_cfg = {**model_cfg, **data_cfg, **run_cfg}
-    # results will only be affected by model_cfg and data_cfg
-    res_cfg = {**model_cfg, **data_cfg}
-    if args.output_dir is None:
-        results_dir = Path('results')
-        hash_str = dict_hash(res_cfg)
-        results_dir = results_dir / f'results-{hash_str}'
-    else: # user specified output directory
-        results_dir = Path(args.output_dir)
+    results_dir = Path('results')
     data_dir = results_dir / 'saved_data'
     model_dir = results_dir / model_dir
     prediction_dir = results_dir / prediction_dir
