@@ -1,4 +1,6 @@
 seed: 42
+# cor_type can be 'pearson', 'spearman'
+cor_type: 'pearson'
 n_jobs: 8
 n_chunk: 4
 # minimum number of valid data point when computing correlation

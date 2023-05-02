@@ -74,7 +74,7 @@ def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any],
 
     # separte cfg into two parts.
     model_cfg['seed'] = cfg_dict['seed'] if 'seed' in cfg_dict else 42
-    model_cfg['cor_type'] = 'pearson'
+    model_cfg['cor_type'] = 'pearson' if 'cor_type' not in cfg_dict else cfg_dict['cor_type']
     model_cfg['split_by'] = 'edge'
     model_cfg['test_size'] = 0.5
     model_cfg['ml_type'] = 'xgboost'
@@ -107,8 +107,6 @@ def main():
     args = arg_parse()
     run_cfg, model_cfg, data_cfg = get_config(args.config_file, args.data_file)
     np.random.seed(model_cfg['seed'])
-    model_dir = 'saved_models'
-    prediction_dir = 'saved_predictions'
     ml_type = model_cfg['ml_type']
     min_feature_count = model_cfg['min_feature_count']
     min_sample_count = model_cfg['min_sample_count']
@@ -129,8 +127,8 @@ def main():
     all_cfg = {**model_cfg, **data_cfg, **run_cfg}
     results_dir = Path('results')
     data_dir = results_dir / 'saved_data'
-    model_dir = results_dir / model_dir
-    prediction_dir = results_dir / prediction_dir
+    model_dir = results_dir / 'saved_models'
+    prediction_dir = results_dir / 'saved_predictions'
     figure_dir = results_dir / 'figures'
     network_dir = results_dir / 'networks'
 

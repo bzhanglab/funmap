@@ -10,7 +10,7 @@ from pathlib import Path
 from collections import defaultdict, Counter
 import pandas as pd
 import numpy as np
-from scipy.stats import spearmanr
+from scipy.stats import pearsonr, spearmanr
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
@@ -249,7 +249,7 @@ def compute_all_features(edge_df, valid_gene_list, data_config, data_file,
     data_file : Path
         Path to data file
     cor_type : str
-        Type of correlation to use (only 'spearman' is supported)
+        Type of correlation to use (only 'pearson' and 'spearman' is supported)
     min_sample_count : int
         Minimum sample count required for a gene to be considered
     n_jobs : int
@@ -262,8 +262,9 @@ def compute_all_features(edge_df, valid_gene_list, data_config, data_file,
     cor_df : pd.DataFrame
         Dataframe containing computed features for edges.
     """
-    assert cor_type == 'spearman', 'correlation type must be spearman'
-    cor_func = spearmanr
+    # assert cor_type to be either pearson or spearman
+    assert cor_type == 'pearson' or cor_type == 'spearman', 'correlation type should be pearson or spearman'
+    cor_func = pearsonr if cor_type == 'pearson' else spearmanr
     data_dict = get_data_dict(data_config, data_file, min_sample_count)
     col_name_cc = [f'{ds}_CC' for ds in data_dict.keys()]
     cor_df = pd.DataFrame(columns=col_name_cc)
