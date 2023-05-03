@@ -14,21 +14,23 @@ from funmap.funmap import validation_llr, predict_all_pairs, dataset_llr
 from funmap.plotting import explore_data, plot_results, merge_and_delete
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
 from funmap.funmap import feature_mapping, set_funmap
-from funmap.utils import dict_hash
 from funmap.data_urls import misc_urls as urls
 from funmap import __version__
 
-# add option for user to specify results directory
 def arg_parse():
-    parser = argparse.ArgumentParser(description='command line arguments.')
-    parser.add_argument('--qc-only', required=False, type=Path,
-                        help='if true, plot the data qc plots and quit, default: False')
-    parser.add_argument('-c', '--config-file', required=True, type=Path,
+    parser = argparse.ArgumentParser(description='funmap command line interface')
+    subparsers = parser.add_subparsers(title='Commands', dest='command')
+    qc_parser = subparsers.add_parser('qc', help='check the data quality')
+    qc_parser.add_argument('-c', '--config-file', required=True, type=Path,
                         help='path to experiment configuration yaml file')
-    parser.add_argument('-d', '--data-file', required=True, type=Path,
+    qc_parser.add_argument('-d', '--data-file', required=True, type=Path,
                         help='path to tar gzipped data file')
-    parser.add_argument('-o', '--output-dir', required=False, type=str,
-                        help='path to output directory, default: ./results')
+    run_parser = subparsers.add_parser('run', help='run funmap')
+    run_parser.add_argument('-c', '--config-file', required=True, type=Path,
+                        help='path to experiment configuration yaml file')
+    run_parser.add_argument('-d', '--data-file', required=True, type=Path,
+                        help='path to tar gzipped data file')
+
     parser.add_argument('--version', action='version', version=f'{__version__}')
 
     args = parser.parse_args()
@@ -103,6 +105,13 @@ def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any],
     return run_cfg, model_cfg, data_cfg
 
 
+def qc(data_cfg, data_file, min_sample_count, figure_dir):
+    all_fig_names = []
+    fig_names = explore_data(data_cfg, data_file, min_sample_count, figure_dir)
+    all_fig_names.extend(fig_names)
+    merge_and_delete(figure_dir, all_fig_names, 'qc.pdf')
+
+
 def main():
     args = arg_parse()
     run_cfg, model_cfg, data_cfg = get_config(args.config_file, args.data_file)
@@ -132,14 +141,10 @@ def main():
     figure_dir = results_dir / 'figures'
     network_dir = results_dir / 'networks'
 
-    all_fig_names = []
-    fig_names = explore_data(data_cfg, args.data_file, min_sample_count, figure_dir)
-    all_fig_names.extend(fig_names)
-    if args.qc_only:
-        merge_and_delete(figure_dir, all_fig_names, 'all_figures.pdf')
+    if args.command == 'qc':
+        qc(data_cfg, args.data_file, min_sample_count, figure_dir)
         return 0
 
-    print(f'Output directory: {results_dir}')
     results_dir.mkdir(parents=True, exist_ok=True)
     data_dir.mkdir(parents=True, exist_ok=True)
     model_dir.mkdir(parents=True, exist_ok=True)
@@ -247,11 +252,12 @@ def main():
         llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
 
     set_funmap(validation_res, run_cfg, network_dir)
+    all_fig_names = []
     fig_names = plot_results(data_cfg, run_cfg, validation_res, llr_ds, gs_train,
                             figure_dir)
     all_fig_names.extend(fig_names)
 
-    merge_and_delete(figure_dir, all_fig_names, 'all_figures.pdf')
+    merge_and_delete(figure_dir, all_fig_names, 'results.pdf')
 
     return 0
 

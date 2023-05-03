@@ -8,22 +8,22 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'pyyaml',
-    'xgboost',
-    'numpy',
-    'scipy',
-    'pyarrow',
-    'pandas',
-    'joblib',
-    'matplotlib',
-    'seaborn',
-    'scikit-learn',
-    'imblearn',
-    'tqdm',
-    'PyPDF2',
-    'matplotlib_venn',
-    'networkx',
-    'powerlaw',
+    'pyyaml>=6.0',
+    'xgboost>=1.7.4',
+    'numpy>=1.24.2',
+    'scipy>=1.10.1',
+    'pyarrow>=11.0.0',
+    'pandas>=1.5.3',
+    'joblib>=1.2.0',
+    'matplotlib>=3.7.0',
+    'seaborn>=0.12.2',
+    'scikit-learn>=1.2.1',
+    'imblearn>=0.10.1',
+    'tqdm>=4.64.1',
+    'PyPDF2>=3.0.1',
+    'matplotlib_venn>=0.11.7',
+    'networkx>=3.0',
+    'powerlaw>=1.5',
     ]
 
 test_requirements = [ ]
