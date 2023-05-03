@@ -141,6 +141,10 @@ def main():
     figure_dir = results_dir / 'figures'
     network_dir = results_dir / 'networks'
 
+    # save configuration to results folder
+    with open(str(results_dir / 'config.json'), 'w') as fh:
+        json.dump(all_cfg, fh, indent=4)
+
     if args.command == 'qc':
         qc(data_cfg, args.data_file, min_sample_count, figure_dir)
         return 0
@@ -151,10 +155,6 @@ def main():
     prediction_dir.mkdir(parents=True, exist_ok=True)
     figure_dir.mkdir(parents=True, exist_ok=True)
     network_dir.mkdir(parents=True, exist_ok=True)
-
-    # save configuration to results folder
-    with open(str(results_dir / 'config.json'), 'w') as fh:
-        json.dump(all_cfg, fh, indent=4)
 
     ml_model_file = model_dir / 'model.pkl.gz'
     predicted_all_pairs_file = prediction_dir / 'predicted_all_pairs.pkl.gz'
