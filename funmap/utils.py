@@ -1,9 +1,11 @@
 import hashlib
+import os
 import json
 from pathlib import Path
 from typing import Dict, Any
 import pandas as pd
 import tarfile
+import shutil
 from funmap.data_urls import misc_urls as urls
 
 
@@ -101,15 +103,22 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
     """
     data_dict = {}
     mapping = pd.read_csv(urls['mapping_file'], sep='\t')
+    # extract the data file from the tar.gz file
+    tmp_dir = 'tmp_data'
+    if not os.path.exists(tmp_dir):
+        os.mkdir(tmp_dir)
+    os.system(f'tar -xzf {data_file} --strip-components=1 -C {tmp_dir}')
     # gene ids are gene symbols
     for dt in data_config['data_files']:
         print(f"... {dt['name']}")
         cur_feature = dt['name']
-        cur_file = get_obj_from_tgz(data_file, dt['path'])
-        cur_data = pd.read_csv(cur_file, sep='\t', index_col=0,
+        # cur_file = get_obj_from_tgz(data_file, dt['path'])
+        # extract the data file from the tar.gz file
+        # cur_data= get_obj_from_tgz(data_file, dt['path'])
+        cur_data = pd.read_csv(os.path.join(tmp_dir, dt['path']), sep='\t', index_col=0,
                                 header=0)
         if cur_data.shape[1] < min_sample_count:
-            print('...... not enough samples, skipped')
+            print(f"... {dt['name']} ... not enough samples, skipped")
             continue
         cur_data = cur_data.T
         # exclude cohort with sample number < min_sample_count
@@ -120,6 +129,8 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
         # duplicated columns, for now select the last column
         cur_data = cur_data.loc[:,~cur_data.columns.duplicated(keep='last')]
         data_dict[cur_feature] = cur_data
+
+    shutil.rmtree(tmp_dir)
 
     return data_dict
 
@@ -263,31 +274,3 @@ def get_node_edge_overlap(network_info):
 
     overlap['edge'] = cur_res
     return overlap
-
-
-# write a function that read a specific file from a tar gz file and return
-# the file object
-def get_obj_from_tgz(tar_file, file_name):
-    """
-    Read a specific file from a tar gz file and return the file object.
-
-    Parameters
-    ----------
-    tar_file : str
-        The path to the tar gz file.
-
-    file_name : str
-        The name of the file to be read.
-
-    Returns
-    -------
-    f
-        The file object of the file to be read.
-    """
-
-    tar = tarfile.open(tar_file, "r:gz")
-    for member in tar.getmembers():
-        if member.name.endswith(file_name):
-            f = tar.extractfile(member)
-            if f is not None:
-                return f
