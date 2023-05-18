@@ -52,7 +52,7 @@ Before running the experiment, user can check the quality of the input data usin
 funmap qc -c test/test_config.yaml -d test/aml_test.gz -o output
 ```
 
-User needs to prepare configuration file and an input data file. The configuration file is a yaml file that specifies the parameters for the experiment. The input data file is a tar gzipped file that contains the data for the experiment. A sample configuration file and a sample input data file can be found in the `test` directory.
+User needs to prepare configuration file and an input data file. The configuration file is a yaml file that specifies the parameters for the experiment. The input data file is a tar gzipped file that contains the data for the experiment. A sample configuration file and a sample input data file can be found in the [`test`](https://github.com/bzhanglab/funmap/tree/main/tests) directory.
 
 ### Run the experiment
 
