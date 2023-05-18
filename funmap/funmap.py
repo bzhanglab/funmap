@@ -930,7 +930,7 @@ def prepare_features(**kwargs):
 
 
 def dataset_llr(feature_df, gs_test_pos_set, gs_test_neg_set,
-                start_edge_num=10000, max_num_edge=250000, step_size=1000,
+                start_edge_num, step_size, max_num_edge,
                 output_file='llr_dataset.tsv'):
     """Calculate the Log-Likelihood Ratio (LLR) for a set of MR features.
 
@@ -942,12 +942,12 @@ def dataset_llr(feature_df, gs_test_pos_set, gs_test_neg_set,
         A set of positive test edges.
     gs_test_neg_set : set
         A set of negative test edges.
-    start_edge_num : int, optional
-        Start number of edges, by default 10000.
-    max_num_edge : int, optional
-        Maximum number of edges, by default 250000.
-    step_size : int, optional
-        Step size, by default 1000.
+    start_edge_num : int
+        Start number of edges.
+    step_size : int
+        Step size.
+    max_num_edge : int
+        Maximum number of edges.
     output_file : str, optional
         Output file name, by default 'llr_dataset.tsv'.
 
@@ -971,6 +971,8 @@ def dataset_llr(feature_df, gs_test_pos_set, gs_test_neg_set,
         cur_results.sort_values(by=col, ascending=False, inplace=True)
         cnt_notna = np.count_nonzero(~np.isnan(cur_results[col].values))
         assert start_edge_num < max_num_edge, 'start_edge_num should be smaller than max_num_edge'
+        print(cnt_notna)
+        print(start_edge_num)
         assert cnt_notna > start_edge_num, 'start_edge_num should be smaller than the number of non-NA values'
         cur_max_num_edge = min(max_num_edge, cnt_notna)
         print(f'... current max_num_edge: {cur_max_num_edge}')

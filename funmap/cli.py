@@ -91,6 +91,7 @@ def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any],
     num_cores = os.cpu_count()
     run_cfg['n_jobs'] = cfg_dict['n_jobs'] if 'n_jobs' in cfg_dict else num_cores
     run_cfg['n_chunks'] = cfg_dict['n_chunks'] if 'n_chunks' in cfg_dict else 4
+    run_cfg['start_edge_num'] = cfg_dict['start_edge_num'] if 'start_edge_num' in cfg_dict else 10000
     run_cfg['max_num_edges'] = cfg_dict['max_num_edges'] if 'max_num_edges' in cfg_dict else 250000
     run_cfg['step_size'] = cfg_dict['step_size'] if 'step_size' in cfg_dict else 100
     run_cfg['lr_cutoff'] = cfg_dict['lr_cutoff'] if 'lr_cutoff' in cfg_dict else 50
@@ -132,6 +133,7 @@ def main():
     n_chunks = run_cfg['n_chunks']
     max_num_edges = run_cfg['max_num_edges']
     step_size = run_cfg['step_size']
+    start_edge_num = run_cfg['start_edge_num']
 
     all_cfg = {**model_cfg, **data_cfg, **run_cfg}
     results_dir = Path('results')
@@ -245,9 +247,9 @@ def main():
 
     if not llr_dataset_file.exists():
         print('Computing LLR for each dataset ...')
-        # TODO: adjust the starting number of edges and step size automatically
+        step_size = int(start_edge_num / 10)
         llr_ds = dataset_llr(all_feature_df, gs_test_pos_set, gs_test_neg_set,
-            10000, max_num_edges, 1000,  llr_dataset_file)
+            start_edge_num, step_size, max_num_edges,  llr_dataset_file)
         print('Done.')
     else:
         llr_ds = pd.read_csv(llr_dataset_file, sep='\t')

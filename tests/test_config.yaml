@@ -3,6 +3,8 @@ seed: 42
 cor_type: 'pearson'
 n_jobs: 8
 n_chunk: 4
+# when evaluating the LLR for each indiviual data set, where to begin to evaluate
+start_edge_num: 100
 # minimum number of valid data point when computing correlation
 min_sample_count: 15
 # whether to output the edge list or not
