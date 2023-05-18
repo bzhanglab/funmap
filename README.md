@@ -30,28 +30,36 @@ pip install --upgrade funmap
 ## How to run
 
 ```sh
-funmap -h
-usage: funmap [-h] -c CONFIG_FILE -d DATA_FILE [-o OUTPUT_DIR] [--version]
+usage: funmap [-h] [--version] {qc,run} ...
 
-command line arguments.
+funmap command line interface
 
 options:
-  -h, --help            show this help message and exit
-  -c CONFIG_FILE, --config-file CONFIG_FILE
-                        path to experiment configuration yaml file
-  -d DATA_FILE, --data-file DATA_FILE
-                        path to tar gzipped data file
-  -o OUTPUT_DIR, --output-dir OUTPUT_DIR
-                        path to output directory
-  --version             show program's version number and exit
+  -h, --help  show this help message and exit
+  --version   show program's version number and exit
+
+Commands:
+  {qc,run}
+    qc        check the data quality
+    run       run funmap
+```
+
+### Data quality check
+
+Before running the experiment, user can check the quality of the input data using the following command
+
+```sh
+funmap qc -c test/test_config.yaml -d test/aml_test.gz -o output
 ```
 
 User needs to prepare configuration file and an input data file. The configuration file is a yaml file that specifies the parameters for the experiment. The input data file is a tar gzipped file that contains the data for the experiment. A sample configuration file and a sample input data file can be found in the `test` directory.
 
+### Run the experiment
+
 To run the experiment, use the following command
 
 ```sh
-funmap -c test/test_config.yaml -d test/aml_test.gz -o output
+funmap run -c test/test_config.yaml -d test/aml_test.gz -o output
 ```
 
 The run time of the experiment depends on the size of the input data file. The above command takes about 10 minutes to run on a standard computer.
