@@ -64,6 +64,25 @@ funmap run -c test_config.yaml -d aml_test.tgz -o output
 
 The run time of the experiment depends on the size of the input data file. The above command takes about 20-30 minutes to run on a standard computer using 4 threads.
 
+#### Configuration file
+
+| Field             | Description                                                                                       | Example Value     |
+|-------------------|---------------------------------------------------------------------------------------------------|-------------------|
+| seed              | Seed for random number generation.                                                                | 42                |
+| cor_type          | Type of correlation, can be 'pearson' or 'spearman'.                                              | 'pearson'         |
+| n_jobs            | Number of parallel jobs to run.                                                                   | 8                 |
+| n_chunk           | Number of chunks to split the data for parallel processing.                                      | 4                 |
+| start_edge_num    | The starting number for evaluating the Log-Likelihood Ratio (LLR) for each individual data set.  | 100               |
+| min_sample_count  | Minimum number of valid data points required when computing correlation.                         | 15                |
+| output_edgelist   | Whether to output the edge list or not.                                                          | True              |
+| max_num_edges     | Maximum number of edges to consider.                                                              | 25000             |
+| step_size         | Step size for the evaluation of LLR.                                                              | 1                 |
+| lr_cutoff         | Likelihood Ratio (LR) cutoff value.                                                          | 10                |
+| dataset_name      | Name of the dataset.                                                                              | 'aml'             |
+| data_files        | List of data files with their name, type, and path.                                               | See the example   |
+
+
+
 ### Hardware requirements
 `funmap` package requires only a standard computer with enough RAM to support the in-memory operations.
 

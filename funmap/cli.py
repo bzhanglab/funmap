@@ -151,8 +151,8 @@ def main():
     network_dir.mkdir(parents=True, exist_ok=True)
 
     # save configuration to results folder
-    with open(str(results_dir / 'config.json'), 'w') as fh:
-        json.dump(all_cfg, fh, indent=4)
+    with open(str(results_dir / 'config.yml'), 'w') as fh:
+        yaml.dump(all_cfg, fh, sort_keys=False)
 
     if args.command == 'qc':
         qc(data_cfg, args.data_file, min_sample_count, figure_dir)
