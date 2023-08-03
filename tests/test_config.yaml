@@ -1,6 +1,9 @@
+name: 'aml'
 seed: 42
+results_dir: 'results'  # if not provided, the result will be saved in "results" directory under the current directory
 # cor_type can be 'pearson', 'spearman'
 cor_type: 'pearson'
+feature_type: 'cc' # 'cc' (correlation coefficient)or 'mr' (mutual rank)
 n_jobs: 8
 n_chunk: 4
 # when evaluating the LLR for each indiviual data set, where to begin to evaluate
@@ -12,7 +15,6 @@ output_edgelist: True
 max_num_edges: 25000
 step_size: 1
 lr_cutoff: 10
-dataset_name: aml
 # path to the root directory of the data files
 data_files:
   - name: 'BeatAMl-T'
@@ -42,3 +44,20 @@ data_files:
   - name: 'target-T'
     type: 'rna'
     path: 'target-T.tsv'
+# this is optional: if you want to add extra features to the data set, you can add them here
+# if not, we will use features based on correlation coefficient or mutual rank
+# if provided, the feature will be added to the feature matrix
+# the extra feature should be provided as a tsv file where the first two columns are the gene names
+# and the third column is the feature value, it is also possible to have more than one extra feature
+# in the same file, the first row is the header, and the first two columns should be named 'gene1' and 'gene2'
+# the following columns can be named anything you want decrisbing the feature
+# it is also possible to have more than one file.
+# funmap will merge all the extra features into one feature matrix and use it for the prediction
+# in addition to the correlation coefficient or mutual rank.
+extra_feature:
+  - name: 'huri'
+    path: 'huri.tsv'
+  - name: 'string'
+    path: 'string.tsv'
+  - name: 'biogrid'
+    path : 'biogrid.tsv'

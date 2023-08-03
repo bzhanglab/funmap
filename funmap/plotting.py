@@ -14,7 +14,9 @@ import PyPDF2
 from matplotlib_venn import venn2, venn2_circles
 import networkx as nx
 import powerlaw
+from funmap.logger import setup_logging, setup_logger
 
+log = setup_logger(__name__)
 
 def edge_number(x, pos):
     """
@@ -110,7 +112,7 @@ def explore_data(data_config: Path,
     A list of file names of the generated plots
 
     """
-    print('Generating plots to explore and visualize data ...')
+    log.info('Generating plots to explore and visualize data ...')
     data_dict = get_data_dict(data_config, data_file, min_sample_count)
     fig_names = []
 
@@ -512,7 +514,7 @@ def plot_llr_compare_networks(validaton_results, cutoff, output_file: Path):
 
         # if the smallest llr value is larger than the cutoff, then we don't need to plot
         if llr_res['llr'].iloc[0] < np.log(cutoff):
-            print('The largest llr value is smaller than the cutoff, no plot will be generated.')
+            log.info('The largest llr value is smaller than the cutoff, no plot will be generated.')
             return
 
         # select the rows that have llr value larger than the cutoff
@@ -540,7 +542,7 @@ def plot_llr_compare_networks(validaton_results, cutoff, output_file: Path):
         ('BioPlex', 'BioPlex', 13854, 154428, 3.3329858940888375, 28.021887299660047)
     ]
     )
-    print(all_networks)
+    log.info(all_networks)
 
     cols = ['name', 'group', 'n', 'e', 'llr', 'lr']
     network_data = pd.DataFrame(all_networks, columns=cols)
@@ -833,7 +835,7 @@ def merge_and_delete(fig_dir, file_list, output_file):
 
     Parameters
     ----------
-    fig_dir : str or Path
+    fig_dir : Path
         The directory where the PDF files are located.
     file_list : list of str
         The list of file names to be merged.
@@ -858,10 +860,10 @@ def merge_and_delete(fig_dir, file_list, output_file):
 
     with open(fig_dir / output_file, 'wb') as fh:
         pdf_writer.write(fh)
-        print('figures have been merged.')
+        log.info('figures have been merged.')
 
     for filename in file_list:
         try:
             os.remove(fig_dir / filename)
         except:
-            print(f'{filename} could not be deleted.')
+            log.error(f'{filename} could not be deleted.')

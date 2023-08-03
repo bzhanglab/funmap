@@ -1,128 +1,71 @@
-import argparse
-import sys
-import yaml
-import os
-import json
-import tarfile
+import click
 import pandas as pd
 import numpy as np
-from typing import Dict, Any, Tuple
 import gzip
 import pickle
 from pathlib import Path
 from funmap.funmap import validation_llr, predict_all_pairs, dataset_llr
 from funmap.plotting import explore_data, plot_results, merge_and_delete
 from funmap.funmap import prepare_features, train_ml_model, prepare_gs_data
-from funmap.funmap import feature_mapping, set_funmap
+from funmap.funmap import feature_mapping, get_funmap
 from funmap.data_urls import misc_urls as urls
+from funmap.logger import setup_logging, setup_logger
+from funmap.utils import setup_experiment
 from funmap import __version__
 
-def arg_parse():
-    parser = argparse.ArgumentParser(description='funmap command line interface')
-    subparsers = parser.add_subparsers(title='Commands', dest='command')
-    qc_parser = subparsers.add_parser('qc', help='check the data quality')
-    qc_parser.add_argument('-c', '--config-file', required=True, type=Path,
-                        help='path to experiment configuration yaml file')
-    qc_parser.add_argument('-d', '--data-file', required=True, type=Path,
-                        help='path to tar gzipped data file')
-    run_parser = subparsers.add_parser('run', help='run funmap')
-    run_parser.add_argument('-c', '--config-file', required=True, type=Path,
-                        help='path to experiment configuration yaml file')
-    run_parser.add_argument('-d', '--data-file', required=True, type=Path,
-                        help='path to tar gzipped data file')
+log = setup_logger(__name__)
 
-    parser.add_argument('--version', action='version', version=f'{__version__}')
-
-    args = parser.parse_args()
-
-    return args
-
-
-def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any],
-    Dict[str, Any], Dict[str, Any]]:
+@click.group(help='funmap command line interface')
+@click.version_option(version=f'{__version__}')
+def cli():
     """
-    Reads the configuration files and loads the configurations for the run, model, and data.
-
-    Parameters
-    ----------
-    cfg_file : Path
-        Path to the configuration file
-    data_file : Path
-        Path to the data file
-
-    Returns
-    -------
-    Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]
-        A tuple containing the run configuration, model configuration, and data configuration
+    Command line interface for funmap.
     """
-    run_cfg = {}
-    model_cfg = {}
-    data_cfg = {}
-    with open(cfg_file, 'r') as fh:
-        cfg_dict = yaml.load(fh, Loader=yaml.FullLoader)
+    click.echo("====== funmap =======")
 
-    # check all file listed under data_files are also in the tar.gz file
-    data_files = cfg_dict['data_files']
-    # list all the files in the tar.gz file
-    with tarfile.open(data_file, "r:gz") as tar:
-        tar_files = tar.getnames()
-        # get the file names only without the path prefix
-        tar_files = [Path(file).name for file in tar_files]
+@cli.command(help='check the data quality')
+@click.option('--config-file', '-c', required=True, type=click.Path(exists=True),
+            help='path to experiment configuration yaml file')
+@click.option('--data-file', '-d', required=True, type=click.Path(exists=True),
+            help='path to tar gzipped data file')
+def qc(config_file, data_file):
+    """
+    Check the data quality.
+    """
+    # Perform setup tasks here, if any
+    setup_logging(config_file)
+    run_cfg, model_cfg, data_cfg = setup_experiment(config_file, data_file)
 
-    # check if all files in data_files are in tar_files
-    if not all(file['path'] in tar_files for file in data_files):
-        print(f'Files listed under data_files are not in the tar.gz file!')
-        raise ValueError('Files listed under data_files are not in the tar.gz file!')
-
-    # separte cfg into two parts.
-    model_cfg['seed'] = cfg_dict['seed'] if 'seed' in cfg_dict else 42
-    model_cfg['cor_type'] = 'pearson' if 'cor_type' not in cfg_dict else cfg_dict['cor_type']
-    model_cfg['split_by'] = 'edge'
-    model_cfg['test_size'] = 0.5
-    model_cfg['ml_type'] = 'xgboost'
-    model_cfg['filter_before_prediction'] = True
-    model_cfg['min_feature_count'] = 1
-    model_cfg['min_sample_count'] = cfg_dict['min_sample_count'] \
-                                    if 'min_sample_count' in cfg_dict else 20
-    run_cfg['filter_after_prediction'] = True
-    run_cfg['filter_criterion'] = 'max'
-    run_cfg['filter_threshold'] = 0.95
-    run_cfg['filter_blacklist'] = True
-    num_cores = os.cpu_count()
-    run_cfg['n_jobs'] = cfg_dict['n_jobs'] if 'n_jobs' in cfg_dict else num_cores
-    run_cfg['n_chunks'] = cfg_dict['n_chunks'] if 'n_chunks' in cfg_dict else 4
-    run_cfg['start_edge_num'] = cfg_dict['start_edge_num'] if 'start_edge_num' in cfg_dict else 10000
-    run_cfg['max_num_edges'] = cfg_dict['max_num_edges'] if 'max_num_edges' in cfg_dict else 250000
-    run_cfg['step_size'] = cfg_dict['step_size'] if 'step_size' in cfg_dict else 100
-    run_cfg['lr_cutoff'] = cfg_dict['lr_cutoff'] if 'lr_cutoff' in cfg_dict else 50
-
-    data_cfg['dataset_name'] = cfg_dict['dataset_name'] if 'dataset_name' in cfg_dict else 'unknown'
-    if 'data_files' not in cfg_dict:
-        raise ValueError('data_files not specified in config file')
-    data_cfg['data_files'] = cfg_dict['data_files']
-    if 'rp_pairs' in cfg_dict:
-        data_cfg['rp_pairs'] = cfg_dict['rp_pairs']
-
-    return run_cfg, model_cfg, data_cfg
-
-
-def qc(data_cfg, data_file, min_sample_count, figure_dir):
+    # Implement qc functionality here
+    log.info(f'Checking data quality')
     all_fig_names = []
+    figure_dir = Path(run_cfg['results_dir']) / run_cfg['subdirs']['figure_dir']
+    min_sample_count = model_cfg['min_sample_count']
     fig_names = explore_data(data_cfg, data_file, min_sample_count, figure_dir)
     all_fig_names.extend(fig_names)
     merge_and_delete(figure_dir, all_fig_names, 'qc.pdf')
+    log.info('figure qc.pdf saved to {}'.format(figure_dir))
+    log.info('QC complete')
 
 
-def main():
-    args = arg_parse()
-    run_cfg, model_cfg, data_cfg = get_config(args.config_file, args.data_file)
-    np.random.seed(model_cfg['seed'])
+@cli.command(help='run funmap')
+@click.option('--config-file', '-c', required=True, type=click.Path(exists=True),
+            help='path to experiment configuration yaml file')
+@click.option('--data-file', '-d', required=True, type=click.Path(exists=True),
+            help='path to tar gzipped data file')
+def run(config_file, data_file):
+    click.echo(f'Running funmap...')
+    setup_logging(config_file)
+    run_cfg, model_cfg, data_cfg = setup_experiment(config_file, data_file)
+
+    seed = model_cfg['seed']
+    np.random.seed(seed)
     ml_type = model_cfg['ml_type']
+    feature_type = model_cfg['feature_type']
     min_feature_count = model_cfg['min_feature_count']
     min_sample_count = model_cfg['min_sample_count']
     filter_before_prediction = model_cfg['filter_before_prediction']
     test_size = model_cfg['test_size']
-    seed = model_cfg['seed']
     cor_type = model_cfg['cor_type']
     split_by = model_cfg['split_by']
     filter_after_prediction = run_cfg['filter_after_prediction']
@@ -135,37 +78,20 @@ def main():
     step_size = run_cfg['step_size']
     start_edge_num = run_cfg['start_edge_num']
 
-    all_cfg = {**model_cfg, **data_cfg, **run_cfg}
-    results_dir = Path('results')
-    data_dir = results_dir / 'saved_data'
-    model_dir = results_dir / 'saved_models'
-    prediction_dir = results_dir / 'saved_predictions'
-    figure_dir = results_dir / 'figures'
-    network_dir = results_dir / 'networks'
-
-    results_dir.mkdir(parents=True, exist_ok=True)
-    data_dir.mkdir(parents=True, exist_ok=True)
-    model_dir.mkdir(parents=True, exist_ok=True)
-    prediction_dir.mkdir(parents=True, exist_ok=True)
-    figure_dir.mkdir(parents=True, exist_ok=True)
-    network_dir.mkdir(parents=True, exist_ok=True)
-
-    # save configuration to results folder
-    with open(str(results_dir / 'config.yml'), 'w') as fh:
-        yaml.dump(all_cfg, fh, sort_keys=False)
-
-    if args.command == 'qc':
-        qc(data_cfg, args.data_file, min_sample_count, figure_dir)
-        return 0
-
+    results_dir = Path(run_cfg['results_dir'])
+    data_dir = results_dir / run_cfg['subdirs']['saved_data_dir']
+    model_dir = results_dir / run_cfg['subdirs']['model_dir']
+    prediction_dir = results_dir / run_cfg['subdirs']['prediction_dir']
+    network_dir = results_dir / run_cfg['subdirs']['network_dir']
+    figure_dir = results_dir / run_cfg['subdirs']['figure_dir']
 
     ml_model_file = model_dir / 'model.pkl.gz'
     predicted_all_pairs_file = prediction_dir / 'predicted_all_pairs.pkl.gz'
     blacklist_file = urls['funmap_blacklist']
 
-    llr_res_files = {feature: results_dir / f'llr_results_{feature}_{max_num_edges}.tsv'
+    llr_res_files = {feature: results_dir / f'llr_results.tsv'
                         for feature in feature_mapping }
-    edge_list_paths = {feature: network_dir/ f'network_{feature}_{max_num_edges}.tsv'
+    edge_list_paths = {feature: network_dir/ f'network.tsv'
                         for feature in feature_mapping }
     # llr obtained with each invividual dataset
     llr_dataset_file = results_dir / 'llr_dataset.tsv'
@@ -175,7 +101,7 @@ def main():
     feature_args = {
         'data_dir': data_dir,
         'data_config': data_cfg,
-        'data_file': args.data_file,
+        'data_file': data_file,
         'min_sample_count': min_sample_count,
         'cor_type': cor_type,
         'n_jobs': n_jobs,
@@ -206,7 +132,7 @@ def main():
                 ml_model = pickle.load(fh)
             print(f'Loading model ... done')
         else:
-            ml_model = train_ml_model(gs_train, ml_type, seed, n_jobs)
+            ml_model = train_ml_model(gs_train, ml_type, feature_type, seed, n_jobs)
             with gzip.open(ml_model_file, 'wb') as fh:
                 pickle.dump(ml_model, fh)
 
@@ -254,7 +180,7 @@ def main():
     else:
         llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
 
-    set_funmap(validation_res, run_cfg, network_dir)
+    get_funmap(validation_res, run_cfg, network_dir)
     all_fig_names = []
     fig_names = plot_results(data_cfg, run_cfg, validation_res, llr_ds, gs_train,
                             figure_dir)
@@ -262,8 +188,6 @@ def main():
 
     merge_and_delete(figure_dir, all_fig_names, 'results.pdf')
 
-    return 0
 
-
-if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+if __name__ == '__main__':
+    cli()

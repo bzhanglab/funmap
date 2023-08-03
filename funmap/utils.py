@@ -1,13 +1,16 @@
 import hashlib
+import yaml
 import os
+import tarfile
 import json
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 import pandas as pd
-import tarfile
 import shutil
 from funmap.data_urls import misc_urls as urls
+from funmap.logger import setup_logger
 
+log = setup_logger(__name__)
 
 # https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
 def dict_hash(dictionary: Dict[str, Any]) -> str:
@@ -110,7 +113,7 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
     os.system(f'tar -xzf {data_file} --strip-components=1 -C {tmp_dir}')
     # gene ids are gene symbols
     for dt in data_config['data_files']:
-        print(f"... {dt['name']}")
+        log.info(f"... {dt['name']}")
         cur_feature = dt['name']
         # cur_file = get_obj_from_tgz(data_file, dt['path'])
         # extract the data file from the tar.gz file
@@ -118,7 +121,7 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
         cur_data = pd.read_csv(os.path.join(tmp_dir, dt['path']), sep='\t', index_col=0,
                                 header=0)
         if cur_data.shape[1] < min_sample_count:
-            print(f"... {dt['name']} ... not enough samples, skipped")
+            log.info(f"... {dt['name']} ... not enough samples, skipped")
             continue
         cur_data = cur_data.T
         # exclude cohort with sample number < min_sample_count
@@ -274,3 +277,131 @@ def get_node_edge_overlap(network_info):
 
     overlap['edge'] = cur_res
     return overlap
+
+def setup_experiment(config_file, data_file):
+    run_cfg, model_cfg, data_cfg = get_config(config_file, data_file)
+    all_cfg = {**data_cfg, **model_cfg, **run_cfg}
+    results_dir = Path(run_cfg['results_dir'])
+    # create folders
+    folder_dict = run_cfg['subdirs']
+    folders = [results_dir / Path(folder_dict[folder_name]) for folder_name in folder_dict]
+    for folder in folders:
+        folder.mkdir(parents=True, exist_ok=True)
+
+    # save configuration to results folder
+    with open(str( results_dir / 'config.yml'), 'w') as fh:
+        yaml.dump(all_cfg, fh, sort_keys=False)
+
+    return run_cfg, model_cfg, data_cfg
+
+def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+    """
+    Reads the configuration files and loads the configurations for the run, model, and data.
+
+    Parameters
+    ----------
+    cfg_file : Path
+        Path to the configuration file
+    data_file : Path
+        Path to the data file
+
+    Returns
+    -------
+    Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]
+        A tuple containing the run configuration, model configuration, and data configuration
+    """
+    run_cfg = {
+        'filter_after_prediction': True,
+        'filter_criterion': 'max',
+        'filter_threshold': 0.95,
+        'filter_blacklist': True,
+        'n_jobs': os.cpu_count(),
+        'n_chunks': 4,
+        'start_edge_num': 10000,
+        'max_num_edges': 250000,
+        'step_size': 100,
+        'lr_cutoff': 50,
+        'results_dir': 'results',
+        # the following directories are relative to the results_dir
+        'subdirs': {
+            'saved_model_dir': 'saved_models',
+            'saved_data_dir': 'saved_data',
+            'saved_predictions_dir': 'saved_predictions',
+            'figure_dir': 'figures',
+            'network_dir': 'networks',
+        }
+    }
+
+    model_cfg = {
+        'seed': 42,
+        'cor_type': 'pearson',
+        'feature_type': 'cc',
+        'split_by': 'edge',
+        'test_size': 0.5,
+        'ml_type': 'xgboost',
+        'filter_before_prediction': True,
+        'min_feature_count': 1,
+        'min_sample_count': 20,
+    }
+
+    data_cfg = {}
+
+    with open(cfg_file, 'r') as fh:
+        cfg_dict = yaml.load(fh, Loader=yaml.FullLoader)
+
+    if 'seed' in cfg_dict:
+        model_cfg['seed'] = cfg_dict['seed']
+
+    if 'cor_type' in cfg_dict:
+        model_cfg['cor_type'] = cfg_dict['cor_type']
+
+    if 'min_sample_count' in cfg_dict:
+        model_cfg['min_sample_count'] = cfg_dict['min_sample_count']
+
+    if 'n_jobs' in cfg_dict:
+        run_cfg['n_jobs'] = cfg_dict['n_jobs']
+
+    if 'n_chunks' in cfg_dict:
+        run_cfg['n_chunks'] = cfg_dict['n_chunks']
+
+    if 'start_edge_num' in cfg_dict:
+        run_cfg['start_edge_num'] = cfg_dict['start_edge_num']
+
+    if 'max_num_edges' in cfg_dict:
+        run_cfg['max_num_edges'] = cfg_dict['max_num_edges']
+
+    if 'step_size' in cfg_dict:
+        run_cfg['step_size'] = cfg_dict['step_size']
+
+    if 'lr_cutoff' in cfg_dict:
+        run_cfg['lr_cutoff'] = cfg_dict['lr_cutoff']
+
+    if 'name' in cfg_dict:
+        run_cfg['name'] = cfg_dict['name']
+        data_cfg['dataset_name'] = cfg_dict['name']
+    else:
+        raise ValueError('name not specified in config file')
+
+    if 'results_dir' in cfg_dict:
+        run_cfg['results_dir'] = cfg_dict['results_dir'] + '/' + cfg_dict['name']
+
+    if 'data_files' not in cfg_dict:
+        raise ValueError('data_files not specified in config file')
+
+    # Check all files listed under data_files are also in the tar.gz file
+    data_files = cfg_dict['data_files']
+    # List all the files in the tar.gz file
+    with tarfile.open(data_file, "r:gz") as tar:
+        tar_files = {Path(file).name for file in tar.getnames()}
+
+    # Check if all files in data_files are in tar_files
+    if not all(file['path'] in tar_files for file in data_files):
+        print('Files listed under data_files are not in the tar.gz file!')
+        raise ValueError('Files listed under data_files are not in the tar.gz file!')
+
+    data_cfg['data_files'] = cfg_dict['data_files']
+
+    if 'rp_pairs' in cfg_dict:
+        data_cfg['rp_pairs'] = cfg_dict['rp_pairs']
+
+    return run_cfg, model_cfg, data_cfg

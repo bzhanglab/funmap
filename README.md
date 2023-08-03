@@ -70,6 +70,7 @@ The run time of the experiment depends on the size of the input data file. The a
 |-------------------|---------------------------------------------------------------------------------------------------|-------------------|
 | seed              | Seed for random number generation.                                                                | 42                |
 | cor_type          | Type of correlation, can be 'pearson' or 'spearman'.                                              | 'pearson'         |
+| feature_type      | Type of features used for training a model, can be 'cc' (correlation coefficient) or 'mr' (mutual rank).                                              | 'cc'         |
 | n_jobs            | Number of parallel jobs to run.                                                                   | 8                 |
 | n_chunk           | Number of chunks to split the data for parallel processing.                                      | 4                 |
 | start_edge_num    | The starting number for evaluating the Log-Likelihood Ratio (LLR) for each individual data set.  | 100               |

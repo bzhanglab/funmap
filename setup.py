@@ -24,6 +24,7 @@ requirements = [
     'matplotlib_venn>=0.11.7',
     'networkx>=3.0',
     'powerlaw>=1.5',
+    'click>=8.0.1'
     ]
 
 test_requirements = [ ]
@@ -35,7 +36,7 @@ setup(
     description="generate gene co-function networks using omics data",
     entry_points={
         'console_scripts': [
-            'funmap=funmap.cli:main',
+            'funmap=funmap.cli:cli',
         ],
     },
     install_requires=requirements,

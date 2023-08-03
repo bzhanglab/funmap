@@ -696,7 +696,7 @@ def validation_llr(all_feature_df, predicted_all_pairs,
 
 
 # set the final funmap edge list file based on the cutoff
-def set_funmap(validation_res, run_config, output_dir):
+def get_funmap(validation_res, run_config, output_dir):
     """Set the final funmap edge list file based on the likelihood ratio cutoff.
     we will use results from "ei" to generate the final edge list.
 
