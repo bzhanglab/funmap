@@ -44,6 +44,8 @@ data_files:
   - name: 'target-T'
     type: 'rna'
     path: 'target-T.tsv'
+# filter out no coding genes
+filter_noncoding_genes: True
 # this is optional: if you want to add extra features to the data set, you can add them here
 # if not, we will use features based on correlation coefficient or mutual rank
 # if provided, the feature will be added to the feature matrix
@@ -55,9 +57,5 @@ data_files:
 # funmap will merge all the extra features into one feature matrix and use it for the prediction
 # in addition to the correlation coefficient or mutual rank.
 extra_feature:
-  - name: 'huri'
-    path: 'huri.tsv'
-  - name: 'string'
-    path: 'string.tsv'
-  - name: 'biogrid'
-    path : 'biogrid.tsv'
+  - name: 'ppi'
+    path: 'ppi.tsv'

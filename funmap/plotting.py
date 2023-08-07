@@ -112,7 +112,6 @@ def explore_data(data_config: Path,
     A list of file names of the generated plots
 
     """
-    log.info('Generating plots to explore and visualize data ...')
     data_dict = get_data_dict(data_config, data_file, min_sample_count)
     fig_names = []
 
@@ -122,7 +121,9 @@ def explore_data(data_config: Path,
 
     max_col_to_plot = 100
 
+    log.info('Generating plots to explore and visualize data ...')
     for ds in data_dict:
+        log.info(f'... {ds}')
         data_df = data_dict[ds]
         fig, ax = plt.subplots(1, 2, figsize=(20, 5))
         cur_data = data_df.T
@@ -155,6 +156,7 @@ def explore_data(data_config: Path,
         fig.tight_layout()
         cur_file_name = f'{ds}_sample_plot.pdf'
         fig_names.append(cur_file_name)
+        log.info(f'Saving figure {cur_file_name} ...')
         fig.savefig(output_dir / cur_file_name)
         plt.close(fig)
         data_keys.append(ds)
@@ -171,6 +173,7 @@ def explore_data(data_config: Path,
     fig.tight_layout()
     file_name = 'data_box_plot.pdf'
     fig_names.append(file_name)
+    log.info(f'Saving figure {file_name} ...')
     fig.savefig(output_dir / file_name)
     plt.close(fig)
 
@@ -207,12 +210,13 @@ def explore_data(data_config: Path,
     fig.tight_layout()
     file_name = 'sample_gene_count.pdf'
     fig.savefig(output_dir / file_name)
+    log.info(f'Saving figure {file_name} ...')
     plt.close(fig)
     fig_names.append(file_name)
     return fig_names
 
 
-def plot_results(data_cfg: dict, run_cfg: dict, validation_results: dict,
+def plot_results(cfg: dict, validation_results: dict,
                 llr_ds: pd.DataFrame, gs_train: pd.DataFrame,
                 figure_dir: Path) -> List[str]:
     """
@@ -220,10 +224,8 @@ def plot_results(data_cfg: dict, run_cfg: dict, validation_results: dict,
 
     Parameters
     ----------
-    data_cfg : dict
+    cfg : dict
         A dictionary containing the configuration for the data being analyzed.
-    run_cfg : dict
-        A dictionary containing the configuration for the analysis.
     validation_results : dict
         A dictionary containing the results of the validation.
     llr_ds : pandas.DataFrame
@@ -243,12 +245,12 @@ def plot_results(data_cfg: dict, run_cfg: dict, validation_results: dict,
     plot_llr_comparison(validation_results, llr_ds, output_file=figure_dir / file_name)
     fig_names.append(file_name)
 
-    if 'rp_pairs' in data_cfg:
-        file_names = plot_pair_llr(gs_train, output_dir=figure_dir, rp_pairs=data_cfg['rp_pairs'])
+    if 'rp_pairs' in cfg:
+        file_names = plot_pair_llr(gs_train, output_dir=figure_dir, rp_pairs=cfg['rp_pairs'])
         fig_names.extend(file_names)
 
     # note that the cutoff is for LR, not LLR (log of LR)
-    cutoff = run_cfg['lr_cutoff']
+    cutoff = cfg['lr_cutoff']
     file_name = 'llr_compare_networks.pdf'
     n_edge_dict = plot_llr_compare_networks(validation_results, cutoff, output_file=figure_dir / file_name)
     fig_names.append(file_name)

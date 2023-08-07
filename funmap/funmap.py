@@ -19,12 +19,9 @@ from joblib import Parallel, delayed
 from funmap.utils import chunks, get_data_dict
 from funmap.data_urls import network_info, misc_urls as urls
 from imblearn.under_sampling import RandomUnderSampler
+from funmap.logger import setup_logger
 
-# what type of features are we using to train the model?
-feature_mapping = {
-    'ex': ['MR'], # expression - mutal rank of CC
-    'ei': ['MR', 'PPI'] # expression and interaction
-}
+log = setup_logger(__name__)
 
 def get_valid_gs_data(gs_path: str, valid_gene_list: List[str]):
     """
@@ -157,31 +154,31 @@ def generate_all_pairs(data_config, data_file, min_sample_count):
         and a list of all valid proteins.
     """
     data_dict = get_data_dict(data_config, data_file, min_sample_count)
-    all_valid_proteins = set()
+    all_valid_ids = set()
     for i in data_dict:
         cur_data = data_dict[i]
         is_valid = cur_data.notna().sum() >= min_sample_count
         valid_count = np.sum(is_valid)
         valid_p = cur_data.columns[is_valid].values
-        all_valid_proteins = all_valid_proteins.union(set(valid_p))
-        print(f'{i} -- ')
-        print(f'  # of samples: {len(cur_data.index)}')
-        print(f'  # of genes: {len(cur_data.columns)}')
-        print(f'  # of genes with at least {min_sample_count} valid samples: {valid_count}')
+        all_valid_ids = all_valid_ids.union(set(valid_p))
+        log.info(f'{i} -- ')
+        log.info(f'  # of samples: {len(cur_data.index)}')
+        log.info(f'  # of ids: {len(cur_data.columns)}')
+        log.info(f'  # of ids with at least {min_sample_count} valid samples: {valid_count}')
 
 
-    all_valid_proteins = list(all_valid_proteins)
-    all_valid_proteins.sort()
+    all_valid_ids = list(all_valid_ids)
+    all_valid_ids.sort()
     # valid protein with at least min_sample_count samples in at least on cancer type
-    print(f'total number of valid proteins: {len(all_valid_proteins)}')
+    log.info(f'total number of valid ids: {len(all_valid_ids)}')
 
     pair_list = []
-    for i in range(len(all_valid_proteins)):
-        for j in range(i + 1, len(all_valid_proteins)):
-            pair_list.append([all_valid_proteins[i], all_valid_proteins[j]])
+    for i in range(len(all_valid_ids)):
+        for j in range(i + 1, len(all_valid_ids)):
+            pair_list.append([all_valid_ids[i], all_valid_ids[j]])
 
     df = pd.DataFrame(pair_list, columns=['P1', 'P2'])
-    return df, all_valid_proteins
+    return df, all_valid_ids
 
 
 def compute_mr(cor_arr, gene_list):
@@ -409,7 +406,7 @@ def train_ml_model(data_df, ml_type, seed, n_jobs):
     """
     X, y = under_sample(data_df)
     assert ml_type == 'xgboost', 'ML model must be xgboost'
-    models = train_xgboost_model(X, y, seed, n_jobs)
+    models = train_model(X, y, seed, n_jobs)
 
     return models
 
@@ -471,7 +468,7 @@ def feature_type_to_regex(feature_type):
     return regex_str
 
 
-def train_xgboost_model(X, y, seed, n_jobs):
+def train_model(X, y, seed, n_jobs):
     """
     Train a XGBoost model using the input feature matrix X and target vector y.
     The model is trained using GridSearchCV with a specified set of parameters,
@@ -696,7 +693,7 @@ def validation_llr(all_feature_df, predicted_all_pairs,
 
 
 # set the final funmap edge list file based on the cutoff
-def get_funmap(validation_res, run_config, output_dir):
+def get_funmap(validation_res, config, output_dir):
     """Set the final funmap edge list file based on the likelihood ratio cutoff.
     we will use results from "ei" to generate the final edge list.
 
@@ -728,7 +725,7 @@ def get_funmap(validation_res, run_config, output_dir):
     edge_list_path = validation_res['ei']['edge_list_path']
     llr_res = pd.read_csv(llr_res_path, sep='\t')
     llr_res = llr_res.sort_values(by=['llr'], ascending=False)
-    cutoff = run_config['lr_cutoff']
+    cutoff = config['lr_cutoff']
 
     if llr_res['llr'].iloc[0] < np.log(cutoff):
         warnings.warn('The largest llr value is smaller than the cutoff, no funmap will be generated.')
@@ -741,16 +738,16 @@ def get_funmap(validation_res, run_config, output_dir):
     funmap_el.to_csv(output_dir / 'funmap.tsv', sep='\t', header=False, index=False)
 
 
-def load_features(data_config: Path, data_file:Path,
-                feature_file: Path,
+def load_features(data_config: Dict, data_file:Path,
+                feature_file: Path, extra_feature_file: Path,
                 pair_file: Path, valid_gene_file: Path, cor_type: str,
                 min_sample_count: int, n_jobs: int, n_chunks: int):
     """Load feature data from feather file or compute if not exist.
 
     Parameters
     ----------
-    data_config : Path
-        Path to the data configuration file.
+    data_config : Dict
+        A dictionary containing the configuration for the dataset.
     data_file: Path
         Path to the data file.
     feature_file : Path
@@ -776,46 +773,46 @@ def load_features(data_config: Path, data_file:Path,
         List of valid genes.
     """
     if feature_file.exists() and valid_gene_file.exists():
-            print(f'Loading all features from {feature_file}')
+            log.info(f'Loading all features from {feature_file}')
             all_feature_df = pd.read_feather(feature_file)
             all_feature_df['index'] = all_feature_df['index'].apply(lambda x: tuple(x))
             all_feature_df.set_index('index', inplace=True)
-            print(f'Loading all features from {feature_file} ... done')
-            print(f'Loading all valid gene from {valid_gene_file}')
-            with open(valid_gene_file, 'r') as fp:
-                valid_genes = fp.read()
-                valid_gene_list = valid_genes.split('\n')
-                valid_gene_list = valid_gene_list[:-1]
-            print(f'Loading all {len(valid_gene_list)} valid gene from {valid_gene_file} ... done')
+            log.info(f'Loading all features from {feature_file} ... done')
+            log.info(f'Loading all valid gene from {valid_gene_file}')
+            valid_genes_list = []
+            with open(valid_gene_file, 'r') as file:
+                for line in file:
+                    valid_genes_list.append(line.strip())
+            log.info(f'Loading all {len(valid_gene_list)} valid gene from {valid_gene_file} ... done')
     else:
-        print(f'Computing features for all pairs ...')
+        log.info(f'Computing features for all pairs ...')
         if not pair_file.exists() or not valid_gene_file.exists():
-            print(f'Generating all pairs ...')
+            log.info(f'Generating all pairs ...')
             edge_df, valid_gene_list = generate_all_pairs(data_config, data_file, min_sample_count)
-            print(f'Saving all pairs ...')
+            log.info(f'Saving all pairs ...')
             edge_df.to_csv(pair_file, sep='\t', header=False, index=False)
             with open(valid_gene_file, 'w') as fp:
                 for item in valid_gene_list:
                     # write each item on a new line
                     fp.write(item + '\n')
-            print(f'Generating all pairs ... done')
+            log.info(f'Generating all pairs ... done')
         else:
-            print(f'Loading all pairs from {pair_file} ...')
+            log.info(f'Loading all pairs from {pair_file} ...')
             edge_df = pd.read_csv(pair_file, sep='\t', header=None)
-            print(f'Loading all pairs from {pair_file} ... done')
-            print(f'Loading all valid gene from {valid_gene_file}')
-            with open(valid_gene_file, 'r') as fp:
-                valid_genes = fp.read()
-                valid_gene_list = valid_genes.split('\n')
-                valid_gene_list = valid_gene_list[:-1]
-            print(f'Loading all valid gene from {valid_gene_file} ... done')
+            log.info(f'Loading all pairs from {pair_file} ... done')
+            log.info(f'Loading all valid gene from {valid_gene_file}')
+            valid_genes_list = []
+            with open(valid_gene_file, 'r') as file:
+                for line in file:
+                    valid_genes_list.append(line.strip())
+            log.info(f'Loading all valid gene from {valid_gene_file} ... done')
 
         all_feature_df = compute_all_features(edge_df, valid_gene_list,
                 data_config, data_file, cor_type, min_sample_count, n_jobs, n_chunks)
         all_feature_df.reset_index(inplace=True)
         all_feature_df.to_feather(feature_file)
         all_feature_df.set_index('index', inplace=True)
-        print(f'Computing feature for all pairs ... done')
+        log.info(f'Computing feature for all pairs ... done')
 
     return all_feature_df, valid_gene_list
 
@@ -889,43 +886,21 @@ def prepare_gs_data(**kwargs):
 
 
 def prepare_features(**kwargs):
-    """
-    Prepare features for the given dataset and correlation type.
-
-    Parameters
-    ----------
-    data_config : Dict
-        A dictionary containing the configuration for the dataset.
-    data_file: Path
-        Path to the data file.
-    min_sample_count : int
-        Minimum number of samples required for a gene to be considered valid.
-    n_jobs : int
-        Number of parallel jobs to run.
-    n_chunks : int
-        Number of chunks to divide the data into for parallel processing.
-    cor_type : str
-        Type of correlation to use for computing feature values.
-
-    Returns
-    -------
-    feature_df : pd.DataFrame
-        Dataframe containing the computed features for all pairs of valid genes.
-    valid_gene_list : List[str]
-        List of valid genes.
-    """
-    data_dir = kwargs['data_dir']
+    saved_data_dir = kwargs['saved_data_dir']
     data_config = kwargs['data_config']
     data_file = kwargs['data_file']
     min_sample_count = kwargs['min_sample_count']
     n_jobs = kwargs['n_jobs']
     n_chunks = kwargs['n_chunks']
     cor_type = kwargs['cor_type']
-    pair_file =data_dir / 'all_pairs.tsv.gz'
-    valid_gene_file = data_dir / 'all_valid_gene.txt'
-    feature_file = data_dir / 'all_features.fth'
-    feature_df, valid_gene_list = load_features(data_config, data_file, feature_file, pair_file,
-            valid_gene_file, cor_type, min_sample_count, n_jobs, n_chunks)
+    feature_type = kwargs['feature_type']
+    extra_feature_file = kwargs['extra_feature_file']
+    pair_file = saved_data_dir / 'all_pairs.tsv.gz'
+    valid_gene_file = saved_data_dir / 'all_valid_gene.txt'
+    feature_file = saved_data_dir / 'all_features.fth'
+    feature_df, valid_gene_list = load_features(data_config, data_file, extra_feature_file,
+            feature_file, pair_file, valid_gene_file, cor_type, feature_type,
+            min_sample_count, n_jobs, n_chunks)
     return feature_df, valid_gene_list
 
 

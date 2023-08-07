@@ -1,4 +1,5 @@
 import hashlib
+import csv
 import yaml
 import os
 import tarfile
@@ -105,7 +106,8 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
 
     """
     data_dict = {}
-    mapping = pd.read_csv(urls['mapping_file'], sep='\t')
+    if 'filter_noncoding_genes' in data_config and data_config['filter_noncoding_genes']:
+        mapping = pd.read_csv(urls['mapping_file'], sep='\t')
     # extract the data file from the tar.gz file
     tmp_dir = 'tmp_data'
     if not os.path.exists(tmp_dir):
@@ -113,7 +115,7 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
     os.system(f'tar -xzf {data_file} --strip-components=1 -C {tmp_dir}')
     # gene ids are gene symbols
     for dt in data_config['data_files']:
-        log.info(f"... {dt['name']}")
+        log.info(f"processing ... {dt['name']}")
         cur_feature = dt['name']
         # cur_file = get_obj_from_tgz(data_file, dt['path'])
         # extract the data file from the tar.gz file
@@ -126,9 +128,10 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
         cur_data = cur_data.T
         # exclude cohort with sample number < min_sample_count
         # remove noncoding genes first
-        coding = mapping.loc[mapping['coding'] == 'coding', ['gene_name']]
-        coding_genes = list(set(coding['gene_name'].to_list()))
-        cur_data = cur_data[[c for c in cur_data.columns if c in coding_genes]]
+        if data_config['filter_noncoding_genes']:
+            coding = mapping.loc[mapping['coding'] == 'coding', ['gene_name']]
+            coding_genes = list(set(coding['gene_name'].to_list()))
+            cur_data = cur_data[[c for c in cur_data.columns if c in coding_genes]]
         # duplicated columns, for now select the last column
         cur_data = cur_data.loc[:,~cur_data.columns.duplicated(keep='last')]
         data_dict[cur_feature] = cur_data
@@ -278,39 +281,28 @@ def get_node_edge_overlap(network_info):
     overlap['edge'] = cur_res
     return overlap
 
+def cleanup_experiment(config_file, data_file):
+    cfg = get_config(config_file, data_file)
+    results_dir = Path(cfg['results_dir'])
+    shutil.rmtree(results_dir, ignore_errors=True)
+
 def setup_experiment(config_file, data_file):
-    run_cfg, model_cfg, data_cfg = get_config(config_file, data_file)
-    all_cfg = {**data_cfg, **model_cfg, **run_cfg}
-    results_dir = Path(run_cfg['results_dir'])
+    cfg = get_config(config_file, data_file)
+    results_dir = Path(cfg['results_dir'])
     # create folders
-    folder_dict = run_cfg['subdirs']
+    folder_dict = cfg['subdirs']
     folders = [results_dir / Path(folder_dict[folder_name]) for folder_name in folder_dict]
     for folder in folders:
         folder.mkdir(parents=True, exist_ok=True)
 
     # save configuration to results folder
     with open(str( results_dir / 'config.yml'), 'w') as fh:
-        yaml.dump(all_cfg, fh, sort_keys=False)
+        yaml.dump(cfg, fh, sort_keys=False)
 
-    return run_cfg, model_cfg, data_cfg
+    return cfg
 
-def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
-    """
-    Reads the configuration files and loads the configurations for the run, model, and data.
-
-    Parameters
-    ----------
-    cfg_file : Path
-        Path to the configuration file
-    data_file : Path
-        Path to the data file
-
-    Returns
-    -------
-    Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]
-        A tuple containing the run configuration, model configuration, and data configuration
-    """
-    run_cfg = {
+def get_config(cfg_file: Path, data_file: Path):
+    cfg = {
         'filter_after_prediction': True,
         'filter_criterion': 'max',
         'filter_threshold': 0.95,
@@ -329,10 +321,7 @@ def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any], Dict[st
             'saved_predictions_dir': 'saved_predictions',
             'figure_dir': 'figures',
             'network_dir': 'networks',
-        }
-    }
-
-    model_cfg = {
+        },
         'seed': 42,
         'cor_type': 'pearson',
         'feature_type': 'cc',
@@ -342,48 +331,49 @@ def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any], Dict[st
         'filter_before_prediction': True,
         'min_feature_count': 1,
         'min_sample_count': 20,
+        'filter_noncoding_genes': False
     }
-
-    data_cfg = {}
 
     with open(cfg_file, 'r') as fh:
         cfg_dict = yaml.load(fh, Loader=yaml.FullLoader)
 
     if 'seed' in cfg_dict:
-        model_cfg['seed'] = cfg_dict['seed']
+        cfg['seed'] = cfg_dict['seed']
 
     if 'cor_type' in cfg_dict:
-        model_cfg['cor_type'] = cfg_dict['cor_type']
+        cfg['cor_type'] = cfg_dict['cor_type']
 
     if 'min_sample_count' in cfg_dict:
-        model_cfg['min_sample_count'] = cfg_dict['min_sample_count']
+        cfg['min_sample_count'] = cfg_dict['min_sample_count']
 
     if 'n_jobs' in cfg_dict:
-        run_cfg['n_jobs'] = cfg_dict['n_jobs']
+        cfg['n_jobs'] = cfg_dict['n_jobs']
 
     if 'n_chunks' in cfg_dict:
-        run_cfg['n_chunks'] = cfg_dict['n_chunks']
+        cfg['n_chunks'] = cfg_dict['n_chunks']
 
     if 'start_edge_num' in cfg_dict:
-        run_cfg['start_edge_num'] = cfg_dict['start_edge_num']
+        cfg['start_edge_num'] = cfg_dict['start_edge_num']
 
     if 'max_num_edges' in cfg_dict:
-        run_cfg['max_num_edges'] = cfg_dict['max_num_edges']
+        cfg['max_num_edges'] = cfg_dict['max_num_edges']
 
     if 'step_size' in cfg_dict:
-        run_cfg['step_size'] = cfg_dict['step_size']
+        cfg['step_size'] = cfg_dict['step_size']
 
     if 'lr_cutoff' in cfg_dict:
-        run_cfg['lr_cutoff'] = cfg_dict['lr_cutoff']
+        cfg['lr_cutoff'] = cfg_dict['lr_cutoff']
 
     if 'name' in cfg_dict:
-        run_cfg['name'] = cfg_dict['name']
-        data_cfg['dataset_name'] = cfg_dict['name']
+        cfg['name'] = cfg_dict['name']
     else:
         raise ValueError('name not specified in config file')
 
+    if 'filter_noncoding_gene' in cfg_dict:
+        cfg['filter_noncoding_genes'] = cfg_dict['filter_noncoding_genes']
+
     if 'results_dir' in cfg_dict:
-        run_cfg['results_dir'] = cfg_dict['results_dir'] + '/' + cfg_dict['name']
+        cfg['results_dir'] = cfg_dict['results_dir'] + '/' + cfg_dict['name']
 
     if 'data_files' not in cfg_dict:
         raise ValueError('data_files not specified in config file')
@@ -399,9 +389,122 @@ def get_config(cfg_file: Path, data_file: Path) -> Tuple[Dict[str, Any], Dict[st
         print('Files listed under data_files are not in the tar.gz file!')
         raise ValueError('Files listed under data_files are not in the tar.gz file!')
 
-    data_cfg['data_files'] = cfg_dict['data_files']
+    cfg['data_files'] = cfg_dict['data_files']
 
     if 'rp_pairs' in cfg_dict:
-        data_cfg['rp_pairs'] = cfg_dict['rp_pairs']
+        cfg['rp_pairs'] = cfg_dict['rp_pairs']
 
-    return run_cfg, model_cfg, data_cfg
+    return cfg
+
+
+def check_gold_standard_file(file_path, min_count=10000):
+    """
+    min_threshold : int
+        The minimum threshold for the lesser of '0' and '1' counts in the 'Class' column.
+
+    """
+    try:
+        with open(file_path, 'r', newline='') as tsv_file:
+            dialect = csv.Sniffer().sniff(tsv_file.read(1024))
+            if dialect.delimiter != '\t':
+                print("Error: Incorrect TSV format. TSV files should be tab-separated.")
+                return False
+    except csv.Error:
+        print("Error: Unable to read TSV file.")
+        return False
+
+    # Check data format and Class values
+    class_values = []
+    with open(file_path, 'r', newline='') as tsv_file:
+        reader = csv.reader(tsv_file, delimiter='\t')
+        next(reader)  # Skip header
+        for row_num, row in enumerate(reader, start=2):  # Add row_num for better error reporting
+            if len(row) != 3:  # Assuming each row should have 3 columns
+                log.error(f'Invalid row format in row {row_num}. Each row should have 3 columns.')
+                return False
+            class_value = row[2].strip()
+            if not class_value.isdigit() or int(class_value) not in (0, 1):
+                log.error(f'Invalid "Class" value in row {row_num}. Must be 0 or 1.')
+                return False
+            class_values.append(int(class_value))
+
+    # Check Class value counts and ratio
+    count_0 = class_values.count(0)
+    count_1 = class_values.count(1)
+    lesser_count = min(count_0, count_1)
+
+    if lesser_count < min_count:
+        log.error(f"The lesser of 0 and 1 occurrences ({lesser_count}) does not meet the threshold. "
+            f"Expected at least {min_count}.")
+        return False
+
+    return True
+
+
+def check_extra_feature_file(file_path, missing_value='NA'):
+    """
+    Notes
+    -----
+    This function checks the following criteria for the measurement TSV file:
+    - The file must have a header row.
+    - There must be at least 3 columns.
+    - The first two columns are gene/protein IDs.
+    - The data type for each additional column (excluding the first two columns) must be consistent
+    and can be either integer, float, or the specified missing_value.
+
+    If any of the checks fail, the function will print informative error messages and return False.
+
+    The TSV file should be tab-separated.
+    """
+    try:
+        with open(file_path, 'r', newline='') as tsv_file:
+            dialect = csv.Sniffer().sniff(tsv_file.read(1024))
+            if dialect.delimiter != '\t':
+                log.error("Incorrect TSV format. TSV files should be tab-separated.")
+                return False
+    except csv.Error:
+        log.error("Unable to read TSV file.")
+        return False
+
+    # Check header and number of columns
+    with open(file_path, 'r', newline='') as tsv_file:
+        reader = csv.reader(tsv_file, delimiter='\t')
+        header = next(reader, None)
+        if header is None:
+            log.error("The TSV file must have a header row.")
+            return False
+
+        num_columns = len(header)
+        if num_columns < 3:
+            log.error("The TSV file must have at least 3 columns.")
+            return False
+
+    # Check data type consistency for additional columns
+    with open(file_path, 'r', newline='') as tsv_file:
+        reader = csv.DictReader(tsv_file, delimiter='\t')
+        column_data_types = {}
+        for row_num, row in enumerate(reader, start=2):  # Add row_num for better error reporting
+            for column_name, value in row.items():
+                if column_name not in header[:2]:  # Skip the first two columns (Protein_1 and Protein_2)
+                    if value == missing_value:
+                        continue
+                    try:
+                        float_value = float(value)
+                        if float_value.is_integer():
+                            value = int(float_value)
+                    except ValueError:
+                        log.error("Invalid data type in row %d, column '%s'. "
+                                    "The value '%s' should be either an integer, a float, or '%s' (missing value).",
+                                    row_num, column_name, value, missing_value)
+                        return False
+                    # Store the data type of each column (float or integer)
+                    data_type = float if '.' in value else int
+                    if column_name not in column_data_types:
+                        column_data_types[column_name] = data_type
+                    elif column_data_types[column_name] != data_type:
+                        log.error("Inconsistent data type in column '%s'. "
+                                    "Expected a consistent data type (integer, float, or '%s') for all rows.",
+                                    column_name, missing_value)
+                        return False
+
+    return True
