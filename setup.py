@@ -24,7 +24,9 @@ requirements = [
     'matplotlib_venn>=0.11.7',
     'networkx>=3.0',
     'powerlaw>=1.5',
-    'click>=8.0.1'
+    'click>=8.0.1',
+    'h5py>=3.4.0',
+    'tables>=3.6.1',
     ]
 
 test_requirements = [ ]

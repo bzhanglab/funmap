@@ -1,4 +1,4 @@
-import hashlib
+import numpy as np
 import csv
 import yaml
 import os
@@ -12,27 +12,6 @@ from funmap.data_urls import misc_urls as urls
 from funmap.logger import setup_logger
 
 log = setup_logger(__name__)
-
-# https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
-def dict_hash(dictionary: Dict[str, Any]) -> str:
-    """
-    Calculate the hash of the given dictionary.
-
-    Parameters
-    ----------
-    dictionary: Dict[str, Any]
-        The input dictionary to be hashed.
-
-    Returns
-    -------
-    str
-        The 8-character hexadecimal hash of the dictionary.
-    """
-    dhash = hashlib.sha256()
-    encoded = json.dumps(dictionary, sort_keys=True).encode()
-    dhash.update(encoded)
-    return dhash.hexdigest()[:8]
-
 
 def gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id'):
     """
@@ -82,21 +61,10 @@ def gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id'):
     return gs_pos_edges, gs_neg_edges
 
 
-def get_data_dict(data_config, data_file, min_sample_count=15):
+def get_data_dict(config, min_sample_count=15):
     """
     Returns a dictionary of data from the provided data configuration, filtered to only include genes that are
     coding and have at least `min_sample_count` samples.
-
-    Parameters
-    ----------
-    data_config : dict
-        A dictionary specifying the data file paths and names. It must contain the following keys:
-        - 'data_root': the root path to the data files
-        - 'data_files': a list of dictionaries, where each dictionary has keys 'name' and 'path'
-    data_file : str/Path
-        Path to the data file.
-    min_sample_count : int, optional
-        Minimum number of samples required for a gene to be included in the returned dictionary. Default is 15.
 
     Returns
     -------
@@ -105,8 +73,9 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
         the data from the corresponding file.
 
     """
+    data_file = config['data_path']
     data_dict = {}
-    if 'filter_noncoding_genes' in data_config and data_config['filter_noncoding_genes']:
+    if 'filter_noncoding_genes' in config and config['filter_noncoding_genes']:
         mapping = pd.read_csv(urls['mapping_file'], sep='\t')
     # extract the data file from the tar.gz file
     tmp_dir = 'tmp_data'
@@ -114,7 +83,7 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
         os.mkdir(tmp_dir)
     os.system(f'tar -xzf {data_file} --strip-components=1 -C {tmp_dir}')
     # gene ids are gene symbols
-    for dt in data_config['data_files']:
+    for dt in config['data_files']:
         log.info(f"processing ... {dt['name']}")
         cur_feature = dt['name']
         # cur_file = get_obj_from_tgz(data_file, dt['path'])
@@ -128,7 +97,7 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
         cur_data = cur_data.T
         # exclude cohort with sample number < min_sample_count
         # remove noncoding genes first
-        if data_config['filter_noncoding_genes']:
+        if config['filter_noncoding_genes']:
             coding = mapping.loc[mapping['coding'] == 'coding', ['gene_name']]
             coding_genes = list(set(coding['gene_name'].to_list()))
             cur_data = cur_data[[c for c in cur_data.columns if c in coding_genes]]
@@ -138,7 +107,31 @@ def get_data_dict(data_config, data_file, min_sample_count=15):
 
     shutil.rmtree(tmp_dir)
 
-    return data_dict
+    log.info('filtering out non valid ids ...')
+    all_valid_ids = set()
+    for i in data_dict:
+        cur_data = data_dict[i]
+        is_valid = cur_data.notna().sum() >= min_sample_count
+        # valid_count = np.sum(is_valid)
+        valid_p = cur_data.columns[is_valid].values
+        all_valid_ids = all_valid_ids.union(set(valid_p))
+
+    all_valid_ids = list(all_valid_ids)
+    all_valid_ids.sort()
+    log.info(f'total number of valid ids: {len(all_valid_ids)}')
+
+    # filter out columns that are not in all_valid_ids
+    for i in data_dict:
+        cur_data = data_dict[i]
+        selected_columns = cur_data.columns.intersection(all_valid_ids)
+        cur_data = cur_data[selected_columns]
+        # it is possible the entire column is nan, remove it
+        cur_data = cur_data.dropna(axis=1, how='all')
+        data_dict[i] = cur_data
+        log.info(f'{i} -- ')
+        log.info(f'  samples x ids: {cur_data.shape}')
+
+    return data_dict, all_valid_ids
 
 
 # https://stackoverflow.com/a/312464/410069
@@ -281,13 +274,13 @@ def get_node_edge_overlap(network_info):
     overlap['edge'] = cur_res
     return overlap
 
-def cleanup_experiment(config_file, data_file):
-    cfg = get_config(config_file, data_file)
+def cleanup_experiment(config_file):
+    cfg = get_config(config_file)
     results_dir = Path(cfg['results_dir'])
     shutil.rmtree(results_dir, ignore_errors=True)
 
-def setup_experiment(config_file, data_file):
-    cfg = get_config(config_file, data_file)
+def setup_experiment(config_file):
+    cfg = get_config(config_file)
     results_dir = Path(cfg['results_dir'])
     # create folders
     folder_dict = cfg['subdirs']
@@ -301,18 +294,8 @@ def setup_experiment(config_file, data_file):
 
     return cfg
 
-def get_config(cfg_file: Path, data_file: Path):
+def get_config(cfg_file: Path):
     cfg = {
-        'filter_after_prediction': True,
-        'filter_criterion': 'max',
-        'filter_threshold': 0.95,
-        'filter_blacklist': True,
-        'n_jobs': os.cpu_count(),
-        'n_chunks': 4,
-        'start_edge_num': 10000,
-        'max_num_edges': 250000,
-        'step_size': 100,
-        'lr_cutoff': 50,
         'results_dir': 'results',
         # the following directories are relative to the results_dir
         'subdirs': {
@@ -323,34 +306,47 @@ def get_config(cfg_file: Path, data_file: Path):
             'network_dir': 'networks',
         },
         'seed': 42,
-        'cor_type': 'pearson',
         'feature_type': 'cc',
-        'split_by': 'edge',
-        'test_size': 0.5,
+        'test_size': 0.2,
         'ml_type': 'xgboost',
-        'filter_before_prediction': True,
-        'min_feature_count': 1,
+        'gs_file': None,
+        'extra_feature_file': None,
+        # 'filter_before_prediction': True,
+        # 'min_feature_count': 1,
         'min_sample_count': 20,
-        'filter_noncoding_genes': False
+        'filter_noncoding_genes': False,
+        # 'filter_after_prediction': True,
+        # 'filter_criterion': 'max',
+        # 'filter_threshold': 0.95,
+        # 'filter_blacklist': False,
+        'n_jobs': os.cpu_count(),
+        # 'start_edge_num': 10000,
+        # 'max_num_edges': 250000,
+        # 'step_size': 100,
+        'lr_cutoff': 50,
     }
 
     with open(cfg_file, 'r') as fh:
         cfg_dict = yaml.load(fh, Loader=yaml.FullLoader)
 
+    # use can change the following parameters in the config file
     if 'seed' in cfg_dict:
         cfg['seed'] = cfg_dict['seed']
 
-    if 'cor_type' in cfg_dict:
-        cfg['cor_type'] = cfg_dict['cor_type']
+    if 'feature_type' in cfg_dict:
+        cfg['feature_type'] = cfg_dict['feature_type']
+
+    if 'extra_feature_file' in cfg_dict:
+        cfg['extra_feature_file'] = cfg_dict['extra_feature_file']
+
+    if 'gs_file' in cfg_dict:
+        cfg['gs_file'] = cfg_dict['gs_file']
 
     if 'min_sample_count' in cfg_dict:
         cfg['min_sample_count'] = cfg_dict['min_sample_count']
 
     if 'n_jobs' in cfg_dict:
         cfg['n_jobs'] = cfg_dict['n_jobs']
-
-    if 'n_chunks' in cfg_dict:
-        cfg['n_chunks'] = cfg_dict['n_chunks']
 
     if 'start_edge_num' in cfg_dict:
         cfg['start_edge_num'] = cfg_dict['start_edge_num']
@@ -369,6 +365,11 @@ def get_config(cfg_file: Path, data_file: Path):
     else:
         raise ValueError('name not specified in config file')
 
+    if 'data_path' in cfg_dict:
+        cfg['data_path'] = cfg_dict['data_path']
+    else:
+        raise ValueError('data_path not specified in config file')
+
     if 'filter_noncoding_gene' in cfg_dict:
         cfg['filter_noncoding_genes'] = cfg_dict['filter_noncoding_genes']
 
@@ -381,7 +382,7 @@ def get_config(cfg_file: Path, data_file: Path):
     # Check all files listed under data_files are also in the tar.gz file
     data_files = cfg_dict['data_files']
     # List all the files in the tar.gz file
-    with tarfile.open(data_file, "r:gz") as tar:
+    with tarfile.open(cfg['data_path'], "r:gz") as tar:
         tar_files = {Path(file).name for file in tar.getnames()}
 
     # Check if all files in data_files are in tar_files
