@@ -63,9 +63,6 @@ def qc(config_file, force_rerun):
             help='if set, will remove results from previous run first')
 def run(config_file, force_rerun):
     click.echo(f'Running funmap...')
-    get_ppi_feature()
-
-
     if force_rerun:
         while True:
             confirmation = input("Do you want to remove results from previous run? (y/n): ")
@@ -92,6 +89,7 @@ def run(config_file, force_rerun):
     np.random.seed(seed)
     ml_type = cfg['ml_type']
     feature_type = cfg['feature_type']
+    use_ppi_feature = cfg['use_ppi_feature']
     # min_feature_count = cfg['min_feature_count']
     min_sample_count = cfg['min_sample_count']
     # filter_before_prediction = cfg['filter_before_prediction']
@@ -124,7 +122,6 @@ def run(config_file, force_rerun):
     llr_dataset_file = results_dir / 'llr_dataset.tsv'
     gs_train = gs_test = None
 
-
     # compute and save cc results
     cc_dict, mr_dict, all_valid_ids = compute_features(cfg, feature_type, min_sample_count,
                                                     saved_data_dir)
@@ -133,6 +130,7 @@ def run(config_file, force_rerun):
         'cc_dict': cc_dict,
         'mr_dict': mr_dict,
         'feature_type': feature_type,
+        'use_ppi_feature': use_ppi_feature,
         'gs_file': gs_file,
         'extra_feature_file': extra_feature_file,
         'valid_id_list': all_valid_ids,
@@ -154,7 +152,7 @@ def run(config_file, force_rerun):
         else:
             gs_train, gs_test = prepare_gs_data(**gs_args)
             with pd.HDFStore(gs_df_file, mode='w') as store:
-                store.put('train',gs_train)
+                store.put('train', gs_train)
                 store.put('test', gs_test)
             ml_model = train_ml_model(gs_train, ml_type, seed, n_jobs)
             with gzip.open(ml_model_file, 'wb') as fh:
@@ -164,21 +162,34 @@ def run(config_file, force_rerun):
             log.info('Predicted all pairs already exists. Skipping prediction.')
         else:
             log.info('Predicting all pairs ...')
-            predict_all_pairs(ml_model, all_valid_ids, feature_type, cc_dict, mr_dict,
-                            extra_feature_file, prediction_dir, predicted_all_pairs_file,
-                            n_jobs)
+            if use_ppi_feature:
+                ppi_feature = get_ppi_feature()
+            else:
+                ppi_feature = None
+            args = {
+                'ml_model': ml_model,
+                'all_valid_ids': all_valid_ids,
+                'feature_type': feature_type,
+                'ppi_feature': ppi_feature,
+                'cc_dict': cc_dict,
+                'mr_dict': mr_dict,
+                'extra_feature_file': extra_feature_file,
+                'prediction_dir': prediction_dir,
+                'predicted_all_pairs_file': predicted_all_pairs_file,
+                'n_jobs': n_jobs
+            }
+            predict_all_pairs(**args)
             log.info('Predicting all pairs ... done')
             # use gs_test to compute cutoff probability
         cutoff_p = cutoff_prob(ml_model, gs_test, lr_cutoff)
         log.info(f'cutoff probability: {cutoff_p}')
-
 
         log.info('Predicting network ...')
         predict_network(predicted_all_pairs_file, cutoff_p, edge_list_file)
         log.info('Predicting network ... done')
 
 
-    # # check to see if all files in the llr_res_files list exist
+    # check to see if all files in the llr_res_files list exist
     # llr_res_exist = llr_res_file.exists()
     # edge_list_file_exist = edge_list_file.exists()
 

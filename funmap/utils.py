@@ -134,27 +134,6 @@ def get_data_dict(config, min_sample_count=15):
     return data_dict, all_valid_ids
 
 
-# https://stackoverflow.com/a/312464/410069
-def chunks(lst, n):
-    """
-    Yield successive n-sized chunks from lst.
-
-    Parameters
-    ----------
-    lst : list
-        The input list to be split into chunks.
-    n : int
-        The size of each chunk.
-
-    Yields
-    ------
-    list
-        A chunk of size n from the input list lst.
-    """
-    for i in range(0, len(lst), n):
-        yield lst[i:i + n]
-
-
 def get_node_edge(edge_list):
     """
     Calculate the number of nodes and edges, and the ratio of edges per node,
@@ -307,6 +286,7 @@ def get_config(cfg_file: Path):
         },
         'seed': 42,
         'feature_type': 'cc',
+        'use_ppi_feature': False,
         'test_size': 0.2,
         'ml_type': 'xgboost',
         'gs_file': None,
@@ -335,6 +315,9 @@ def get_config(cfg_file: Path):
 
     if 'feature_type' in cfg_dict:
         cfg['feature_type'] = cfg_dict['feature_type']
+
+    if 'use_ppi_feature' in cfg_dict:
+        cfg['use_ppi_feature'] = cfg_dict['use_ppi_feature']
 
     if 'extra_feature_file' in cfg_dict:
         cfg['extra_feature_file'] = cfg_dict['extra_feature_file']

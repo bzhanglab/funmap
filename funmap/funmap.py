@@ -223,7 +223,7 @@ def balance_classes(df, random_state=42):
 
     return balanced_df
 
-def assemble_feature_df(h5_file_mapping, gs_df, dataset='cc', extra_feature_file=None):
+def assemble_feature_df(h5_file_mapping, gs_df, dataset='cc'):
     gs_df.reset_index(drop=True, inplace=True)
     # Initialize feature_df with columns for HDF5 file keys and 'label'
     file_keys = list(h5_file_mapping.keys())
@@ -259,19 +259,27 @@ def assemble_feature_df(h5_file_mapping, gs_df, dataset='cc', extra_feature_file
         # delete the 'label' column from feature_df
         del feature_df['label']
 
-    # TODO: Add extra features if provided
-    if extra_feature_file is not None:
-        pass
-
     return feature_df
 
-def extract_features(df, feature_type, cc_dict, extra_feature_file, mr_dict):
+def extract_features(df, feature_type, cc_dict,  ppi_feature=None, extra_feature=None, mr_dict=None):
     if feature_type == 'mr':
         if not mr_dict:
             raise ValueError('mr dict is empty')
 
     feature_dict = cc_dict if feature_type == 'cc' else mr_dict
-    feature_df = assemble_feature_df(feature_dict, df, feature_type, extra_feature_file)
+    feature_df = assemble_feature_df(feature_dict, df, feature_type)
+    if ppi_feature is not None:
+        ppi_dict = {key: set(value) for key, value in ppi_feature.items()}
+        for ppi_source, ppi_tuples in ppi_dict.items():
+            feature_df[ppi_source] = df.apply(
+                lambda row: 1 if (row['P1'], row['P2']) in ppi_tuples else 0, axis=1)
+        if 'label' in feature_df.columns:
+            feature_df = feature_df[[col for col in feature_df.columns if col != 'label'] + ['label']]
+
+    # TODO: add extra features if provided
+    if extra_feature is not None:
+        pass
+
     return feature_df
 
 
@@ -300,9 +308,6 @@ def get_ppi_feature():
         data = data.apply(lambda x: tuple(sorted(x)), axis=1)
         ppi_name = f'{feature_names[i]}_PPI'
         ppi_features[ppi_name] = data.tolist()
-
-    from IPython import embed; embed()
-    import sys; sys.exit(0)
 
     return ppi_features
 
@@ -557,6 +562,7 @@ def prepare_gs_data(**kwargs):
     mr_dict = kwargs['mr_dict']
     gs_file = kwargs['gs_file']
     feature_type = kwargs['feature_type']
+    use_ppi_feature = kwargs['use_ppi_feature']
     extra_feature_file = kwargs['extra_feature_file']
     valid_id_list = kwargs['valid_id_list']
     test_size = kwargs['test_size']
@@ -575,23 +581,19 @@ def prepare_gs_data(**kwargs):
             test_size=test_size, random_state=seed,
             stratify=gs_df_balanced.iloc[:, -1])
 
-    gs_train_df = extract_features(gs_train, feature_type, cc_dict,
+    ppi_feature = None
+    if use_ppi_feature:
+        ppi_feature = get_ppi_feature()
+
+    gs_train_df = extract_features(gs_train, feature_type, cc_dict, ppi_feature,
+                                    extra_feature_file, mr_dict)
+    gs_test_df =  extract_features(gs_test, feature_type, cc_dict, ppi_feature,
                                     extra_feature_file, mr_dict)
 
-    gs_test_df =  extract_features(gs_test, feature_type, cc_dict,
-                                    extra_feature_file, mr_dict)
     # store both the ids with gs_test_df for later use
     # add the first two column of gs_test to gs_test_df at the beginning
     gs_test_df = pd.concat([gs_test.iloc[:, :2], gs_test_df], axis=1)
 
-    # cols = gs_test.columns[0:2]
-    # gs_test.index = [tuple(sorted(x)) for x in
-    #                     zip(gs_test.pop(cols[0]),
-    #                         gs_test.pop(cols[1]))]
-    # label_col = gs_test.columns[-1]
-    # gs_test_pos_df = gs_test.loc[gs_test[label_col] == 1, label_col]
-    # gs_test_neg_df = gs_test.loc[gs_test[label_col] == 0, label_col]
-    # return gs_train_df, gs_test_pos_df, gs_test_neg_df
     log.info('Preparing gs data ... done')
     return gs_train_df, gs_test_df
 
@@ -696,7 +698,7 @@ def predict_network(predict_results_file, cutoff_p, output_file):
     filtered_df[['P1', 'P2']].to_csv(output_file, sep='\t', index=False)
 
 
-def predict_all_pairs(model, all_ids, feature_type, cc_dict,
+def predict_all_pairs(model, all_ids, feature_type, ppi_feature, cc_dict,
                     mr_dict, extra_feature_file, prediction_dir,
                     output_file, n_jobs=1):
     chunk_size = 1000000
@@ -710,7 +712,7 @@ def predict_all_pairs(model, all_ids, feature_type, cc_dict,
     def process_and_save_chunk(start_idx, chunk_id):
         chunk = all_pairs[start_idx:start_idx + chunk_size]
         chunk_df = pd.DataFrame(chunk, columns=['P1', 'P2'])
-        feature_df = extract_features(chunk_df, feature_type, cc_dict,
+        feature_df = extract_features(chunk_df, feature_type, cc_dict, ppi_feature,
                                     extra_feature_file, mr_dict)
         predictions = model.predict_proba(feature_df)
         prediction_df = pd.DataFrame(predictions[:, 1], columns=['prediction'])
