@@ -300,9 +300,9 @@ def get_config(cfg_file: Path):
         # 'filter_threshold': 0.95,
         # 'filter_blacklist': False,
         'n_jobs': os.cpu_count(),
-        # 'start_edge_num': 10000,
-        # 'max_num_edges': 250000,
-        # 'step_size': 100,
+        'start_edge_num': 1000,
+        'max_num_edges': 250000,
+        'step_size': 1000,
         'lr_cutoff': 50,
     }
 

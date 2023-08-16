@@ -223,8 +223,8 @@ def balance_classes(df, random_state=42):
 
     return balanced_df
 
-def assemble_feature_df(h5_file_mapping, gs_df, dataset='cc'):
-    gs_df.reset_index(drop=True, inplace=True)
+def assemble_feature_df(h5_file_mapping, df, dataset='cc'):
+    df.reset_index(drop=True, inplace=True)
     # Initialize feature_df with columns for HDF5 file keys and 'label'
     file_keys = list(h5_file_mapping.keys())
     feature_df = pd.DataFrame(columns=file_keys + ['label'])
@@ -236,11 +236,11 @@ def assemble_feature_df(h5_file_mapping, gs_df, dataset='cc'):
             gene_to_index = {gene.astype(str): idx for idx, gene in enumerate(gene_ids)}
 
             # Get gene indices for P1 and P2
-            p1_indices = np.array([gene_to_index.get(gene, -1) for gene in gs_df.iloc[:, 0]])
-            p2_indices = np.array([gene_to_index.get(gene, -1) for gene in gs_df.iloc[:, 1]])
+            p1_indices = np.array([gene_to_index.get(gene, -1) for gene in df.iloc[:, 0]])
+            p2_indices = np.array([gene_to_index.get(gene, -1) for gene in df.iloc[:, 1]])
 
             f_dataset = h5_file[dataset]
-            f_values = np.empty(len(gs_df), dtype=float)
+            f_values = np.empty(len(df), dtype=float)
             valid_indices = (p1_indices != -1) & (p2_indices != -1)
 
             linear_indices_func = lambda row_indices, col_indices, n: np.array(col_indices) - np.array(row_indices) + (2*n - np.array(row_indices) + 1) * np.array(row_indices) // 2
@@ -253,13 +253,14 @@ def assemble_feature_df(h5_file_mapping, gs_df, dataset='cc'):
             feature_df[key] = f_values
 
     # if the last column is 'label', assign it to feature_df
-    if gs_df.columns[-1] == 'label':
-        feature_df['label'] = gs_df[gs_df.columns[-1]]
+    if df.columns[-1] == 'label':
+        feature_df['label'] = df[df.columns[-1]]
     else:
         # delete the 'label' column from feature_df
         del feature_df['label']
 
     return feature_df
+
 
 def extract_features(df, feature_type, cc_dict,  ppi_feature=None, extra_feature=None, mr_dict=None):
     if feature_type == 'mr':
@@ -382,179 +383,44 @@ def train_model(X, y, seed, n_jobs):
     return model
 
 
-def validation_llr(all_feature_df, predicted_all_pairs,
-                filter_after_prediction, filter_criterion, filter_threshold,
-                filter_blacklist, blacklist_file: str, max_num_edges, step_size,
-                gs_test_pos_set, gs_test_neg_set, output_dir: Path,
-                network_out_dir: Path):
-    """
-    Compute Log Likelihood Ratio (LLR) for a given set of edges and a given set of gold
-    standard positive and negative edges.
-    The function performs filtering and sorting on the input edges before computing LLR.
+def compute_llr(predicted_all_pairs, llr_res_file, start_edge_num, max_num_edges, step_size,
+                gs_test):
+    # final results
+    log.info(f'Calculating llr_res_dict ...')
+    # make sure max_num_edges is smaller than the number of non-NA values
+    assert max_num_edges < np.count_nonzero(~np.isnan(predicted_all_pairs.iloc[:, -1].values)), \
+        f'max_num_edges should be smaller than the number of non-NA values'
 
-    Parameters
-    ----------
-    all_feature_df (pd.DataFrame): Dataframe containing all features
-    predicted_all_pair (pd.DataFrame): Dataframe containing predicted values of edges
-    filter_after_prediction (bool): whether to filter edges after prediction
-    filter_criterion (str): criterion to filter edges
-    filter_threshold (float): threshold value to filter edges
-    filter_blacklist (bool): whether to filter edges incident on genes in blacklist
-    blacklist_file (str): url to blacklist file
-    max_num_edges (int): maximum number of edges to compute LLR for
-    step_size (int): step size for iterating over edges
-    gs_test_pos_set (set): set of gold standard positive edges
-    gs_test_neg_set (set): set of gold standard negative edges
-    output_dir (Path): directory to save LLR results
-    network_out_dir (Path): directory to save selected edges
+    cur_col_name = 'prediction'
+    cur_results = predicted_all_pairs.nlargest(max_num_edges, cur_col_name)
 
-    Returns
-    -------
-    llr_res_dict (pd.DataFrame): Dataframe containing LLR results for all selected edges
-    edge_list_file_out (Path): path to save selected edges
-    """
+    gs_test_pos_set = set(gs_test[gs_test['label'] == 1][['P1', 'P2']].apply(lambda row: tuple(sorted({row['P1'], row['P2']})), axis=1))
+    gs_test_neg_set = set(gs_test[gs_test['label'] == 0][['P1', 'P2']].apply(lambda row: tuple(sorted({row['P1'], row['P2']})), axis=1))
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-    ret = {}
+    result_dict = defaultdict(list)
+    # llr_res_dict only save maximum of max_steps data points for downstream
+    # analysis / plotting
+    for k in tqdm(range(start_edge_num, max_num_edges+step_size, step_size)):
+        selected_edges = set(cur_results.iloc[:k, :][['P1', 'P2']].apply(lambda row: tuple(sorted({row['P1'], row['P2']})), axis=1))
+        all_nodes = set(itertools.chain.from_iterable(selected_edges))
+        common_pos_edges = selected_edges & gs_test_pos_set
+        common_neg_edges = selected_edges & gs_test_neg_set
+        try:
+            lr = len(common_pos_edges) / len(common_neg_edges) / (len(gs_test_pos_set) / len(gs_test_neg_set))
+        except ZeroDivisionError:
+            lr = 0
+        llr = np.log(lr) if lr > 0 else np.nan
+        n_node = len(all_nodes)
+        result_dict['k'].append(k)
+        result_dict['n'].append(n_node)
+        result_dict['llr'].append(llr)
 
-    for ft in predicted_all_pairs:
-        # final results
-        llr_res_file = output_dir / f'llr_results_{ft}_{max_num_edges}.tsv'
+    llr_res = pd.DataFrame(result_dict)
+    if llr_res_file is not None:
+        llr_res.to_csv(llr_res_file, sep='\t', index=False)
 
-        print(f'Calculating llr_res_dict ({ft})...')
-        llr_res_dict = {}
-        cur_col_name = 'prediction'
-        cur_results = predicted_all_pairs[ft][[cur_col_name]].copy()
-        cur_results.sort_values(by=cur_col_name, ascending=False,
-                                inplace=True)
-        # for this filter criterion, only based on 'MR'
-        if filter_after_prediction:
-            if filter_criterion != 'max':
-                raise ValueError('Filter criterion must be "max" for MR')
-            # filter edges with MR < filter_threshold
-            if ft == 'ex':
-                regex_str = feature_type_to_regex(ft)
-                all_feature_df_sel = all_feature_df.filter(regex=regex_str)
-                all_feature_df_sel = all_feature_df_sel.drop(all_feature_df_sel[all_feature_df_sel.max(axis=1)
-                                    < filter_threshold].index)
-                cur_results = cur_results[cur_results.index.isin(all_feature_df_sel.index)]
-            elif ft == 'ei':
-                # the filter is still based on 'ex', but we need to add back
-                # _PPI columns back after the filtering
-                regex_str = feature_type_to_regex('ex')
-                all_feature_df_sel = all_feature_df.filter(regex=regex_str)
-                all_feature_df_sel = all_feature_df_sel.drop(all_feature_df_sel[all_feature_df_sel.max(axis=1)
-                                    < filter_threshold].index)
-
-                regex_str2 = feature_type_to_regex('ei')
-                all_feature_df_sel_2 = all_feature_df.filter(regex=regex_str2)
-                # only keep indices that are in all_feature_df_sel
-                all_feature_df_sel_2 = all_feature_df_sel_2[all_feature_df_sel_2.index.isin(all_feature_df_sel.index)]
-                cur_results = cur_results[cur_results.index.isin(all_feature_df_sel_2.index)]
-            else:
-                raise ValueError(f'Filtering not supported for {ft}')
-
-        # remove any edge that is incident on any genes in the black list
-        if filter_blacklist:
-            bl_genes = pd.read_csv(blacklist_file, sep='\t', header=None)
-            bl_genes = set(bl_genes[0].to_list())
-            cur_results = cur_results.reset_index()
-            cur_results[['e1', 'e2']] = pd.DataFrame(cur_results['index'].tolist(),
-                                        index=cur_results.index)
-            cur_results = cur_results[~(cur_results['e1'].isin(bl_genes)
-                                    | cur_results['e2'].isin(bl_genes))]
-            cur_results.drop(columns=['e1', 'e2'], inplace=True)
-            cur_results = cur_results.set_index('index')
-
-        cnt_notna = np.count_nonzero(~np.isnan(cur_results.values))
-        print(f'total number of pairs with valid prediction: {cnt_notna}')
-        result_dict = defaultdict(list)
-        assert cnt_notna > max_num_edges, f'not enough valid edges after filtering, need {max_num_edges}, actual {cnt_notna}'
-        # llr_res_dict only save maximum of max_steps data points for downstream
-        # analysis / plotting
-        for k in tqdm(range(step_size, max_num_edges+step_size, step_size)):
-            selected_edges = set(cur_results.iloc[:k, :].index)
-            all_nodes = set(itertools.chain.from_iterable(selected_edges))
-            # https://stackoverflow.com/a/7590970/410069
-            common_pos_edges = selected_edges & gs_test_pos_set
-            common_neg_edges = selected_edges & gs_test_neg_set
-            try:
-                lr = len(common_pos_edges) / len(common_neg_edges) / (len(gs_test_pos_set) / len(gs_test_neg_set))
-            except ZeroDivisionError:
-                lr = 0
-            llr = np.log(lr) if lr > 0 else np.nan
-            n_node = len(all_nodes)
-            result_dict['k'].append(k)
-            result_dict['n'].append(n_node)
-            result_dict['llr'].append(llr)
-
-        llr_res_dict = pd.DataFrame(result_dict)
-        llr_res_dict.to_csv(llr_res_file, sep='\t', index=False)
-
-        # write edge list to file, also include the prediction score
-        print(f'saving edges to file ...')
-        edge_list_file = network_out_dir / f'network_{ft}_{max_num_edges}.tsv'
-        cur_results = cur_results.reset_index()
-        cur_results[['e1', 'e2']] = pd.DataFrame(cur_results['index'].tolist(),
-                                    index=cur_results.index)
-        cur_results.drop(columns=['index'], axis=1, inplace=True)
-        cur_results = cur_results.reindex(columns=['e1', 'e2', cur_col_name])
-        selected_edges = cur_results.iloc[:max_num_edges, :]
-        selected_edges.to_csv(edge_list_file, sep='\t', index=False, header=False)
-        print(f'Calculating llr_res_dict ({ft})... done')
-
-        ret[ft] = {
-            'llr_res_path': llr_res_file,
-            'edge_list_path': edge_list_file
-        }
-
-    return ret
-
-
-# set the final funmap edge list file based on the cutoff
-def get_funmap(validation_res, config, output_dir):
-    """Set the final funmap edge list file based on the likelihood ratio cutoff.
-    we will use results from "ei" to generate the final edge list.
-
-    Parameters
-    ----------
-    validation_res : dict
-        A dictionary containing the validation results. It should have a key 'ei' which
-        should be a dictionary containing the paths to the likelihood ratio test results
-        and the edge list file.
-    run_config : dict
-        A dictionary containing the configuration for running the function. It should have
-        a key 'lr_cutoff' which specifies the likelihood ratio cutoff value.
-    output_dir : Path
-        A Path object specifying the output directory where the final funmap edge list file
-        will be saved.
-
-    Returns
-    -------
-    None
-        This function does not return anything, but it saves the final funmap edge list file
-        to the output directory specified by `output_dir`.
-
-    Raises
-    ------
-    UserWarning
-        If the largest llr value is smaller than the cutoff, no funmap will be generated.
-    """
-    llr_res_path = validation_res['ei']['llr_res_path']
-    edge_list_path = validation_res['ei']['edge_list_path']
-    llr_res = pd.read_csv(llr_res_path, sep='\t')
-    llr_res = llr_res.sort_values(by=['llr'], ascending=False)
-    cutoff = config['lr_cutoff']
-
-    if llr_res['llr'].iloc[0] < np.log(cutoff):
-        warnings.warn('The largest llr value is smaller than the cutoff, no funmap will be generated.')
-        return
-    llr_res = llr_res[llr_res['llr'] >= np.log(cutoff)]
-    funmap = llr_res.iloc[-1]
-    n_edge = int(funmap['k'])
-    funmap_el = pd.read_csv(edge_list_path, sep='\t', header=None)
-    funmap_el = funmap_el.iloc[:n_edge, :2]
-    funmap_el.to_csv(output_dir / 'funmap.tsv', sep='\t', header=False, index=False)
+    print(f'Calculating llr_res_dict ... done')
+    return llr_res
 
 
 def prepare_gs_data(**kwargs):
@@ -598,78 +464,55 @@ def prepare_gs_data(**kwargs):
     return gs_train_df, gs_test_df
 
 
-def dataset_llr(feature_df, gs_test_pos_set, gs_test_neg_set,
-                start_edge_num, step_size, max_num_edge,
-                output_file='llr_dataset.tsv'):
-    """Calculate the Log-Likelihood Ratio (LLR) for a set of MR features.
+def extract_dataset_feature(all_pairs, feature_file, feature_type='cc'):
+    # convert all_pairrs to a dataframe
+    df = pd.DataFrame(all_pairs, columns=['P1', 'P2'])
+    with h5py.File(feature_file, 'r') as h5_file:
+        gene_ids = h5_file['ids'][:]
+        gene_to_index = {gene.astype(str): idx for idx, gene in enumerate(gene_ids)}
 
-    Parameters
-    ----------
-    feature_df : pandas.DataFrame
-        DataFrame containing features for calculation.
-    gs_test_pos_set : set
-        A set of positive test edges.
-    gs_test_neg_set : set
-        A set of negative test edges.
-    start_edge_num : int
-        Start number of edges.
-    step_size : int
-        Step size.
-    max_num_edge : int
-        Maximum number of edges.
-    output_file : str, optional
-        Output file name, by default 'llr_dataset.tsv'.
+        # Get gene indices for P1 and P2
+        p1_indices = np.array([gene_to_index.get(gene, -1) for gene in df.iloc[:, 0]])
+        p2_indices = np.array([gene_to_index.get(gene, -1) for gene in df.iloc[:, 1]])
 
-    Returns
-    -------
-    llr_ds: pandas.DataFrame
+        f_dataset = h5_file[feature_type]
+        f_values = np.empty(len(df), dtype=float)
+        valid_indices = (p1_indices != -1) & (p2_indices != -1)
 
-    Notes
-    -----
-    - feature_df should contain features ending with "_MR".
-    - Features ending with "_CC" will be removed from calculation.
-    - start_edge_num should be smaller than max_num_edge.
-    - max_num_edge should be smaller than the number of non-NA values.
-    """
-    mr_df = feature_df.filter(regex='_MR$', axis=1)
-    result_dict = defaultdict(list)
-    for col in mr_df:
-        dataset_name = re.sub('_MR$', '', col)
-        print(f'... processing {dataset_name}')
-        cur_results = mr_df[[col]].copy()
-        cur_results.sort_values(by=col, ascending=False, inplace=True)
-        cnt_notna = np.count_nonzero(~np.isnan(cur_results[col].values))
-        assert start_edge_num < max_num_edge, 'start_edge_num should be smaller than max_num_edge'
-        print(cnt_notna)
-        print(start_edge_num)
-        assert cnt_notna > start_edge_num, 'start_edge_num should be smaller than the number of non-NA values'
-        cur_max_num_edge = min(max_num_edge, cnt_notna)
-        print(f'... current max_num_edge: {cur_max_num_edge}')
-        for k in range(start_edge_num, cur_max_num_edge+step_size, step_size):
-            selected_edges = cur_results.iloc[:k, :].index.tolist()
-            all_nodes = { i for t in list(selected_edges) for i in t}
-            common_pos_edges = set(selected_edges) & gs_test_pos_set
-            common_neg_edges = set(selected_edges) & gs_test_neg_set
-            llr = np.log(len(common_pos_edges) / len(common_neg_edges) / (len(gs_test_pos_set) / len(gs_test_neg_set)))
-            n_node = len(all_nodes)
-            result_dict['k'].append(k)
-            result_dict['n'].append(n_node)
-            result_dict['llr'].append(llr)
-            result_dict['dataset'].append(dataset_name)
-            print(f'{dataset_name}, {k}, {n_node}, {llr}')
+        linear_indices_func = lambda row_indices, col_indices, n: np.array(col_indices) - np.array(row_indices) + (2*n - np.array(row_indices) + 1) * np.array(row_indices) // 2
+        linear_indices = linear_indices_func(p1_indices[valid_indices], p2_indices[valid_indices], len(gene_ids))
 
-    llr_ds = pd.DataFrame(result_dict)
-    llr_ds.to_csv(output_file, sep='\t', index=False)
+        f_values[valid_indices] = f_dataset[:][linear_indices]
+        f_values[~valid_indices] = np.nan
+        df['prediction'] = f_values
+
+    return df
+
+
+def dataset_llr(all_ids, feature_dict, feature_type, gs_test, start_edge_num,
+                max_num_edge, step_size, llr_dataset_file):
+    llr_ds = pd.DataFrame()
+    all_ids = sorted(all_ids)
+    all_pairs = list(itertools.combinations(all_ids, 2))
+    for dataset in feature_dict:
+        log.info(f'Calculating llr for {dataset} ...')
+        feature_file = feature_dict[dataset]
+        predicted_all_pairs = extract_dataset_feature(all_pairs, feature_file, feature_type)
+        cur_llr_res = compute_llr(predicted_all_pairs, None, start_edge_num,
+                            max_num_edge, step_size, gs_test)
+        cur_llr_res['dataset'] = dataset
+        llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
+        llr_ds.to_csv(llr_dataset_file, sep='\t', index=False)
+        log.info(f'Calculating llr for {dataset} ... done')
+
+    llr_ds.to_csv(llr_dataset_file, sep='\t', index=False)
+
     return llr_ds
-
-
-def compute_llr(feature_df, gs_test_pos_set, gs_test_neg_set):
-    pass
 
 
 def cutoff_prob(model, gs_test, lr_cutoff):
     # the first 2 cols are the ids, the last col is the label
-    prob = model.predict_proba(gs_test.iloc[:, 0:-1])
+    prob = model.predict_proba(gs_test.iloc[:, 2:-1])
     prob = prob[:, 1]
     pred_df = pd.DataFrame(prob, columns=['prob'])
     pred_df = pd.concat([pred_df, gs_test.iloc[:, -1]], axis=1)
@@ -696,6 +539,10 @@ def predict_network(predict_results_file, cutoff_p, output_file):
     predicted_df = pd.read_parquet(predict_results_file)
     filtered_df = predicted_df[predicted_df['prediction'] > cutoff_p]
     filtered_df[['P1', 'P2']].to_csv(output_file, sep='\t', index=False)
+    num_edges = len(filtered_df)
+    num_nodes = len(set(filtered_df['P1']) | set(filtered_df['P2']))
+    log.info(f'Number of edges: {num_edges}')
+    log.info(f'Number of nodes: {num_nodes}')
 
 
 def predict_all_pairs(model, all_ids, feature_type, ppi_feature, cc_dict,

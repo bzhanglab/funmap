@@ -13,6 +13,7 @@ import seaborn as sns
 import PyPDF2
 from matplotlib_venn import venn2, venn2_circles
 import networkx as nx
+import warnings
 import powerlaw
 from funmap.logger import setup_logging, setup_logger
 
@@ -72,10 +73,9 @@ def plot_llr_comparison(validation_results, llr_ds, output_file='llr_comparison.
         if start == -1:
             start = cur_df['k'].iloc[0]
     # plot llr_res with the same start point
-    for ft in validation_results:
-        llr_res = pd.read_csv(validation_results[ft]['llr_res_path'], sep='\t')
-        llr_res = llr_res[llr_res['k'] >= start]
-        ax.plot(llr_res['k'], llr_res['llr'], label=f'funmap_{ft}', linewidth=3)
+    llr_res = pd.read_csv(validation_results['llr_res_path'], sep='\t')
+    llr_res = llr_res[llr_res['k'] >= start]
+    ax.plot(llr_res['k'], llr_res['llr'], label=f'funmap', linewidth=3)
 
     ax.xaxis.set_major_formatter(edge_number)
     ax.set_xlabel('number of gene pairs', fontsize=16)
@@ -269,22 +269,23 @@ def plot_results(cfg: dict, validation_results: dict,
     network_info = network_info.drop(columns=['url'])
 
     # for each funmap, create a dataframe
-    for ft in validation_results:
-        edge_file_path = validation_results[ft]['edge_list_path']
-        funmap_el = pd.read_csv(edge_file_path, sep='\t', header=None)
-        n_edge = n_edge_dict[ft]
-        funmap_el = funmap_el.iloc[:n_edge, :2]
+    # for ft in validation_results:
+    edge_file_path = validation_results['edge_list_path']
+    funmap_el = pd.read_csv(edge_file_path, sep='\t', header=None)
+    n_edge = n_edge_dict
+    funmap_el = funmap_el.iloc[:n_edge, :2]
 
-        funmap_df = pd.DataFrame({'name': ['FunMap'], 'type': ['FunMap'], 'el': [funmap_el]})
-        all_network_info = pd.concat([network_info, funmap_df], ignore_index=True)
-        overlap_info = get_node_edge_overlap(all_network_info)
-        node_color, edge_color = '#7DC462', '#774FA0'
-        for (type, color) in zip(['node', 'edge'], [node_color, edge_color]):
-            fig_name = plot_overlap_venn(f'funmap_{ft}', overlap_info[type], type, color, figure_dir)
-            fig_names.append(fig_name)
-
-        fig_name = plot_network_stats(all_network_info, ft, figure_dir)
+    funmap_df = pd.DataFrame({'name': ['FunMap'], 'type': ['FunMap'], 'el': [funmap_el]})
+    all_network_info = pd.concat([network_info, funmap_df], ignore_index=True)
+    overlap_info = get_node_edge_overlap(all_network_info)
+    node_color, edge_color = '#7DC462', '#774FA0'
+    for (type, color) in zip(['node', 'edge'], [node_color, edge_color]):
+        fig_name = plot_overlap_venn(f'funmap', overlap_info[type], type, color, figure_dir)
         fig_names.append(fig_name)
+
+    # fig_name = plot_network_stats(all_network_info, ft, figure_dir)
+    fig_name = plot_network_stats(all_network_info, figure_dir)
+    fig_names.append(fig_name)
 
     return fig_names
 
@@ -378,9 +379,9 @@ def plot_2d_llr(ax, feature_df, feature_type, pair_name, rna_feature, pro_featur
     data_range = {'CC': (-1, 1), 'MR': (0, 1)}
 
     for label in [0, 1]:
-        df = feature_df.loc[:, ['Class', rna_feature, pro_feature]]
+        df = feature_df.loc[:, ['label', rna_feature, pro_feature]]
         df = df.dropna()
-        cur_df = df.loc[df['Class'] == label, [rna_feature, pro_feature]]
+        cur_df = df.loc[df['label'] == label, [rna_feature, pro_feature]]
         hist_density, _, _ = np.histogram2d(cur_df[rna_feature].values,
                                 cur_df[pro_feature].values, bins=n_bins,
                                 range=np.array([data_range[feature_type],
@@ -389,9 +390,9 @@ def plot_2d_llr(ax, feature_df, feature_type, pair_name, rna_feature, pro_featur
         max_density = max(max_density, np.max(hist_density))
 
     for label in [0, 1]:
-        df = feature_df.loc[:, ['Class', rna_feature, pro_feature]]
+        df = feature_df.loc[:, ['label', rna_feature, pro_feature]]
         df = df.dropna()
-        cur_df = df.loc[df['Class'] == label, [rna_feature, pro_feature]]
+        cur_df = df.loc[df['label'] == label, [rna_feature, pro_feature]]
         cnt[label] = cur_df.shape[0]
         hist, _, _ = np.histogram2d(cur_df[rna_feature].values,
                                     cur_df[pro_feature].values, bins=n_bins,
@@ -448,7 +449,7 @@ def plot_pair_llr(feature_df: pd.DataFrame, output_dir: Path, rp_pairs: List[Dic
     """
     n_bins = 20
     # feature_type = ['CC', 'MR']
-    feature_type = ['CC']
+    feature_type = ['MR']
     file_names = []
     # plot for each rna-protein pair using CC or MR as feature
     for rp_pair in rp_pairs:
@@ -456,8 +457,8 @@ def plot_pair_llr(feature_df: pd.DataFrame, output_dir: Path, rp_pairs: List[Dic
             fig, ax = plt.subplots(2, 2, figsize=(10, 10),
                                 gridspec_kw={'width_ratios': [4, 1],
                                             'height_ratios': [1, 4]})
-            rna_feature = rp_pair['rna'] + '_' + ft
-            pro_feature = rp_pair['protein'] + '_' + ft
+            rna_feature = rp_pair['rna']
+            pro_feature = rp_pair['protein']
             plot_1d_llr(ax[0,0], feature_df, rna_feature, ft, 'RNA', n_bins)
             ax[0, 0].xaxis.set_ticks_position('none')
             ax[0, 0].set_xticklabels([])
@@ -475,7 +476,7 @@ def plot_pair_llr(feature_df: pd.DataFrame, output_dir: Path, rp_pairs: List[Dic
             cax = fig.add_axes([1.05, 0.25, 0.03, 0.5])
             fig.colorbar(heatmap2d, cax=cax)
 
-            plt.tight_layout()
+            # plt.tight_layout()
             plt.box(on=None)
             file_name = f"{rp_pair['name']}_rna_pro_{ft}_llr.pdf"
             file_names.append(file_name)
@@ -506,27 +507,27 @@ def plot_llr_compare_networks(validaton_results, cutoff, output_file: Path):
     all_networks = []
     n_edge = {}
 
-    for ft in validaton_results:
-        llr_res = pd.read_csv(validaton_results[ft]['llr_res_path'], sep='\t')
-        # sort the llr_res dataframe by the llr value
-        llr_res = llr_res.sort_values(by=['llr'], ascending=False)
+    # for ft in validaton_results:
+    llr_res = pd.read_csv(validaton_results['llr_res_path'], sep='\t')
+    # sort the llr_res dataframe by the llr value
+    llr_res = llr_res.sort_values(by=['llr'], ascending=False)
 
-        # if the smallest llr value is larger than the cutoff, then we don't need to plot
-        if llr_res['llr'].iloc[0] < np.log(cutoff):
-            log.info('The largest llr value is smaller than the cutoff, no plot will be generated.')
-            return
+    # if the smallest llr value is larger than the cutoff, then we don't need to plot
+    if llr_res['llr'].iloc[0] < np.log(cutoff):
+        log.info('The largest llr value is smaller than the cutoff, no plot will be generated.')
+        return
 
-        # select the rows that have llr value larger than the cutoff
-        llr_res = llr_res[llr_res['llr'] >= np.log(cutoff)]
-        # the last row correspond the network we want
-        funmap = llr_res.iloc[-1]
-        # this is the number of edges in the network that satisfies the cutoff
-        n_edge[ft] = int(funmap['k'])
+    # select the rows that have llr value larger than the cutoff
+    llr_res = llr_res[llr_res['llr'] >= np.log(cutoff)]
+    # the last row correspond the network we want
+    funmap = llr_res.iloc[-1]
+    # this is the number of edges in the network that satisfies the cutoff
+    n_edge = int(funmap['k'])
 
-        all_networks.extend([
-            (f'FunMap_{ft}', 'FunMap', int(funmap['n']), int(funmap['k']),
-                funmap['llr'], np.exp(funmap['llr']))
-        ])
+    all_networks.extend([
+        (f'FunMap', 'FunMap', int(funmap['n']), int(funmap['k']),
+            funmap['llr'], np.exp(funmap['llr']))
+    ])
 
     # these are pre-computed values
     all_networks.extend(
@@ -564,7 +565,8 @@ def plot_llr_compare_networks(validaton_results, cutoff, output_file: Path):
     # group 0 is FunMap, group 1 is HI, group 2 is ProHD, group 3 is STRING,
     # group 4 is BioGRID, group 5 is BioPlex
     # the length of gro
-    color_group = [0] * len(validaton_results) + [1] * 2 + [2] * 1 + [3] * 1 + [4] * 1 + [5] * 1
+    color_group = [0] + [1] * 2 + [2] * 1 + [3] * 1 + [4] * 1 + [5] * 1
+    # color_group = [0] * len(validaton_results) + [1] * 2 + [2] * 1 + [3] * 1 + [4] * 1 + [5] * 1
     scatter = ax.scatter(x, y, c=color_group, cmap=mycmap,
                         s=e/1000)
     ax.set_ylim(2, 6)
@@ -601,7 +603,6 @@ def plot_llr_compare_networks(validaton_results, cutoff, output_file: Path):
         leg.legendHandles[i].set_color('gray')
 
     ax.xaxis.set_major_formatter(edge_number)
-    print(z)
     for i, txt in enumerate(z):
         if txt == 'STRING':
             ax.annotate(txt, (x[i]-500, y[i]+0.18), color='gray', fontsize=10)
@@ -689,7 +690,8 @@ def plot_overlap_venn(network_name, overlap, node_or_edge, color, output_dir):
     return file_name
 
 
-def plot_network_stats(network_info, feature_type, output_dir):
+# def plot_network_stats(network_info, feature_type, output_dir):
+def plot_network_stats(network_info, output_dir):
     """
     Plot the network statistics for a list of networks.
 
@@ -732,16 +734,16 @@ def plot_network_stats(network_info, feature_type, output_dir):
         density[n] = cur_density
         largest_cc = max(nx.connected_components(cur_network), key=len)
         cur_cc = cur_network.subgraph(largest_cc).copy()
-        print(n)
         cur_average_shortest_path = nx.average_shortest_path_length(cur_cc)
         average_shortest_path[n] = cur_average_shortest_path
-        print(cur_average_shortest_path)
         cur_degrees = [val for (_, val) in cur_network.degree()]
         if n == 'FunMap': # only fit for FunMap
-            fit = powerlaw.Fit(cur_degrees, discrete=True, xmax=250, estimate_discrete=False)
-            powerlaw.plot_pdf(cur_degrees, linear_bins=True, linestyle='None', marker='o',
-                        markerfacecolor='None', color='#de2d26',
-                        linewidth=3, ax=ax[0])
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                fit = powerlaw.Fit(cur_degrees, discrete=True, xmax=250, estimate_discrete=False)
+                powerlaw.plot_pdf(cur_degrees, linear_bins=True, linestyle='None', marker='o',
+                            markerfacecolor='None', color='#de2d26',
+                            linewidth=3, ax=ax[0])
             # not plotting the power law fit
             # fit.power_law.plot_pdf(linestyle='--',color='black', ax=ax[0])
 
@@ -774,7 +776,6 @@ def plot_network_stats(network_info, feature_type, output_dir):
         cur_network = nx.from_pandas_edgelist(network_el, source=0, target=1)
         cur_cc = nx.average_clustering(cur_network)
         avg_cc[n] = cur_cc
-        print(n, cur_cc)
 
     network_list = network_info['name'].tolist()
     ax[1].bar(network_list, [avg_cc[i] for i in network_list], width=0.5, align='center',
@@ -821,8 +822,10 @@ def plot_network_stats(network_info, feature_type, output_dir):
     ax[3].yaxis.grid(color = 'gainsboro', linestyle = 'dotted')
     ax[3].set_axisbelow(True)
 
-    fig.suptitle(f'Network properties of Funmap ({feature_type})', fontsize=16)
-    file_name = f'Funmap_{feature_type}_network_properties.pdf'
+    # fig.suptitle(f'Network properties of Funmap ({feature_type})', fontsize=16)
+    # file_name = f'Funmap_{feature_type}_network_properties.pdf'
+    fig.suptitle(f'Network properties of Funmap', fontsize=16)
+    file_name = f'Funmap_network_properties.pdf'
     fig.savefig(output_dir / file_name, bbox_inches='tight')
     plt.close(fig)
     return file_name

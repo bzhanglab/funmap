@@ -4,10 +4,10 @@ import numpy as np
 import gzip
 import pickle
 from pathlib import Path
-from funmap.funmap import validation_llr, predict_all_pairs, dataset_llr, predict_all_pairs
+from funmap.funmap import compute_llr, predict_all_pairs, dataset_llr, predict_all_pairs
 from funmap.plotting import explore_data, plot_results, merge_and_delete
 from funmap.funmap import  train_ml_model, prepare_gs_data, cutoff_prob, get_ppi_feature
-from funmap.funmap import get_funmap, compute_features, predict_network
+from funmap.funmap import compute_features, predict_network
 from funmap.data_urls import misc_urls as urls
 from funmap.logger import setup_logging, setup_logger
 from funmap.utils import setup_experiment, cleanup_experiment, check_gold_standard_file
@@ -100,9 +100,9 @@ def run(config_file, force_rerun):
     # filter_blacklist = cfg['filter_blacklist']
     n_jobs = cfg['n_jobs']
     lr_cutoff = cfg['lr_cutoff']
-    # max_num_edges = cfg['max_num_edges']
-    # step_size = cfg['step_size']
-    # start_edge_num = cfg['start_edge_num']
+    max_num_edges = cfg['max_num_edges']
+    step_size = cfg['step_size']
+    start_edge_num = cfg['start_edge_num']
 
     results_dir = Path(cfg['results_dir'])
     saved_data_dir = results_dir / cfg['subdirs']['saved_data_dir']
@@ -117,7 +117,7 @@ def run(config_file, force_rerun):
     # blacklist_file = urls['funmap_blacklist']
 
     llr_res_file = results_dir / f'llr_results.tsv'
-    edge_list_file = network_dir/ f'network.tsv'
+    edge_list_file = network_dir/ f'funmap.tsv'
     # llr obtained with each invividual dataset
     llr_dataset_file = results_dir / 'llr_dataset.tsv'
     gs_train = gs_test = None
@@ -167,15 +167,15 @@ def run(config_file, force_rerun):
             else:
                 ppi_feature = None
             args = {
-                'ml_model': ml_model,
-                'all_valid_ids': all_valid_ids,
+                'model': ml_model,
+                'all_ids': all_valid_ids,
                 'feature_type': feature_type,
                 'ppi_feature': ppi_feature,
                 'cc_dict': cc_dict,
                 'mr_dict': mr_dict,
                 'extra_feature_file': extra_feature_file,
                 'prediction_dir': prediction_dir,
-                'predicted_all_pairs_file': predicted_all_pairs_file,
+                'output_file': predicted_all_pairs_file,
                 'n_jobs': n_jobs
             }
             predict_all_pairs(**args)
@@ -188,41 +188,43 @@ def run(config_file, force_rerun):
         predict_network(predicted_all_pairs_file, cutoff_p, edge_list_file)
         log.info('Predicting network ... done')
 
-
     # check to see if all files in the llr_res_files list exist
-    # llr_res_exist = llr_res_file.exists()
-    # edge_list_file_exist = edge_list_file.exists()
+    llr_res_exist = llr_res_file.exists()
+    edge_list_file_exist = edge_list_file.exists()
 
-    # if llr_res_exist and edge_list_file_exist:
-    #     log.info('validation results already exist.')
-    #     validation_res = {
-    #         'llr_res_file': llr_res_file,
-    #         'edge_list_file': edge_list_file
-    #     }
-    # else:
-    #     log.info('Computing LLR with trained model ...')
-    #     validation_res = validation_llr(all_feature_df, predicted_all_pairs,
-    #                 filter_after_prediction, filter_criterion, filter_threshold,
-    #                 filter_blacklist, blacklist_file,
-    #                 max_num_edges, step_size, gs_test_pos_set,
-    #                 gs_test_neg_set, results_dir, network_dir)
-    #     log.info('Done.')
+    if gs_test is None:
+        with pd.HDFStore(gs_df_file, mode='r') as store:
+                gs_train = store['train']
+                gs_test = store['test']
 
-    # if not llr_dataset_file.exists():
-    #     log.info('Computing LLR for each dataset ...')
-    #     step_size = int(start_edge_num / 10)
-    #     llr_ds = dataset_llr(all_feature_df, gs_test_pos_set, gs_test_neg_set,
-    #         start_edge_num, step_size, max_num_edges,  llr_dataset_file)
-    #     log.info('Done.')
-    # else:
-    #     llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
+    if llr_res_exist and edge_list_file_exist:
+        log.info('LLR results already exist.')
+        # llr_res = pd.read_csv(llr_res_file, sep='\t')
+    else:
+        log.info('Computing LLR  ...')
+        predicted_all_pairs = pd.read_parquet(predicted_all_pairs_file)
+        # also save the llr results to file
+        compute_llr(predicted_all_pairs, llr_res_file, start_edge_num, max_num_edges, step_size, gs_test)
+        log.info('Computing LLR  ... done')
 
-    # get_funmap(validation_res, cfg, network_dir)
-    # all_fig_names = []
-    # fig_names = plot_results(cfg, validation_res, llr_ds, gs_train, figure_dir)
-    # all_fig_names.extend(fig_names)
+    if not llr_dataset_file.exists():
+        log.info('Computing LLR for each dataset ...')
+        feature_dict = cc_dict if feature_type == 'cc' else mr_dict
+        llr_ds = dataset_llr(all_valid_ids, feature_dict, feature_type, gs_test, start_edge_num, max_num_edges, step_size,
+                            llr_dataset_file)
+        log.info('Done.')
+    else:
+        llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
 
-    # merge_and_delete(figure_dir, all_fig_names, 'results.pdf')
+    all_fig_names = []
+    llr_res_dict = {
+        'llr_res_path': llr_res_file,
+        'edge_list_path': edge_list_file
+    }
+    fig_names = plot_results(cfg, llr_res_dict, llr_ds, gs_train, figure_dir)
+    all_fig_names.extend(fig_names)
+
+    merge_and_delete(figure_dir, all_fig_names, 'results.pdf')
 
 
 if __name__ == '__main__':
