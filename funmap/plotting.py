@@ -243,7 +243,7 @@ def plot_results(cfg: dict, validation_results: dict,
     fig_names.append(file_name)
 
     if 'rp_pairs' in cfg:
-        file_names = plot_pair_llr(gs_train, output_dir=figure_dir, rp_pairs=cfg['rp_pairs'])
+        file_names = plot_pair_llr(gs_train, cfg['feature_type'], output_dir=figure_dir, rp_pairs=cfg['rp_pairs'])
         fig_names.extend(file_names)
 
     # note that the cutoff is for LR, not LLR (log of LR)
@@ -429,27 +429,8 @@ def plot_2d_llr(ax, feature_df, feature_type, pair_name, rna_feature, pro_featur
     return fig
 
 
-def plot_pair_llr(feature_df: pd.DataFrame, output_dir: Path, rp_pairs: List[Dict[str, str]]):
-    """
-    Plot the heatmap of LLR for each pair of RNA and protein.
-
-    Parameters
-    ----------
-    feature_df : pd.DataFrame
-        The input data frame that contains the features.
-    output_dir : Path
-        The output directory where the plots will be saved.
-    rp_pairs : List[Dict[str, str]]
-        A list of dictionaries that contain information about each RNA-protein pair, including the name and the RNA/protein features.
-
-    Returns
-    -------
-    A list of file names of the plots.
-
-    """
+def plot_pair_llr(feature_df, feature_type, output_dir, rp_pairs):
     n_bins = 20
-    # feature_type = ['CC', 'MR']
-    feature_type = ['MR']
     file_names = []
     # plot for each rna-protein pair using CC or MR as feature
     for rp_pair in rp_pairs:
