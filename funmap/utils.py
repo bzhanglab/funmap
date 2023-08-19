@@ -1,17 +1,37 @@
-import numpy as np
 import csv
 import yaml
 import os
 import tarfile
-import json
+import re
 from pathlib import Path
-from typing import Dict, Any, Tuple
 import pandas as pd
 import shutil
 from funmap.data_urls import misc_urls as urls
 from funmap.logger import setup_logger
 
 log = setup_logger(__name__)
+
+def check_gs_files_exist(file_dict, key='CC'):
+    if key.upper() == 'CC':
+        paths = file_dict.get('CC')
+        if paths is not None and os.path.exists(paths):
+            return True
+    elif key.upper() == 'MR':
+        paths = file_dict.get('MR')
+        if paths is not None and all(os.path.exists(p) for p in paths):
+            return True
+    else:
+        log.error(f"'{key}' is not a valid feature type (cc or mr).")
+
+    return False
+
+
+def normalize_filename(filename):
+    # Remove any characters that are not allowed in filenames
+    cleaned_filename = re.sub(r'[^\w\s.-]', '', filename)
+    # Replace spaces with underscores
+    cleaned_filename = cleaned_filename.replace(' ', '_')
+    return cleaned_filename
 
 def gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id'):
     """
@@ -275,6 +295,7 @@ def setup_experiment(config_file):
 
 def get_config(cfg_file: Path):
     cfg = {
+        'task': 'protein_func',
         'results_dir': 'results',
         # the following directories are relative to the results_dir
         'subdirs': {
@@ -286,7 +307,6 @@ def get_config(cfg_file: Path):
         },
         'seed': 42,
         'feature_type': 'cc',
-        'use_ppi_feature': False,
         'test_size': 0.2,
         'ml_type': 'xgboost',
         'gs_file': None,
@@ -310,14 +330,16 @@ def get_config(cfg_file: Path):
         cfg_dict = yaml.load(fh, Loader=yaml.FullLoader)
 
     # use can change the following parameters in the config file
+    if 'task' in cfg_dict:
+        cfg['task'] = cfg_dict['task']
+        assert cfg['task'] in ['protein_func', 'kinase_func']
+
     if 'seed' in cfg_dict:
         cfg['seed'] = cfg_dict['seed']
 
     if 'feature_type' in cfg_dict:
         cfg['feature_type'] = cfg_dict['feature_type']
-
-    if 'use_ppi_feature' in cfg_dict:
-        cfg['use_ppi_feature'] = cfg_dict['use_ppi_feature']
+        assert cfg['feature_type'] in ['cc', 'mr']
 
     if 'extra_feature_file' in cfg_dict:
         cfg['extra_feature_file'] = cfg_dict['extra_feature_file']
@@ -353,8 +375,13 @@ def get_config(cfg_file: Path):
     else:
         raise ValueError('data_path not specified in config file')
 
-    if 'filter_noncoding_gene' in cfg_dict:
-        cfg['filter_noncoding_genes'] = cfg_dict['filter_noncoding_genes']
+    if cfg['task'] == 'protein_func':
+        if 'filter_noncoding_gene' in cfg_dict:
+            cfg['filter_noncoding_genes'] = cfg_dict['filter_noncoding_genes']
+    else:
+        # ignore filter_noncoding_genes for kinase_func
+        cfg['filter_noncoding_genes'] = False
+        log.info('ignoring filter_noncoding_genes for kinase_func')
 
     if 'results_dir' in cfg_dict:
         cfg['results_dir'] = cfg_dict['results_dir'] + '/' + cfg_dict['name']

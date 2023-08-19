@@ -1,6 +1,6 @@
 import os
 import glob
-import re
+import math
 import h5py
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -8,9 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from tqdm import tqdm
 from sklearn.utils import resample
 import itertools
-import warnings
 from typing import List
-import gzip, pickle
 from pathlib import Path
 from collections import defaultdict, Counter
 import pandas as pd
@@ -274,12 +272,14 @@ def extract_features(df, feature_type, cc_dict,  ppi_feature=None, extra_feature
         for ppi_source, ppi_tuples in ppi_dict.items():
             feature_df[ppi_source] = df.apply(
                 lambda row: 1 if (row['P1'], row['P2']) in ppi_tuples else 0, axis=1)
-        if 'label' in feature_df.columns:
-            feature_df = feature_df[[col for col in feature_df.columns if col != 'label'] + ['label']]
 
     # TODO: add extra features if provided
     if extra_feature is not None:
         pass
+
+    # move 'label' column to the end of the dataframe if it exists
+    if 'label' in feature_df.columns:
+        feature_df = feature_df[[col for col in feature_df.columns if col != 'label'] + ['label']]
 
     return feature_df
 
@@ -313,80 +313,43 @@ def get_ppi_feature():
     return ppi_features
 
 
-def train_ml_model(data_df, ml_type, seed, n_jobs):
-    """
-    Train a machine learning model.
-
-    Parameters
-    ----------
-    data_df : pd.DataFrame
-        Dataframe containing the input features and target variable.
-    ml_type : str
-        Type of machine learning model to use. Currently only 'xgboost' is supported.
-    seed : int
-        Seed for the random number generator for reproducibility.
-    n_jobs : int
-        Number of parallel jobs to run.
-
-    Returns
-    -------
-    models: dict
-        A dictionary of trained models, where the keys are the target
-        variables and the values are the
-
-    """
+def train_ml_model(data_df, ml_type, seed, n_jobs, feature_mapping):
     assert ml_type == 'xgboost', 'ML model must be xgboost'
-    log.info(f'Training model with {n_jobs} jobs ...')
-    models = train_model(data_df.iloc[:, :-1], data_df.iloc[:, -1], seed, n_jobs)
-    log.info('Training model ... done')
+    models = train_model(data_df.iloc[:, :-1], data_df.iloc[:, -1], seed, n_jobs, feature_mapping)
 
     return models
 
 
-def train_model(X, y, seed, n_jobs):
-    """
-    Train a XGBoost model using the input feature matrix X and target vector y.
-    The model is trained using GridSearchCV with a specified set of parameters,
-    and a 5-fold stratified cross validation.
-
-    Parameters
-    -----------
-    X : pd.DataFrame
-        The feature matrix
-    y : pd.Series
-        The target vector
-    seed : int
-        The random seed used for reproducibility
-    n_jobs : int
-        The number of CPU cores used for parallel computation
-
-    Returns
-    --------
-    models: dict
-        A dictionary of trained models, where the keys are the feature types
-        and the values are the trained models.
-    """
+def train_model(X, y, seed, n_jobs, feature_mapping):
     model_params = {
         'n_estimators': [50, 150, 250, 300],
         'max_depth': [2, 3, 4, 5, 6],
         'learning_rate': [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
     }
 
-    # use only mutual rank
-    xgb_model = xgb.XGBClassifier(random_state=seed,
-                            eval_metric='logloss', n_jobs=n_jobs)
-    cv = StratifiedKFold(n_splits=5, random_state=seed, shuffle=True)
-    clf = GridSearchCV(xgb_model, model_params, scoring='roc_auc', cv=cv,
-                    n_jobs=1, verbose=2)
-    model = clf.fit(X, y)
+    models = {}
+    for ft in feature_mapping:
+        # use only mutual rank
+        log.info(f'Training model for {ft} ...')
+        xgb_model = xgb.XGBClassifier(random_state=seed,
+                                eval_metric='logloss', n_jobs=n_jobs)
+        cv = StratifiedKFold(n_splits=5, random_state=seed, shuffle=True)
+        clf = GridSearchCV(xgb_model, model_params, scoring='roc_auc', cv=cv,
+                        n_jobs=1, verbose=2)
+        if ft == 'ex':
+            # exclude ppi features
+            Xtrain = X.loc[:, ~X.columns.str.endswith('_PPI')]
+        else:
+            Xtrain = X
+        model = clf.fit(Xtrain, y)
+        models[ft] = model
+        log.info(f'Training model for {ft} ... done')
 
-    return model
+    return models
 
 
 def compute_llr(predicted_all_pairs, llr_res_file, start_edge_num, max_num_edges, step_size,
                 gs_test):
-    # final results
-    log.info(f'Calculating llr_res_dict ...')
     # make sure max_num_edges is smaller than the number of non-NA values
     assert max_num_edges < np.count_nonzero(~np.isnan(predicted_all_pairs.iloc[:, -1].values)), \
         f'max_num_edges should be smaller than the number of non-NA values'
@@ -400,7 +363,8 @@ def compute_llr(predicted_all_pairs, llr_res_file, start_edge_num, max_num_edges
     result_dict = defaultdict(list)
     # llr_res_dict only save maximum of max_steps data points for downstream
     # analysis / plotting
-    for k in tqdm(range(start_edge_num, max_num_edges+step_size, step_size)):
+    total = math.ceil((max_num_edges - start_edge_num) / step_size) + 1
+    for k in tqdm(range(start_edge_num, max_num_edges+step_size, step_size), total=total, ascii=' >='):
         selected_edges = set(cur_results.iloc[:k, :][['P1', 'P2']].apply(lambda row: tuple(sorted({row['P1'], row['P2']})), axis=1))
         all_nodes = set(itertools.chain.from_iterable(selected_edges))
         common_pos_edges = selected_edges & gs_test_pos_set
@@ -419,16 +383,15 @@ def compute_llr(predicted_all_pairs, llr_res_file, start_edge_num, max_num_edges
     if llr_res_file is not None:
         llr_res.to_csv(llr_res_file, sep='\t', index=False)
 
-    print(f'Calculating llr_res_dict ... done')
     return llr_res
 
 
 def prepare_gs_data(**kwargs):
+    task = kwargs['task']
     cc_dict = kwargs['cc_dict']
     mr_dict = kwargs['mr_dict']
     gs_file = kwargs['gs_file']
     feature_type = kwargs['feature_type']
-    use_ppi_feature = kwargs['use_ppi_feature']
     extra_feature_file = kwargs['extra_feature_file']
     valid_id_list = kwargs['valid_id_list']
     test_size = kwargs['test_size']
@@ -446,11 +409,10 @@ def prepare_gs_data(**kwargs):
     gs_train, gs_test = train_test_split(gs_df_balanced,
             test_size=test_size, random_state=seed,
             stratify=gs_df_balanced.iloc[:, -1])
-
-    ppi_feature = None
-    if use_ppi_feature:
+    if task == 'protein_func':
         ppi_feature = get_ppi_feature()
-
+    else:
+        ppi_feature = None
     gs_train_df = extract_features(gs_train, feature_type, cc_dict, ppi_feature,
                                     extra_feature_file, mr_dict)
     gs_test_df =  extract_features(gs_test, feature_type, cc_dict, ppi_feature,
@@ -465,7 +427,7 @@ def prepare_gs_data(**kwargs):
 
 
 def extract_dataset_feature(all_pairs, feature_file, feature_type='cc'):
-    # convert all_pairrs to a dataframe
+    # convert all_pairs to a dataframe
     df = pd.DataFrame(all_pairs, columns=['P1', 'P2'])
     with h5py.File(feature_file, 'r') as h5_file:
         gene_ids = h5_file['ids'][:]
@@ -484,6 +446,7 @@ def extract_dataset_feature(all_pairs, feature_file, feature_type='cc'):
 
         f_values[valid_indices] = f_dataset[:][linear_indices]
         f_values[~valid_indices] = np.nan
+        # extracted feature is the 'prediction' column
         df['prediction'] = f_values
 
     return df
@@ -492,60 +455,91 @@ def extract_dataset_feature(all_pairs, feature_file, feature_type='cc'):
 def dataset_llr(all_ids, feature_dict, feature_type, gs_test, start_edge_num,
                 max_num_edge, step_size, llr_dataset_file):
     llr_ds = pd.DataFrame()
-    all_ids = sorted(all_ids)
-    all_pairs = list(itertools.combinations(all_ids, 2))
+    all_ids_sorted = sorted(all_ids)
+    all_pairs = list(itertools.combinations(all_ids_sorted, 2))
+    all_ds_pred = None
+
     for dataset in feature_dict:
         log.info(f'Calculating llr for {dataset} ...')
         feature_file = feature_dict[dataset]
         predicted_all_pairs = extract_dataset_feature(all_pairs, feature_file, feature_type)
+        if all_ds_pred is None:
+            all_ds_pred = predicted_all_pairs['prediction'].values
+        else:
+            all_ds_pred = np.vstack((all_ds_pred, predicted_all_pairs['prediction'].values))
+
         cur_llr_res = compute_llr(predicted_all_pairs, None, start_edge_num,
-                            max_num_edge, step_size, gs_test)
+                                max_num_edge, step_size, gs_test)
         cur_llr_res['dataset'] = dataset
         llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
         llr_ds.to_csv(llr_dataset_file, sep='\t', index=False)
         log.info(f'Calculating llr for {dataset} ... done')
 
+    # calculate llr for all datasets based on the average prediction
+    log.info(f'Calculating llr for all datasets average ...')
+    all_ds_pred_df = pd.DataFrame(all_pairs, columns=['P1', 'P2'])
+    all_ds_pred_avg = np.nanmean(all_ds_pred, axis=0)
+    all_ds_pred_df['prediction'] = all_ds_pred_avg
+    cur_llr_res = compute_llr(all_ds_pred_df, None, start_edge_num, max_num_edge, step_size, gs_test)
+    cur_llr_res['dataset'] = 'all_average'
+    llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
+    log.info(f'Calculating llr for all datasets average ... done')
     llr_ds.to_csv(llr_dataset_file, sep='\t', index=False)
 
     return llr_ds
 
 
-def cutoff_prob(model, gs_test, lr_cutoff):
-    # the first 2 cols are the ids, the last col is the label
-    prob = model.predict_proba(gs_test.iloc[:, 2:-1])
-    prob = prob[:, 1]
-    pred_df = pd.DataFrame(prob, columns=['prob'])
-    pred_df = pd.concat([pred_df, gs_test.iloc[:, -1]], axis=1)
-    pred_df = pred_df.sort_values(by='prob', ascending=False)
+def get_cutoff(model_dict, gs_test, lr_cutoff):
+    cutoff_p_dict = {}
+    cutoff_llr_dict = {}
+    for ft in model_dict:
+        log.info(f'Calculating cutoff prob for {ft} ...')
+        model = model_dict[ft]
+        if ft == 'ex':
+            gs_test_df = gs_test.loc[:, ~gs_test.columns.str.endswith('_PPI')]
+        else:
+            gs_test_df = gs_test
+        prob = model.predict_proba(gs_test_df.iloc[:, 2:-1])
+        prob = prob[:, 1]
+        pred_df = pd.DataFrame(prob, columns=['prob'])
+        pred_df = pd.concat([pred_df, gs_test_df.iloc[:, -1]], axis=1)
+        pred_df = pred_df.sort_values(by='prob', ascending=False)
 
-    P = pred_df['label'].sum()
-    N = len(pred_df) - P
-    cumulative_pp = np.cumsum(pred_df['label'])
-    cumulative_pn = np.arange(len(pred_df)) + 1 - cumulative_pp
-    llr_values = np.log((cumulative_pp / cumulative_pn) / (P / N))
-    pred_df['llr'] = llr_values
+        P = pred_df['label'].sum()
+        N = len(pred_df) - P
+        cumulative_pp = np.cumsum(pred_df['label'])
+        cumulative_pn = np.arange(len(pred_df)) + 1 - cumulative_pp
+        llr_values = np.log((cumulative_pp / cumulative_pn) / (P / N))
+        pred_df['llr'] = llr_values
 
-    # find the first prob that has llr >= lr_cutoff
-    cutoff = np.log(lr_cutoff)
-    for _, row in pred_df[::-1].iterrows():
-        if not np.isinf(row['llr']) and row['llr'] >= cutoff:
-            cutoff_prob = row['prob']
-            break
+        # find the first prob that has llr >= lr_cutoff
+        cutoff = np.log(lr_cutoff)
+        for _, row in pred_df[::-1].iterrows():
+            if not np.isinf(row['llr']) and row['llr'] >= cutoff:
+                cutoff_prob = row['prob']
+                cutoff_llr = row['llr']
+                break
 
-    return cutoff_prob
+        cutoff_p_dict[ft] = cutoff_prob
+        cutoff_llr_dict[ft] = cutoff_llr
+
+    return cutoff_p_dict, cutoff_llr_dict
 
 
 def predict_network(predict_results_file, cutoff_p, output_file):
-    predicted_df = pd.read_parquet(predict_results_file)
-    filtered_df = predicted_df[predicted_df['prediction'] > cutoff_p]
-    filtered_df[['P1', 'P2']].to_csv(output_file, sep='\t', index=False)
-    num_edges = len(filtered_df)
-    num_nodes = len(set(filtered_df['P1']) | set(filtered_df['P2']))
-    log.info(f'Number of edges: {num_edges}')
-    log.info(f'Number of nodes: {num_nodes}')
+    for ft in predict_results_file:
+        log.info(f'Predicting network for {ft} ...')
+        predicted_df = pd.read_parquet(predict_results_file[ft])
+        filtered_df = predicted_df[predicted_df['prediction'] > cutoff_p[ft]]
+        filtered_df[['P1', 'P2']].to_csv(output_file[ft], sep='\t', index=False, header=None)
+        num_edges = len(filtered_df)
+        num_nodes = len(set(filtered_df['P1']) | set(filtered_df['P2']))
+        log.info(f'Number of edges: {num_edges}')
+        log.info(f'Number of nodes: {num_nodes}')
+        log.info(f'Predicting network for {ft} ... done')
 
 
-def predict_all_pairs(model, all_ids, feature_type, ppi_feature, cc_dict,
+def predict_all_pairs(model_dict, all_ids, feature_type, ppi_feature, cc_dict,
                     mr_dict, extra_feature_file, prediction_dir,
                     output_file, n_jobs=1):
     chunk_size = 1000000
@@ -554,33 +548,44 @@ def predict_all_pairs(model, all_ids, feature_type, ppi_feature, cc_dict,
     all_pairs = list(itertools.combinations(all_ids, 2))
     log.info('Genearating all pairs ... done')
     log.info(f'Number of valid ids {format(len(all_ids), ",")}')
-    log.info(f'Predicting all {format(len(all_pairs), ",")} pairs ...')
-
-    def process_and_save_chunk(start_idx, chunk_id):
-        chunk = all_pairs[start_idx:start_idx + chunk_size]
-        chunk_df = pd.DataFrame(chunk, columns=['P1', 'P2'])
-        feature_df = extract_features(chunk_df, feature_type, cc_dict, ppi_feature,
-                                    extra_feature_file, mr_dict)
-        predictions = model.predict_proba(feature_df)
-        prediction_df = pd.DataFrame(predictions[:, 1], columns=['prediction'])
-        prediction_df['P1'] = chunk_df['P1']
-        prediction_df['P2'] = chunk_df['P2']
-        prediction_df = prediction_df[['P1', 'P2', 'prediction']]
-        prediction_df['prediction'] = prediction_df['prediction'].astype('float32')
-        table = pa.Table.from_pandas(prediction_df)
-        chunk_id = str(chunk_id).zfill(6)
-        output_file = f'{prediction_dir}/chunk_{chunk_id}.parquet'
-        pq.write_table(table, output_file)
-
-    with ThreadPoolExecutor(max_workers=n_jobs) as executor:
-        for chunk_id, chunk_start in enumerate(range(0, len(all_pairs), chunk_size)):
-            executor.submit(process_and_save_chunk, chunk_start, chunk_id)
-
+    # remove all "chunk_*.parquet" files in prediction_dir if they exist
     pattern = os.path.join(prediction_dir, 'chunk_*.parquet')
     matching_files = glob.glob(pattern)
-    matching_files.sort()
-    pq.write_table(pa.concat_tables([pq.read_table(file) for file in matching_files]), output_file)
     for file in matching_files:
         os.remove(file)
 
-    log.info(f'Predicting all {format(len(all_pairs), ",")} pairs ... done.')
+    for ft in model_dict:
+        log.info(f'Predicting all pairs ({format(len(all_pairs), ",")}) for {ft} ...')
+        model = model_dict[ft]
+        def process_and_save_chunk(start_idx, chunk_id):
+            chunk = all_pairs[start_idx:start_idx + chunk_size]
+            chunk_df = pd.DataFrame(chunk, columns=['P1', 'P2'])
+            if ft == 'ex':
+                cur_ppi_feature = None
+            else:
+                cur_ppi_feature = ppi_feature
+            feature_df = extract_features(chunk_df, feature_type, cc_dict, cur_ppi_feature,
+                                        extra_feature_file, mr_dict)
+            predictions = model.predict_proba(feature_df)
+            prediction_df = pd.DataFrame(predictions[:, 1], columns=['prediction'])
+            prediction_df['P1'] = chunk_df['P1']
+            prediction_df['P2'] = chunk_df['P2']
+            prediction_df = prediction_df[['P1', 'P2', 'prediction']]
+            prediction_df['prediction'] = prediction_df['prediction'].astype('float32')
+            table = pa.Table.from_pandas(prediction_df)
+            chunk_id = str(chunk_id).zfill(6)
+            output_file = f'{prediction_dir}/chunk_{chunk_id}.parquet'
+            pq.write_table(table, output_file)
+
+        with ThreadPoolExecutor(max_workers=n_jobs) as executor:
+            for chunk_id, chunk_start in enumerate(range(0, len(all_pairs), chunk_size)):
+                executor.submit(process_and_save_chunk, chunk_start, chunk_id)
+
+        pattern = os.path.join(prediction_dir, 'chunk_*.parquet')
+        matching_files = glob.glob(pattern)
+        matching_files.sort()
+        pq.write_table(pa.concat_tables([pq.read_table(file) for file in matching_files]), output_file[ft])
+        for file in matching_files:
+            os.remove(file)
+
+        log.info(f'Predicting all {format(len(all_pairs), ",")} pairs for {ft} done.')
