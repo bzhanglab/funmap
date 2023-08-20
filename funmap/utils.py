@@ -3,6 +3,9 @@ import yaml
 import os
 import tarfile
 import re
+import hashlib
+import urllib
+from urllib.parse import urlparse
 from pathlib import Path
 import pandas as pd
 import shutil
@@ -10,6 +13,36 @@ from funmap.data_urls import misc_urls as urls
 from funmap.logger import setup_logger
 
 log = setup_logger(__name__)
+
+
+def is_url_scheme(path):
+    parsed = urlparse(path)
+    if parsed.scheme == 'file':
+        return False
+
+    return parsed.scheme != ''
+
+def read_csv_with_md5_check(url, expected_md5=None, local_path='downloaded_file.csv', **kwargs):
+    try:
+        response = urllib.request.urlopen(url)
+        content = response.read()
+
+        if expected_md5:
+            md5_hash = hashlib.md5(content).hexdigest()
+            if md5_hash != expected_md5:
+                log.error('gold standard file: MD5 hash mismatch, file may be corrupted.')
+                raise ValueError("MD5 hash mismatch, file may be corrupted.")
+
+        # Save the content to a local file
+        with open(local_path, 'wb') as f:
+            f.write(content)
+
+        df = pd.read_csv(local_path, **kwargs)
+        os.remove(local_path)
+        return df
+    except Exception as e:
+        return None
+
 
 def check_gs_files_exist(file_dict, key='CC'):
     if key.upper() == 'CC':
@@ -32,53 +65,6 @@ def normalize_filename(filename):
     # Replace spaces with underscores
     cleaned_filename = cleaned_filename.replace(' ', '_')
     return cleaned_filename
-
-def gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id'):
-    """
-    Extract positive and negative edges from a gold standard file.
-
-    Parameters
-    ----------
-    gold_standard_file : str
-        Path to the gold standard file.
-    id_type : str, optional
-        Type of IDs used in the gold standard file. Supported values are 'ensembl_gene_id' (default) and 'uniprot'.
-
-    Returns
-    -------
-    gs_pos_edges : set
-        Set of positive edges.
-    gs_neg_edges : set
-        Set of negative edges.
-
-    Raises
-    ------
-    ValueError
-        If `id_type` is not supported.
-
-    Examples
-    --------
-    >>> gold_standard_file = 'path/to/gold_standard.tsv'
-    >>> gs_pos_edges, gs_neg_edges = gold_standard_edge_sets(gold_standard_file, id_type='ensembl_gene_id')
-    """
-    if id_type == 'ensembl_gene_id':
-        gs_df = pd.read_csv(gold_standard_file, sep='\t')
-        cols = gs_df.columns[0:2]
-        gs_df.index = [tuple(sorted(x)) for x in zip(gs_df.pop(cols[0]), gs_df.pop(cols[1]))]
-        gs_df = gs_df[~gs_df.index.duplicated(keep='first')]
-        gs_pos_edges = set(gs_df.loc[gs_df.iloc[:, 0] == 1, :].index)
-        gs_neg_edges = set(gs_df.loc[gs_df.iloc[:, 0] == 0, :].index)
-    elif id_type == 'uniprot':
-        gs_df = pd.read_csv(gold_standard_file)
-        cols = gs_df.columns[0:2]
-        gs_df.index = [tuple(sorted(x)) for x in zip(gs_df.pop(cols[0]), gs_df.pop(cols[1]))]
-        gs_df = gs_df[~gs_df.index.duplicated(keep='first')]
-        gs_pos_edges = set(gs_df.loc[gs_df.iloc[:, 0] == 'TP', :].index)
-        gs_neg_edges = set(gs_df.loc[gs_df.iloc[:, 0] == 'FP', :].index)
-    else:
-        raise ValueError('id_type not supported')
-
-    return gs_pos_edges, gs_neg_edges
 
 
 def get_data_dict(config, min_sample_count=15):

@@ -17,30 +17,22 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 import xgboost as xgb
-from funmap.utils import get_data_dict
+from funmap.utils import get_data_dict, is_url_scheme, read_csv_with_md5_check
 from funmap.data_urls import network_info, misc_urls as urls
 from funmap.logger import setup_logger
 
 log = setup_logger(__name__)
 
-def get_valid_gs_data(gs_path: str, valid_gene_list: List[str]):
-    """
-    Get valid gene-gene pairs by removing non-valid genes and removing duplicate edges.
-
-    Parameters
-    ----------
-    gs_path : str
-        The path of the gene-gene pair file
-    valid_gene_list : List[str]
-        List of valid genes.
-
-    Returns
-    -------
-    gs_edge_df : pd.DataFrame
-        Dataframe containing valid gene-gene pairs
-    """
+def get_valid_gs_data(gs_path: str, valid_gene_list: List[str], md5=None):
     log.info(f'Loading gold standard feature file "{gs_path}" ...')
-    gs_edge_df = pd.read_csv(gs_path, sep='\t')
+    if is_url_scheme(gs_path):
+        gs_edge_df = read_csv_with_md5_check(gs_path, expected_md5=md5,
+                            local_path='download_gs_file', sep='\t')
+        if gs_edge_df is None:
+            raise ValueError('Failed to download gold standard file')
+    else:
+        gs_edge_df = pd.read_csv(gs_path, sep='\t')
+
     log.info('Done loading gold standard feature file')
     gs_edge_df = gs_edge_df.rename(columns={gs_edge_df.columns[0]: 'P1',
                                             gs_edge_df.columns[1]: 'P2'})
@@ -399,11 +391,12 @@ def prepare_gs_data(**kwargs):
 
     if gs_file is None:
         gs_file = urls['reactome_gold_standard']
+        gs_file_md5 = urls['reactome_gold_standard_md5']
 
     # TODO:  use user provided gs_file if it is not None
 
     log.info('Preparing gold standard data')
-    gs_df = get_valid_gs_data(gs_file, valid_id_list)
+    gs_df = get_valid_gs_data(gs_file, valid_id_list, md5=gs_file_md5)
     gs_df_balanced = balance_classes(gs_df, random_state=seed)
     del gs_df
     gs_train, gs_test = train_test_split(gs_df_balanced,
@@ -514,11 +507,15 @@ def get_cutoff(model_dict, gs_test, lr_cutoff):
 
         # find the first prob that has llr >= lr_cutoff
         cutoff = np.log(lr_cutoff)
+        cutoff_prob = None
         for _, row in pred_df[::-1].iterrows():
             if not np.isinf(row['llr']) and row['llr'] >= cutoff:
                 cutoff_prob = row['prob']
                 cutoff_llr = row['llr']
                 break
+
+        if cutoff_prob is None:
+            log.error(f'Cannot find cutoff prob for {ft}, try to lower lr_cutoff')
 
         cutoff_p_dict[ft] = cutoff_prob
         cutoff_llr_dict[ft] = cutoff_llr
