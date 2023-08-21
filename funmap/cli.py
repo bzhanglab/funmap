@@ -178,12 +178,8 @@ def run(config_file, force_rerun):
             with pd.HDFStore(gs_df_file, mode='w') as store:
                 store.put('train', gs_train)
                 store.put('test', gs_test)
-            ml_model_dict = train_ml_model(gs_train, ml_type, seed, n_jobs, feature_mapping)
-            for feature in ml_model_dict:
-                ml_model = ml_model_dict[feature]
-                ml_model_file = model_dir / f'model_{feature}.pkl.gz'
-                with gzip.open(ml_model_file, 'wb') as fh:
-                    pickle.dump(ml_model, fh)
+            ml_model_dict = train_ml_model(gs_train, ml_type, seed, n_jobs, feature_mapping,
+                                        model_dir)
 
         all_predicted_all_pairs_exist = all(os.path.exists(file_path) for file_path in
                                             predicted_all_pairs_file.values())

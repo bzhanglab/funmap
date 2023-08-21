@@ -2,6 +2,8 @@ import os
 import glob
 import math
 import h5py
+import gzip
+import pickle
 import pyarrow as pa
 import pyarrow.parquet as pq
 from concurrent.futures import ThreadPoolExecutor
@@ -305,14 +307,15 @@ def get_ppi_feature():
     return ppi_features
 
 
-def train_ml_model(data_df, ml_type, seed, n_jobs, feature_mapping):
+def train_ml_model(data_df, ml_type, seed, n_jobs, feature_mapping, model_dir):
     assert ml_type == 'xgboost', 'ML model must be xgboost'
-    models = train_model(data_df.iloc[:, :-1], data_df.iloc[:, -1], seed, n_jobs, feature_mapping)
+    models = train_model(data_df.iloc[:, :-1], data_df.iloc[:, -1], seed, n_jobs, feature_mapping,
+                        model_dir)
 
     return models
 
 
-def train_model(X, y, seed, n_jobs, feature_mapping):
+def train_model(X, y, seed, n_jobs, feature_mapping, model_dir):
     model_params = {
         'n_estimators': [50, 150, 250, 300],
         'max_depth': [2, 3, 4, 5, 6],
@@ -335,6 +338,10 @@ def train_model(X, y, seed, n_jobs, feature_mapping):
             Xtrain = X
         model = clf.fit(Xtrain, y)
         models[ft] = model
+        ml_model_file = model_dir / f'model_{ft}.pkl.gz'
+        with gzip.open(ml_model_file, 'wb') as fh:
+            pickle.dump(model, fh)
+
         log.info(f'Training model for {ft} ... done')
 
     return models
