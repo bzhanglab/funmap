@@ -355,21 +355,24 @@ def compute_llr(predicted_all_pairs, llr_res_file, start_edge_num, max_num_edges
 
     cur_col_name = 'prediction'
     cur_results = predicted_all_pairs.nlargest(max_num_edges, cur_col_name)
+    selected_edges_all = cur_results[['P1', 'P2']].apply(lambda row: tuple(sorted({row['P1'], row['P2']})), axis=1)
 
     gs_test_pos_set = set(gs_test[gs_test['label'] == 1][['P1', 'P2']].apply(lambda row: tuple(sorted({row['P1'], row['P2']})), axis=1))
     gs_test_neg_set = set(gs_test[gs_test['label'] == 0][['P1', 'P2']].apply(lambda row: tuple(sorted({row['P1'], row['P2']})), axis=1))
+    n_gs_test_pos_set = len(gs_test_pos_set)
+    n_gs_test_neg_set = len(gs_test_neg_set)
 
     result_dict = defaultdict(list)
     # llr_res_dict only save maximum of max_steps data points for downstream
     # analysis / plotting
     total = math.ceil((max_num_edges - start_edge_num) / step_size) + 1
     for k in tqdm(range(start_edge_num, max_num_edges+step_size, step_size), total=total, ascii=' >='):
-        selected_edges = set(cur_results.iloc[:k, :][['P1', 'P2']].apply(lambda row: tuple(sorted({row['P1'], row['P2']})), axis=1))
+        selected_edges = set(selected_edges_all[:k])
         all_nodes = set(itertools.chain.from_iterable(selected_edges))
         common_pos_edges = selected_edges & gs_test_pos_set
         common_neg_edges = selected_edges & gs_test_neg_set
         try:
-            lr = len(common_pos_edges) / len(common_neg_edges) / (len(gs_test_pos_set) / len(gs_test_neg_set))
+            lr = len(common_pos_edges) / len(common_neg_edges) / (n_gs_test_pos_set / n_gs_test_neg_set)
         except ZeroDivisionError:
             lr = 0
         llr = np.log(lr) if lr > 0 else np.nan
