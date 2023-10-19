@@ -4,9 +4,6 @@
 
 from setuptools import setup, find_packages
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
-
 requirements = [
     'pyyaml>=6.0',
     'xgboost>=1.7.4',
@@ -16,7 +13,7 @@ requirements = [
     'pandas>=1.5.3',
     'joblib>=1.2.0',
     'matplotlib>=3.7.0',
-    'seaborn>=0.12.2',
+    'seaborn==0.11.2',
     'scikit-learn>=1.2.1',
     'imbalanced-learn>=0.10.1',
     'tqdm>=4.64.1',
@@ -43,7 +40,6 @@ setup(
     },
     install_requires=requirements,
     license='MIT license',
-    long_description='\n\n' + history,
     include_package_data=True,
     keywords=['funmap', 'bioinformatics', 'biological-network'],
     name='funmap',
