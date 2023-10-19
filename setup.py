@@ -13,7 +13,7 @@ requirements = [
     'pandas>=1.5.3',
     'joblib>=1.2.0',
     'matplotlib>=3.7.0',
-    'seaborn==0.11.2',
+    'seaborn>=0.12',
     'scikit-learn>=1.2.1',
     'imbalanced-learn>=0.10.1',
     'tqdm>=4.64.1',
