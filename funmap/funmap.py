@@ -524,8 +524,13 @@ def get_cutoff(model_dict, gs_test, lr_cutoff):
                 cutoff_llr = row['llr']
                 break
 
+        # if cutoff_prob is None, it means that the lr_cutoff is too high
+        # and we cannot find a cutoff prob that has llr >= lr_cutoff
+        # in this case, we set cutoff_llr be the largest llr value
         if cutoff_prob is None:
-            log.error(f'Cannot find cutoff prob for {ft}, try to lower lr_cutoff')
+            log.warn(f'Cannot find cutoff prob for {ft}, setting lr_cutoff to the largest llr')
+            cutoff_llr = pred_df['llr'].max()
+            cutoff_prob = pred_df[pred_df['llr'] == cutoff_llr]['prob'].values[0]
 
         cutoff_p_dict[ft] = cutoff_prob
         cutoff_llr_dict[ft] = cutoff_llr
