@@ -211,10 +211,16 @@ def run(config_file, force_rerun):
         log.info(f'cutoff llr: {cutoff_llr}')
         predict_network(predicted_all_pairs_file, cutoff_p, edge_list_file)
 
-    if gs_test is None:
-        with pd.HDFStore(gs_df_file, mode='r') as store:
-                gs_train = store['train']
-                gs_test = store['test']
+    if not gs_df_file.exists():
+        gs_train, gs_test = prepare_gs_data(**gs_args)
+        with pd.HDFStore(gs_df_file, mode='w') as store:
+            store.put('train', gs_train)
+            store.put('test', gs_test)
+    else:
+        if gs_test is None:
+            with pd.HDFStore(gs_df_file, mode='r') as store:
+                    gs_train = store['train']
+                    gs_test = store['test']
 
     all_llr_res_exist = all(os.path.exists(file_path) for file_path in llr_res_file.values())
     all_edge_list_exist = all(os.path.exists(file_path) for file_path in edge_list_file.values())
@@ -279,7 +285,6 @@ def run(config_file, force_rerun):
             }
         gs_train, gs_test = prepare_gs_data(**gs_args)
         gs_dict['CC'] = gs_train
-        pass
 
     fig_names = plot_results(cfg, validation_res, llr_ds, gs_dict, cutoff_llr,
                             figure_dir)

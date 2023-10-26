@@ -189,7 +189,6 @@ def compute_features(cfg, feature_type, min_sample_count, output_dir):
                 # only store the upper triangle part
                 hf.create_dataset('mr',  data=arr_mr[upper_indices])
                 hf.create_dataset('ids', data=data_dict[i].columns.values.astype('S'))
-            mr_dict[i] = mr_file
 
     return cc_dict, mr_dict, all_valid_ids
 
@@ -526,11 +525,9 @@ def get_cutoff(model_dict, gs_test, lr_cutoff):
 
         # if cutoff_prob is None, it means that the lr_cutoff is too high
         # and we cannot find a cutoff prob that has llr >= lr_cutoff
-        # in this case, we set cutoff_llr be the largest llr value
         if cutoff_prob is None:
-            log.warn(f'Cannot find cutoff prob for {ft}, setting lr_cutoff to the largest llr')
-            cutoff_llr = pred_df['llr'].max()
-            cutoff_prob = pred_df[pred_df['llr'] == cutoff_llr]['prob'].values[0]
+            log.error(f'Cannot find cutoff prob for {ft}, lower lr_cutoff and try again')
+            import sys; sys.exit(1)
 
         cutoff_p_dict[ft] = cutoff_prob
         cutoff_llr_dict[ft] = cutoff_llr
