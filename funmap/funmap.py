@@ -540,7 +540,13 @@ def predict_network(predict_results_file, cutoff_p, output_file):
         log.info(f'Predicting network for {ft} ...')
         predicted_df = pd.read_parquet(predict_results_file[ft])
         filtered_df = predicted_df[predicted_df['prediction'] > cutoff_p[ft]]
-        filtered_df[['P1', 'P2']].to_csv(output_file[ft], sep='\t', index=False, header=None)
+        cur_file = output_file[ft]
+        filtered_df[['P1', 'P2']].to_csv(cur_file, sep='\t', index=False, header=None)
+        directory, file_name = os.path.split(cur_file)
+        base_name, extension = os.path.splitext(file_name)
+        new_file_name = f"{base_name}'_with_p'{extension}"
+        new_file = os.path.join(directory, new_file_name)
+        filtered_df.to_csv(new_file, sep='\t', index=False)
         num_edges = len(filtered_df)
         num_nodes = len(set(filtered_df['P1']) | set(filtered_df['P2']))
         log.info(f'Number of edges: {num_edges}')
