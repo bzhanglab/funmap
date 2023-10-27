@@ -544,7 +544,7 @@ def predict_network(predict_results_file, cutoff_p, output_file):
         filtered_df[['P1', 'P2']].to_csv(cur_file, sep='\t', index=False, header=None)
         directory, file_name = os.path.split(cur_file)
         base_name, extension = os.path.splitext(file_name)
-        new_file_name = f"{base_name}'_with_p'{extension}"
+        new_file_name = f'{base_name}_with_p{extension}'
         new_file = os.path.join(directory, new_file_name)
         filtered_df.to_csv(new_file, sep='\t', index=False)
         num_edges = len(filtered_df)

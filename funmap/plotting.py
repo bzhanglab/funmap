@@ -743,7 +743,7 @@ def plot_network_stats(network_info, feature_type, output_dir):
     ax[3].set_axisbelow(True)
 
     fig.suptitle(f'Network properties of Funmap ({feature_type})', fontsize=16)
-    file_name = f'Funmap_{feature_type}_network_properties.pdf'
+    file_name = f'funmap_{feature_type}_network_properties.pdf'
     fig.savefig(output_dir / file_name, bbox_inches='tight')
     plt.close(fig)
     return file_name
