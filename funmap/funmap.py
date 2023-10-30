@@ -325,8 +325,7 @@ def train_model(X, y, seed, n_jobs, feature_mapping, model_dir):
     for ft in feature_mapping:
         # use only mutual rank
         log.info(f'Training model for {ft} ...')
-        xgb_model = xgb.XGBClassifier(random_state=seed,
-                                eval_metric='logloss', n_jobs=n_jobs)
+        xgb_model = xgb.XGBClassifier(random_state=seed, n_jobs=n_jobs)
         cv = StratifiedKFold(n_splits=5, random_state=seed, shuffle=True)
         clf = GridSearchCV(xgb_model, model_params, scoring='roc_auc', cv=cv,
                         n_jobs=1, verbose=2)
