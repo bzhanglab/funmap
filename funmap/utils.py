@@ -402,12 +402,12 @@ def check_gold_standard_file(file_path, min_count=10000):
     """
     try:
         with open(file_path, 'r', newline='') as tsv_file:
-            dialect = csv.Sniffer().sniff(tsv_file.read(1024))
+            dialect = csv.Sniffer().sniff(tsv_file.read(2048))
             if dialect.delimiter != '\t':
                 print("Error: Incorrect TSV format. TSV files should be tab-separated.")
                 return False
-    except csv.Error:
-        print("Error: Unable to read TSV file.")
+    except csv.Error as e:
+        print(f"CSV Error: {e}")
         return False
 
     # Check data format and Class values
