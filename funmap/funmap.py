@@ -316,8 +316,8 @@ def train_ml_model(data_df, ml_type, seed, n_jobs, feature_mapping, model_dir):
 
 def train_model(X, y, seed, n_jobs, feature_mapping, model_dir):
     model_params = {
-        'n_estimators': [50, 150, 250, 300],
-        'max_depth': [2, 3, 4, 5, 6],
+        'n_estimators': [10, 20, 50, 100],
+        'max_depth': [1, 2, 3, 4, 5],
         'learning_rate': [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
     }
 
@@ -391,6 +391,7 @@ def prepare_gs_data(**kwargs):
     cc_dict = kwargs['cc_dict']
     mr_dict = kwargs['mr_dict']
     gs_file = kwargs['gs_file']
+    gs_file_md5 = None
     feature_type = kwargs['feature_type']
     extra_feature_file = kwargs['extra_feature_file']
     valid_id_list = kwargs['valid_id_list']
@@ -400,8 +401,6 @@ def prepare_gs_data(**kwargs):
     if gs_file is None:
         gs_file = urls['reactome_gold_standard']
         gs_file_md5 = urls['reactome_gold_standard_md5']
-
-    # TODO:  use user provided gs_file if it is not None
 
     log.info('Preparing gold standard data')
     gs_df = get_valid_gs_data(gs_file, valid_id_list, md5=gs_file_md5)
