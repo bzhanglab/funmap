@@ -10,8 +10,6 @@ n_chunk: 4
 start_edge_num: 100
 # minimum number of valid data point when computing correlation
 min_sample_count: 15
-# whether to output the edge list or not
-output_edgelist: True
 max_num_edges: 25000
 step_size: 1
 lr_cutoff: 10
