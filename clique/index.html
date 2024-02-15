@@ -144,14 +144,15 @@
             padding-right: 10%;
             padding-left: 10%;
         }
-        #gene_search_error {
-    white-space: normal;
-}
 
-.download_button {
-    margin-left: 25%;
-    width: 50%;
-}
+        #gene_search_error {
+            white-space: normal;
+        }
+
+        .download_button {
+            margin-left: 25%;
+            width: 50%;
+        }
     </style>
 </head>
 
@@ -169,17 +170,21 @@
                 <div class="search_area">
                     <h3 style="text-align: center">Clique ID</h3>
                     <div class="container">
-                        <input style="width: 80%" type="text" class="text" id="clique_id" name="clique_id" value="Clique ID: 160" />
+                        <input style="width: 80%" type="text" class="text" id="clique_id" name="clique_id"
+                            value="Clique ID: 160" />
                         <button style="width: 20%" id="search_button">Search</button>
+                        <p style="color: var(--color-error); text-align: center; font-size: calc(var(--unit)); display: block; flex: 1;"
+                            id="clique_search_error"></p>
                     </div>
                 </div>
                 <div class="search_area">
                     <h3 style="text-align: center">Gene Symbol</h3>
                     <div class="container">
-                        <input style="width: 80%" list="genes" type="text" class="text" id="gene_id" name="gene_id" value="MRPL22" />
+                        <input style="width: 80%" list="genes" type="text" class="text" id="gene_id" name="gene_id"
+                            value="MRPL22" />
                         <datalist id="genes"></datalist>
                         <button style="width: 20%" id="gene_search_button">Search</button>
-                        <p style="color: var(--color-error); text-align: center; font-size: calc(var(--unit)); display: block; flex: 1;" 
+                        <p style="color: var(--color-error); text-align: center; font-size: calc(var(--unit)); display: block; flex: 1;"
                             id="gene_search_error"></p>
                     </div>
                 </div>
@@ -190,7 +195,11 @@
         <div id="result_container" class="centering">
         </div>
         <script>
-            let search_error = document.getElementById("gene_search_error");
+            function isNumeric(n) {
+                return !isNaN(parseInt(n)) && isFinite(n);
+            }
+            let gene_search_error = document.getElementById("gene_search_error");
+            let clique_search_error = document.getElementById("clique_search_error");
             let gene_json = "../data/clique_genes.json";
             let gene_element = "genes";
             let gene_to_clique = "../data/gene_to_clique.json";
@@ -212,22 +221,32 @@
             let search_results = document.getElementById("search_results");
             let clique_button = document.getElementById("search_button");
             clique_button.addEventListener("click", function () {
+                gene_search_error.innerHTML = "";
                 let clique_id = document.getElementById("clique_id").value;
                 clique_id = "C" + clique_id.split("Clique ID: ")[1];
+                if (!clique_id || !isNumeric(clique_id.replace("C", ""))) {
+                    clique_search_error.innerHTML = "Please enter a valid Clique ID between 1 and 281.";
+                    return;
+                }
+                if (parseInt(clique_id.replace("C", "")) > 281 || parseInt(clique_id.replace("C", "")) < 1) {
+                    clique_search_error.innerHTML = "Please enter a valid Clique ID between 1 and 281.";
+                    return;
+                }
                 search_results.innerHTML = "";
-                search_error.innerHTML = "";
+                clique_search_error.innerHTML = "";
                 create_dags([clique_id]);
             });
             let gene_button = document.getElementById("gene_search_button");
             gene_button.addEventListener("click", function () {
+                clique_search_error.innerHTML = "";
                 if (!gene_to_clique) {
-                    search_error.innerHTML = "Gene to clique data not loaded yet. Please try again.";
+                    gene_search_error.innerHTML = "Gene to clique data not loaded yet. Please try again.";
                     return;
                 } else if (!gene_to_clique[document.getElementById("gene_id").value]) {
-                    search_error.innerHTML = "Gene not found in any cliques. Please use the dropdown to select valid genes.";
+                    gene_search_error.innerHTML = "Gene not found in any cliques. Please use the dropdown to select valid genes.";
                     return;
                 }
-                search_error.innerHTML = "";
+                gene_search_error.innerHTML = "";
                 let gene_id = document.getElementById("gene_id").value;
                 let found_cliques = gene_to_clique[gene_id]
                 let clique_form = found_cliques.length > 1 ? "cliques" : "clique";
