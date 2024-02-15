@@ -85,7 +85,9 @@
                 <input type="text" list="genes" class="text" id="clique_id" name="clique_id" value="RBM34" />
                 <datalist id="genes"></datalist>
                 <button id="search_button">Search</button>
+                
             </div>
+            <p style="color: var(--color-error); text-align: center; font-size: calc(var(--unit)); display: block; flex: 1;" id="gene_search_error"></p>
         </div>
         <h4 id="gene_title">Gene: </h4>
         <div class="result">
@@ -119,9 +121,11 @@
         <script>
             let gene_json = "../data/genes.json";
             let gene_element = "genes";
+            let all_gene_data = [];
             fetch(gene_json)
                 .then((res) => res.json())
                 .then((gene_data) => {
+                    all_gene_data = gene_data;
                     let genelist = document.getElementById(gene_element);
                     for (let i = 0; i < gene_data.length; i++) {
                         let option = document.createElement("option");
@@ -197,8 +201,16 @@
             }
             let button = document.getElementById("search_button");
             button.addEventListener("click", function () {
-                let clique_id = document.getElementById("clique_id").value;
-                get_dag(clique_id);
+                let gene_id = document.getElementById("clique_id").value;
+                if (gene_id == "") {
+                    document.getElementById("gene_search_error").innerHTML = "Please enter a gene symbol";
+                    return;
+                } else if (!all_gene_data.includes(gene_id)) {
+                    document.getElementById("gene_search_error").innerHTML = `Gene symbol ${gene_id} not present in FunMap.<br>Please use the dropdown options to filter for genes.`;
+                    return;
+                }
+                document.getElementById("gene_search_error").innerHTML = "";
+                get_dag(gene_id);
             });
             get_dag("RBM34");
             document
