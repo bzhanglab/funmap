@@ -1,0 +1,216 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>FunMap Hierarchical Organization</title>
+    <script src="../assets/js/echarts.min.js"></script>
+    <script src="../assets/js/min/dag.min.js"></script>
+    <script src="../assets/js/min/funmap.min.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="../assets/css/funmap.css" />
+</head>
+
+<body>
+    <div id="outer">
+        <div id="chart" style="width: 100%; height: 100%"></div>
+        <div id="legend-tab-container" class="tab-container">Legend</div>
+        <div id="search-tab-container" class="tab-container">Search</div>
+        <div id="dag-tab-container" class="tab-container" style="display: none">
+            Graph
+        </div>
+        <div id="legend-container" class="side-container">
+            <div id="legend">
+                <!-- Content of the drawer -->
+                <p>
+                    Visualize and interact with the hierarchical structure
+                    of
+                    <a href="https://github.com/bzhanglab/funmap" target="_blank">FunMap</a>.<br /><br />
+                    Click on collapsed nodes to view children. Hover over
+                    nodes to see more information about the module.
+                </p>
+                <h3 style="text-align: center">Legend</h3>
+                <ul style="list-style-type: none; line-height: 1.3">
+                    <li>
+                        <img class="svg" src="../assets/img/diamond.svg" />
+                        Collapsed node
+                    </li>
+                    <li>
+                        <img class="svg" src="../assets/img/circle.svg" />
+                        Expanded node
+                    </li>
+                    <li><b>Fill Color</b> - Signed log10 meta-p value<sup><b style="color: red">*</b></sup></li>
+                    <li><b>Edge Color</b> - Cancer hallmark</li>
+                    <li><b>Node Size</b> - Number of genes in module</li>
+                    <li><b>Label Boldness</b> - </b>bold</b> labels indicate node has displayable graph<sup><b
+                                style="color: red">**</b></sup></li>
+                </ul>
+                <span style="font-size: 0.75vw; padding-bottom: 50%;"><sup><b style="color: red">*</b></sup> Meta-p
+                    calculated by combining p values from five individual cancer cohorts</span>
+                <br />
+                <span style="font-size: 0.75vw; padding-bottom: 50%;"><sup><b style="color: red">**</b></sup> Due to
+                    performance, only nodes
+                    with &lt; 50 genes can be
+                    displayed</span>
+            </div>
+        </div>
+        <div id="search-container" class="side-container">
+            <div id="search-area">
+                <h3 style="text-align: center">
+                    Search for Module Containing Gene
+                </h3>
+                <input list="genes" id="gene_search" placeholder="Search for a gene" style="width: 100%; height: 2em" />
+                <datalist id="genes"></datalist>
+                <button id="search_button" style="width: 100%; height: 2em">
+                    Search
+                </button>
+            </div>
+        </div>
+        <div id="dag-container" class="side-container">
+            <div id="dag-area" style="width: 100%; height: 100%">
+                <div id="dag" style="width: 100%; height: 100%"></div>
+            </div>
+        </div>
+        <div id="pie_chart_container">
+            <div id="pie_chart_grey" style="width: 100%; height: 100%"></div>
+            <div id="pie_chart" style="width: 100%; height: 100%"></div>
+        </div>
+    </div>
+    <script>
+        const legendContainer = document.getElementById("legend-container");
+        const legendTabContainer = document.getElementById(
+            "legend-tab-container",
+        );
+        const searchContainer = document.getElementById("search-container");
+        const searchTabContainer = document.getElementById(
+            "search-tab-container",
+        );
+        const dagContainer = document.getElementById("dag-container");
+        const dagTabContainer =
+            document.getElementById("dag-tab-container");
+
+        const initial_timeout = 3000;
+        const legend_timeout = 3000;
+        const search_timeout = 3000;
+        const dag_timeout = 3000;
+        let has_shown_dag = false;
+        dagContainer.style.right = "-35.2%"; // Hide initially
+        dagTabContainer.style.right = "-1.15%";
+        let timeout_id = 0;
+        setTimeout(() => {
+            searchTabContainer.dispatchEvent(new Event("mouseleave"));
+            legendTabContainer.dispatchEvent(new Event("mouseleave"));
+        }, initial_timeout);
+
+        registerMouseEvents = function (
+            container,
+            tab,
+            timeout,
+            direction,
+            closed_container_pos,
+            closed_tab_pos,
+            open_container_pos,
+            open_tab_pos,
+        ) {
+            container.addEventListener("mouseleave", () => {
+                setTimeout(
+                    (old_timeout_id) => {
+                        if (
+                            container.id == "dag-container" &&
+                            old_timeout_id != timeout_id
+                        ) {
+                            return;
+                        }
+                        if (
+                            container.id == "search-container" &&
+                            !!document.activeElement &&
+                            document.activeElement.id == "gene_search"
+                        ) {
+                            return;
+                        }
+                        if (
+                            container.matches(":hover") ||
+                            tab.matches(":hover")
+                        ) {
+                            return;
+                        }
+                        container.style[direction] = closed_container_pos;
+                        tab.style[direction] = closed_tab_pos;
+                    },
+                    timeout,
+                    timeout_id,
+                );
+            });
+            tab.addEventListener("mouseleave", () => {
+                setTimeout(
+                    (old_timeout_id) => {
+                        if (
+                            container.id == "dag-container" &&
+                            old_timeout_id != timeout_id
+                        ) {
+                            return;
+                        }
+                        if (
+                            container.id == "search-container" &&
+                            !!document.activeElement &&
+                            document.activeElement.id == "gene_search"
+                        ) {
+                            return;
+                        }
+                        if (
+                            container.matches(":hover") ||
+                            tab.matches(":hover")
+                        ) {
+                            return;
+                        }
+                        container.style[direction] = closed_container_pos;
+                        tab.style[direction] = closed_tab_pos;
+                    },
+                    timeout,
+                    timeout_id,
+                );
+            });
+
+            // New event listener for handling the tab hover
+            tab.addEventListener("mouseenter", () => {
+                container.style[direction] = open_container_pos;
+                tab.style[direction] = open_tab_pos;
+            });
+        };
+
+        registerMouseEvents(
+            legendContainer,
+            legendTabContainer,
+            legend_timeout,
+            "left",
+            "-22.2%",
+            "-1.15%",
+            "0",
+            "20.85%",
+        );
+        registerMouseEvents(
+            searchContainer,
+            searchTabContainer,
+            search_timeout,
+            "right",
+            "-23.2%",
+            "-1.15%",
+            "0",
+            "21.85%",
+        );
+        registerMouseEvents(
+            dagContainer,
+            dagTabContainer,
+            dag_timeout,
+            "right",
+            "-35.2%",
+            "-1.15%",
+            "0",
+            "33.95%",
+        );
+
+        funmap(echarts);
+    </script>
+</body>
+
+</html>

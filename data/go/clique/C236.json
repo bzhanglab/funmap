@@ -1,0 +1,1 @@
+{"gomf": {"set": "GO:0003682", "set_name": "chromatin binding", "fdr": "1"}, "gobp": {"set": "GO:0051321", "set_name": "meiotic cell cycle", "fdr": "1"}, "gocc": {"set": "GO:0005819", "set_name": "spindle", "fdr": "0.085291712"}}

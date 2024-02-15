@@ -1,0 +1,1 @@
+{"gomf": {"set": "GO:0005201", "set_name": "extracellular matrix structural constituent", "fdr": "0.333039327"}, "gobp": {"set": "GO:0097320", "set_name": "plasma membrane tubulation", "fdr": "0.866600473"}, "gocc": {"set": "GO:0005901", "set_name": "caveola", "fdr": "0.01267743"}}

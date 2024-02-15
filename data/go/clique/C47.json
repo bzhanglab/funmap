@@ -1,0 +1,1 @@
+{"gomf": {"set": "GO:0008017", "set_name": "microtubule binding", "fdr": "1"}, "gobp": {"set": "GO:0035082", "set_name": "axoneme assembly", "fdr": "2.95E-06"}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "fdr": "4.71E-10"}}

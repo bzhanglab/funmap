@@ -1,0 +1,1 @@
+{"gomf": {"set": "GO:0030246", "set_name": "carbohydrate binding", "fdr": "0.033323891"}, "gobp": {"set": "GO:0006890", "set_name": "retrograde vesicle-mediated transport, Golgi to ER", "fdr": "5.58E-05"}, "gocc": {"set": "GO:0033116", "set_name": "endoplasmic reticulum-Golgi intermediate compartment membrane", "fdr": "1.09E-08"}}

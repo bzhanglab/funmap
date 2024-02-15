@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="assets/css/gd.min.css" />
+    <meta charset="utf-8" />
+    <title>Resources for FunMap</title>
+    <meta name="description" content="FunMap" />
+    <meta name="author" content="John Elizarraras" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0c0c">
+    <base target="_blank" />
+    <style>
+        main {
+            max-width: 70%;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="hierarchal/">Visualization</a></li>
+                <li><a href="https://github.com/bzhanglab/funmap">Python Package</a></li>
+                <li><a href="https://github.com/bzhanglab/funmap">Publication</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main id="main-content">
+        <header>
+            <h1>FunMap</h1>
+            <span>
+                <i>Generate Gene Co-Function Networks using Omics Data</i>
+            </span>
+        </header>
+        <details open>
+            <summary>Abstract</summary>
+            <p>Large-scale omics profiling and genetic screen studies have greatly expanded the landscape of somatic
+                mutations and cancer-associated proteins, posing significant challenges for their functional
+                interpretation.
+                We present FunMap, a systems biology approach that utilizes a pan-cancer functional map comprising
+                over 10,000 protein coding genes.
+                Leveraging supervised machine learning on recently released massive proteomics and RNASeq data from
+                1,194 patients across 11 cancer types,
+                FunMap connects functionally associated genes with unprecedented precision, surpassing
+                protein-protein interaction maps. Network analysis uncovers known and novel protein modules,
+                revealing a hierarchical modular organization linked to cancer hallmarks and clinical phenotypes.
+                Our results demonstrate the utility of FunMap in predicting functions of understudied cancer
+                proteins, providing insights into established cancer drivers, and identifying new somatic drivers.
+                This study highlights FunMap as a powerful and unbiased framework for interpreting somatic mutations
+                and understudied proteins, with broad implications for advancing cancer biology and informing
+                therapeutic strategies.
+            </p>
+        </details>
+        <section>
+            <aside>
+                <div>
+                    <h3>Visualization</h3>
+
+                    <p>
+                        To visualize and explore  FunMap, we have developed a web application
+                        that allows users to search for gene neighborhoods, cliques, modules, and cancer hallmarks.
+                        <h6>Explore:</h6>
+                        <ul>
+                            <li><a href="./gene/" target="_blank">Gene Neighborhoods</a></li>
+                            <li><a href="./clique/" target="_blank">Cliques</a></li>
+                            <li><a href="./hierarchal/" target="_blank">Hierarchal Structure</a></li>
+                        </ul>
+                       
+                    </p>
+
+                    <a href="https://bzhanglab.github.io/funmap_visualization/" target="_blank"><img
+                            style="margin-left: 25%;width: 50%;border: 1px solid var(--color-body);"
+                            src="./assets/img/visualization.png"></img></a>
+                </div>
+            </aside>
+            <aside>
+                <div>
+                    <h3>Enrichment</h3>
+
+                    <p>
+                        We have integrated FunMap with <a href="https://2024.webgestalt.org/"
+                            target="_blank">WebGestalt</a> to provide enrichment analysis for gene lists. We have also
+                        provided examples of how to use WebGestalt with FunMap.
+                        <br><br>
+                        For instructions on how to use WebGestalt with FunMap, please view the <a
+                            href="./webgestalt_tutorial.html" target="_blank">FunMap WebGestalt Tutorial</a>
+                    </p>
+                </div>
+            </aside>
+            <aside>
+                <div>
+                    <h3>Download</h3>
+                    <h6>FunMap input expression matrices
+                        <span data-toggle="tooltip"
+                            title='This gzipped tar file contains mRNA and protein expression matrices for 11 different cancer types. Five of them contain both tumor and normal samples, while six of them contain only tumor samples.'>
+                            ⓘ
+                        </span>
+                    </h6>
+                    <p>
+                        <a href="https://zenodo.org/record/7948944" target="_blank">Download (Size: 228.6 MB)</a>
+                    </p>
+                    <h6>FunMap feature data file used for model training
+                        <span data-toggle="tooltip"
+                            title='The provided file is a TSV (Tab-Separated Values, gzipped) file that serves as input for a machine learning model. The file structure consists of rows representing gene pairs and columns containing 16 Spearman correlation coefficients and 16 mutual ranks. The Spearman correlation coefficients capture the strength and direction of the relationship between gene pairs. Additionally, the mutual ranks are derived from the correlation coefficients and are utilized in the training process of the model'>
+                            ⓘ
+                        </span>
+                    </h6>
+                    <p>
+                        <a href="https://zenodo.org/record/7949375" target="_blank">Download (Size: 24.5 GB)</a>
+                    </p>
+                    <h6>FunMap prediction scores for all gene pairs
+                        <span data-toggle="tooltip"
+                            title='his gzipped TSV (Tab-Separated Values) file contains prediction scores generated by a predictive model trained on different types of feature set.'>
+                            ⓘ
+                        </span>
+                    </h6>
+                    <p>
+                        <a href="https://zenodo.org/records/10080764" target="_blank">Download (Size: 1.8 GB)</a>
+                    </p </div>
+            </aside>
+        </section>
+    </main>
+    <footer style="background-color: var(--color-body); color: var(--color-body-inverted);">
+        <main>
+            <section>
+                <ul style="color: var(--color-body-inverted)">
+                    <li><a style="color: var(--color-body-inverted)" href=" https://www.linkedomics.org">LinkedOmics</a>
+                    </li>
+                    <li><a style="color: var(--color-body-inverted)"
+                            href="https://github.com/bzhanglab/funmap">GitHub</a></li>
+                    <li><a style="color: var(--color-body-inverted)" href="https://www.zhang-lab.org/">Bing Zhang
+                            Lab</a></li>
+                    <li><a style="color: var(--color-body-inverted)"
+                            href="https://github.com/bzhanglab/funmap/issues/new">Report Issue</a></li>
+                </ul>
+                <article>
+                    <p>Developed by Zhiao Shi, Jonathan Lei, John Elizarraras, and Bing Zhang</p>
+                    <p>
+                        Please Cite:<br>
+                        <code>
+                            Z. Shi, J. Lei, J. Elizarraras, and B. Zhang, "FunMap: a pan-cancer functional map of
+                            protein coding genes," bioRxiv, 2022.
+                        </code>
+                    </p>
+                </article>
+            </section>
+        </main>
+    </footer>
+</body>
+</body>
+
+</html>

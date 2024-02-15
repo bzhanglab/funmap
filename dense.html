@@ -1,0 +1,281 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>FunMap Hierarchical Organization</title>
+    <script src="assets/js/echarts.min.js"></script>
+    <script src="assets/js/min/dense.min.js"></script>
+    <script src="assets/js/min/dag.min.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="assets/css/funmap.css" />
+    <style>
+        .square {
+            width: 25%;
+            height: 250px;
+            display: inline-block;
+        }
+
+        body {
+            overflow-x: hidden;
+        }
+
+        #dense-outer {
+            width: 100%;
+            height: 100%;
+        }
+
+        #loading-container {
+            z-index: 2001;
+            background-color: #FFF;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+        #loading {
+            width: 100%;
+            height: 100%;
+            background-color: #FFF;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            position: absolute;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #000;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            position: relative;
+            animation: pulse 1s linear infinite;
+            z: 1000;
+        }
+
+        .loader:after {
+            content: '';
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            border: 5px solid #000;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            animation: scaleUp 1s linear infinite;
+        }
+
+        @keyframes scaleUp {
+            0% {
+                transform: translate(-50%, -50%) scale(0)
+            }
+
+            60%,
+            100% {
+                transform: translate(-50%, -50%) scale(1)
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            60%,
+            100% {
+                transform: scale(1)
+            }
+
+            80% {
+                transform: scale(1.2)
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="loading">
+        <div id="loading-container">
+            <p style="text-align: center; font-family: Arial, Helvetica, sans-serif;">
+                <span class="loader"></span><br>
+                Loading...
+                <br>
+                <span id="loading-text">placeholder</span>
+            </p>
+        </div>
+    </div>
+    <div id="dense-outer">
+        <table id="dense_tables" style="border: 0px solid black; width: 100%; height: 100%;">
+        </table>
+    </div>
+    <div id="legend-tab-container" class="tab-container">Legend</div>
+    <div id="search-tab-container" class="tab-container">Search</div>
+    <div id="dag-tab-container" class="tab-container" style="display: none">
+        Graph
+    </div>
+    <div id="legend-container" class="side-container">
+        <div id="legend">
+            <!-- Content of the drawer -->
+            <p>
+                Visualize and interact with the hierarchical structure
+                of
+                <a href="https://github.com/bzhanglab/funmap" target="_blank">FunMap</a>.<br /><br />
+                Click on collapsed nodes to view children. Hover over
+                nodes to see more information about the module.
+            </p>
+            <h3 style="text-align: center">Legend</h3>
+            <ul style="list-style-type: none; line-height: 1.3">
+                <li>
+                    <img class="svg" src="./assets/diamond.svg" />
+                    Collapsed node
+                </li>
+                <li>
+                    <img class="svg" src="./assets/circle.svg" />
+                    Expanded node
+                </li>
+                <li><b>Fill Color</b> - Signed log10 meta-p value</li>
+                <li><b>Edge Color</b> - Cancer hallmark</li>
+            </ul>
+        </div>
+    </div>
+    <div id="search-container" class="side-container">
+        <div id="search-area">
+            <h3 style="text-align: center">
+                Search for Module Containing Gene
+            </h3>
+            <input list="genes" id="gene_search" placeholder="Search for a gene" style="width: 100%; height: 2em" />
+            <datalist id="genes"></datalist>
+            <button id="search_button" style="width: 100%; height: 2em">
+                Search
+            </button>
+        </div>
+    </div>
+    <div id="dag-container" class="side-container">
+        <div id="dag-area">
+            <div id="dag" style="width: 100%; height: 500%"></div>
+        </div>
+    </div>
+    </div>
+    <script>
+        const legendContainer = document.getElementById("legend-container");
+        const legendTabContainer = document.getElementById(
+            "legend-tab-container",
+        );
+        const searchContainer = document.getElementById("search-container");
+        const searchTabContainer = document.getElementById(
+            "search-tab-container",
+        );
+        const dagContainer = document.getElementById("dag-container");
+        const dagTabContainer =
+            document.getElementById("dag-tab-container");
+
+        const initial_timeout = 3000;
+        const legend_timeout = 3000;
+        const search_timeout = 3000;
+        const dag_timeout = 3000;
+        let has_shown_dag = false;
+        dagContainer.style.right = "-35.2%"; // Hide initially
+        dagTabContainer.style.right = "-1.15%";
+        let timeout_id = 0;
+        setTimeout(() => {
+            legendContainer.style.left = "-22.2%";
+            legendTabContainer.style.left = "-1.15%";
+            searchContainer.style.right = "-23.2%";
+            searchTabContainer.style.right = "-1.15%";
+        }, initial_timeout);
+
+        registerMouseEvents = function (
+            container,
+            tab,
+            timeout,
+            direction,
+            closed_container_pos,
+            closed_tab_pos,
+            open_container_pos,
+            open_tab_pos,
+        ) {
+            container.addEventListener("mouseleave", () => {
+                setTimeout(() => {
+                    if (
+                        container.matches(":hover") ||
+                        tab.matches(":hover")
+                    ) {
+                        return;
+                    }
+                    container.style[direction] = closed_container_pos;
+                    tab.style[direction] = closed_tab_pos;
+                }, timeout);
+            });
+            tab.addEventListener("mouseleave", () => {
+                setTimeout(
+                    (old_timeout_id) => {
+                        if (
+                            container.id == "dag-container" &&
+                            old_timeout_id != timeout_id
+                        ) {
+                            return;
+                        }
+                        if (
+                            container.matches(":hover") ||
+                            tab.matches(":hover")
+                        ) {
+                            return;
+                        }
+                        container.style[direction] = closed_container_pos;
+                        tab.style[direction] = closed_tab_pos;
+                    },
+                    timeout,
+                    timeout_id,
+                );
+            });
+
+            // New event listener for handling the tab hover
+            tab.addEventListener("mouseenter", () => {
+                container.style[direction] = open_container_pos;
+                tab.style[direction] = open_tab_pos;
+            });
+        };
+
+        registerMouseEvents(
+            legendContainer,
+            legendTabContainer,
+            legend_timeout,
+            "left",
+            "-22.2%",
+            "-1.15%",
+            "0",
+            "20.85%",
+        );
+        registerMouseEvents(
+            searchContainer,
+            searchTabContainer,
+            search_timeout,
+            "right",
+            "-23.2%",
+            "-1.15%",
+            "0",
+            "21.85%",
+        );
+        registerMouseEvents(
+            dagContainer,
+            dagTabContainer,
+            dag_timeout,
+            "right",
+            "-35.2%",
+            "-1.15%",
+            "0",
+            "33.95%",
+        );
+
+        // removeFadeOut(document.getElementById("loading"), 1000);
+        dense(echarts);
+
+    </script>
+</body>
+
+</html>

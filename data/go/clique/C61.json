@@ -1,0 +1,1 @@
+{"gomf": {"set": "GO:0000995", "set_name": "RNA polymerase III general transcription initiation factor activity", "fdr": "1.38E-07"}, "gobp": {"set": "GO:0042791", "set_name": "5S class rRNA transcription by RNA polymerase III", "fdr": "1.83E-10"}, "gocc": {"set": "GO:0000127", "set_name": "transcription factor TFIIIC complex", "fdr": "4.23E-11"}}

@@ -1,0 +1,1 @@
+{"gomf": {"set": "gomf_geneSet", "set_name": "gomf_description", "fdr": "gomf_FDR"}, "gobp": {"set": "gobp_geneSet", "set_name": "gobp_description", "fdr": "gobp_FDR"}, "gocc": {"set": "gocc_geneSet", "set_name": "gocc_description", "fdr": "gocc_FDR"}}

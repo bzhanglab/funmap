@@ -1,0 +1,1 @@
+{"gomf": {"set": "GO:0043130", "set_name": "ubiquitin binding", "fdr": "0.607812346"}, "gobp": {"set": "GO:0043328", "set_name": "protein transport to vacuole involved in ubiquitin-dependent protein catabolic process via the multivesicular body sorting pathway", "fdr": "8.90E-06"}, "gocc": {"set": "GO:0000814", "set_name": "ESCRT II complex", "fdr": "1.57E-07"}}

@@ -1,0 +1,1 @@
+{"gomf": {"set": "GO:0016887", "set_name": "ATPase activity", "fdr": "0.001401408"}, "gobp": {"set": "GO:0006270", "set_name": "DNA replication initiation", "fdr": "4.87E-09"}, "gocc": {"set": "GO:0098687", "set_name": "chromosomal region", "fdr": "1.25E-07"}}

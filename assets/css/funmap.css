@@ -1,0 +1,259 @@
+:root {
+    --unit: 1rem;
+    --unit-2: 2rem;
+    --unit-3: 3rem;
+    --leading: 1.4;
+    --measure: 960px;
+    --measure-min: 288px;
+    --font: -apple-system, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell,
+        "Helvetica Neue", sans-serif;
+    --font-header: var(--font);
+    --color-body: #1a1a1a;
+    --color-body-light: #626a6e;
+    --color-body-inverted: #fff;
+    --color-select: #b3d4fc;
+    --color-access: #fd0;
+    --color-error: #f00;
+    --color-line: #b1b4b6;
+    --color-light: #505050;
+    --color-very-light: #f3f2f1;
+    --color-primary: #005ea5;
+    --color-primary-hover: #003078;
+    --color-primary-active: #2b8cc4;
+    --color-primary-visited: #4c2c92;
+    --color-secondary: #005a30;
+    --color-secondary-hover: #003e21;
+    --color-secondary-active: #003e21;
+    --color-secondary-visited: #00703c;
+    --color-tertiary: #942514;
+    --color-tertiary-hover: #6f0000;
+    --color-tertiary-active: #6f0000;
+    --color-tertiary-visited: #6f0000;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+#outer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#chart {
+    position: absolute;
+    min-height: 100%;
+}
+
+#pie_chart_container {
+    position: absolute;
+    bottom: 0;
+    right: 0%;
+    height: 10%;
+    border: 0.5px solid lightgrey;
+    border-radius: 5%;
+    width: 10%;
+    z-index: 1000;
+    pointer-events: hover;
+    transition-duration: 0.5s;
+    background-color: white;
+}
+
+#pie_chart_grey {
+    position: absolute;
+    bottom: 0;
+    right: 0%;
+    height: 10%;
+    border: inherit;
+    border-radius: inherit;
+    width: 10%;
+    z-index: 1000;
+    pointer-events: none;
+    transition-duration: 0.5s;
+    background-color: rgba(140, 140, 140, 0.25);
+}
+
+.side-container {
+    position: absolute;
+    background: white;
+    height: fit-content;
+    border: inherit;
+    border-radius: inherit;
+    width: 21%;
+    padding-top: 1%;
+    z-index: 1001;
+    transition-duration: 0.5s;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1em;
+    font-size: 1vw;
+    text-align: left;
+    border: 0.1vw solid black;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+#legend-container {
+    top: 0;
+    left: 0;
+    padding-left: 1%;
+    padding-bottom: 1%;
+}
+
+#search-container {
+    top: 5%;
+    right: 0;
+    padding-right: 1%;
+    padding-left: 1%;
+    padding-bottom: 1%;
+}
+
+#dag-container {
+    top: 25%;
+    right: 0;
+    padding: 0%;
+    width: 35%;
+    height: 45%;
+}
+
+.tab-container {
+    background: white;
+    position: absolute;
+    /* Adjust the distance from the left side */
+    width: fit-content;
+    /* Set width for the tab */
+    height: fit-content;
+    /* Set height for the tab */
+    text-align: center;
+    padding: 0.5%;
+
+    font-size: 1em;
+    font-size: 1vw;
+    align-content: center;
+    border: 0.1vw solid black;
+    border-top: 0.3vw solid white;
+    font-family: Arial, Helvetica, sans-serif;
+    transition-duration: 0.5s;
+    z-index: 1005;
+    /* Place above other elements */
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+#legend-tab-container {
+    top: 15%;
+    left: 20.85%;
+    padding-bottom: 0.2%;
+    transform: translate(0%, 0%) rotate(90deg);
+    border-top: 0.1vw solid black;
+    border-bottom: 0.3vw solid white;
+}
+
+#search-tab-container {
+    top: 15%;
+    right: 21.85%;
+    padding-bottom: 0.2%;
+    transform: translate(0%, 0%) rotate(-90deg);
+    border-top: 0.1vw solid black;
+    border-bottom: 0.3vw solid white;
+}
+
+#dag-tab-container {
+    top: 35%;
+    right: 33.95%;
+    padding-bottom: 0.2%;
+    transform: translate(0%, 0%) rotate(-90deg);
+    border-top: 0.1vw solid black;
+    border-bottom: 0.3vw solid white;
+}
+
+#pie_chart_container:hover > #pie_chart_grey {
+    background-color: rgba(1, 1, 1, 0);
+    transition-duration: 0.5s;
+}
+
+#pie_chart_container:hover {
+    border-color: black;
+    height: 30%;
+    width: 20%;
+    transition-duration: 0.5s;
+    pointer-events: all;
+}
+
+td {
+    padding: 0 1em;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.svg {
+    line-height: 5;
+    height: 1.5em;
+    width: 1.5em;
+}
+
+a {
+    color: #000;
+    font-weight: bold;
+}
+
+input,
+output {
+    display: inline-block;
+    font-size: 1em;
+    font-size: 1vw;
+    line-height: var(--leading);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    box-sizing: border-box;
+    width: 100%;
+    height: 2.5rem;
+    margin-top: 0;
+    padding: 5px;
+    border: 2px solid var(--color-body);
+    border-radius: 0;
+    appearance: none;
+}
+
+button,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+    width: auto;
+    height: 1.5em;
+    background-color: var(--color-secondary);
+    border: 2px solid transparent;
+    box-shadow: var(--color-body) 0 2px 0 0;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: var(--font);
+    font-size: 1em;
+    font-size: 1vw;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 1%;
+    margin-top: 0;
+    text-align: center;
+    vertical-align: 100%;
+    -moz-appearance: none;
+    -moz-osx-font-smoothing: grayscale;
+    padding: 1%;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background: var(--color-secondary-hover);
+}

@@ -1,0 +1,1 @@
+{"gomf": {"set": "GO:0003727", "set_name": "single-stranded RNA binding", "fdr": "1"}, "gobp": {"set": "GO:0000394", "set_name": "RNA splicing, via endonucleolytic cleavage and ligation", "fdr": "6.36E-06"}, "gocc": {"set": "GO:0072669", "set_name": "tRNA-splicing ligase complex", "fdr": "6.29E-07"}}

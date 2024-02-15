@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="gd.min.css">
+    <meta charset="utf-8" />
+    <title>Resources for FunMap</title>
+    <meta name="description" content="FunMap" />
+    <meta name="author" content="John Elizarraras" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000000" />
+    <base target="_blank">
+    <style>
+        header {
+            background: none !important;
+            color: black;
+        }
+
+        footer {
+            background: none !important;
+            color: black;
+        }
+
+        p {
+            text-align: justify;
+        }
+
+        img {
+            width: 100%;
+        }
+
+        body {
+            padding-left: 25% !important;
+            padding-right: 25% !important;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1 style="padding-top: 5%">Resources for FunMap
+        </h1>
+        <table style="width: 50%; min-width: 20%">
+            <tr style="border: none; color: black;">
+                <td><a style="color: var(--color-primary); font-weight: 500;" href="https://github.com/bzhanglab/funmap"
+                        target="_blank">Python Package</a></td>
+                <td><a style="color: var(--color-primary); font-weight: 500;"
+                        href="https://bzhanglab.github.io/funmap_visualization/" target="_blank">Visualization</a></td>
+            </tr>
+        </table>
+
+    </header>
+
+    <main>
+
+        <div>
+
+
+            <details open>
+                <summary>Abstract</summary>
+                <p>Large-scale omics profiling and genetic screen studies have greatly expanded the landscape of somatic
+                    mutations and cancer-associated proteins, posing significant challenges for their functional
+                    interpretation.
+                    We present FunMap, a systems biology approach that utilizes a pan-cancer functional map comprising
+                    over 10,000 protein coding genes.
+                    Leveraging supervised machine learning on recently released massive proteomics and RNASeq data from
+                    1,194 patients across 11 cancer types,
+                    FunMap connects functionally associated genes with unprecedented precision, surpassing
+                    protein-protein interaction maps. Network analysis uncovers known and novel protein modules,
+                    revealing a hierarchical modular organization linked to cancer hallmarks and clinical phenotypes.
+                    Our results demonstrate the utility of FunMap in predicting functions of understudied cancer
+                    proteins, providing insights into established cancer drivers, and identifying new somatic drivers.
+                    This study highlights FunMap as a powerful and unbiased framework for interpreting somatic mutations
+                    and understudied proteins, with broad implications for advancing cancer biology and informing
+                    therapeutic strategies.
+                </p>
+            </details>
+        </div>
+        <div>
+            <h2>FunMap Hierarchal Organization</h2>
+
+            <p>
+                To visualize and explore the hierarchal structure of FunMap, we have developed a web application that
+                allows users to search for genes, modules, and cancer hallmarks.
+                The full application is available at <a href="https://bzhanglab.github.io/funmap_visualization/"
+                    target="_blank">bzhanglab.github.io/funmap_visualization</a>.
+            </p>
+
+            <a href="https://bzhanglab.github.io/funmap_visualization/" target="_blank"><img
+                    style="margin-left: 25%;width: 50%;border: 1px solid var(--color-body);"
+                    src="./assets/visualization.png"></img></a>
+        </div>
+
+        <div>
+            <h2>FunMap Enrichment</h2>
+
+            <p>
+                We have integrated FunMap with <a href="https://2024.webgestalt.org/" target="_blank">WebGestalt</a> to
+                provide enrichment analysis for gene lists. We have also provided examples of how to use WebGestalt with
+                FunMap.
+                <br><br>
+                For instructions on how to use WebGestalt with FunMap, please view the <a
+                    href="./webgestalt_tutorial.html" target="_blank">FunMap WebGestalt Tutorial</a>
+            </p>
+        </div>
+
+        <div class="data-section">
+            <h2>FunMap input expression matrices</h2>
+            <p>This gzipped tar file contains mRNA and protein expression
+                matrices for 11 different cancer types. Five of them contain both tumor
+                and normal samples, while six of them contain only tumor samples.</p>
+            <p><a href="https://zenodo.org/record/7948944" target="_blank">Download (Size: 228.6 MB)</a></p>
+        </div>
+
+        <div class="data-section">
+            <h2>FunMap feature data file used for model training</h2>
+            <p>The provided file is a TSV (Tab-Separated Values, gzipped) file
+                that serves as input for a machine learning model. The file structure
+                consists of rows representing gene pairs and columns containing 16
+                Spearman correlation coefficients and 16 mutual ranks. The Spearman
+                correlation coefficients capture the strength and direction of the
+                relationship between gene pairs. Additionally, the mutual ranks are
+                derived from the correlation coefficients and are utilized in the
+                training process of the model.</p>
+            <p><a href="https://zenodo.org/record/7949375" target="_blank">Download (Size: 24.5 GB)</a></p>
+        </div>
+
+        <div class="data-section">
+            <h2>FunMap prediction scores for all gene pairs</h2>
+            <p>This gzipped TSV (Tab-Separated Values) file contains
+                prediction scores generated by a predictive model trained on different
+                types of feature set. The file structure is as follows:</p>
+            <ul>
+                <li>Column 1 (Gene Pair): This column represents pairs of gene
+                    ids. Each entry in this column consists of two gene ids, potentially
+                    denoting associations between genes.</li>
+                <li>Column 2 (RNA Data Prediction): The values in this column
+                    represent predictions generated by the model using RNA features as
+                    input.</li>
+                <li>Column 3 (Protein Data Prediction): This column contains
+                    prediction scores produced by the model when trained on protein
+                    features.</li>
+                <li>Column 4 (Combined RNA and Protein Data Prediction): The
+                    values in this column represent prediction scores resulting from the
+                    model trained with both RNA and protein features.</li>
+            </ul>
+            <p><a href="https://zenodo.org/records/10080764" target="_blank">Download (Size: 1.8 GB)</a></p>
+        </div>
+
+
+    </main>
+
+    <footer>
+        <p>Last Updated: <time datetime="2024-01-29" target="_blank">January 29, 2024</time></p>
+    </footer>
+    </div>
+</body>
+
+</html>
