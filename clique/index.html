@@ -147,6 +147,11 @@
         #gene_search_error {
     white-space: normal;
 }
+
+.download_button {
+    margin-left: 25%;
+    width: 50%;
+}
     </style>
 </head>
 
@@ -323,8 +328,16 @@
                     dag_p.style.fontSize = "var(--unit)";
                     dag_p.style.textAlign = "center";
                     dag_p.innerHTML = "Scroll to zoom, click and drag to move nodes.";
+                    let download_button = document.createElement("button");
+                    download_button.id = `download_button_${i}`;
+                    download_button.className = "download_button";
+                    download_button.innerHTML = "Download Clique";
+                    download_button.onclick = function () {
+                        window.open(`../data/dag/dense_modules/${clique_id}.json`, "_blank");
+                    };
                     dag_container.appendChild(dag_div);
                     dag_container.appendChild(dag_p);
+                    dag_container.appendChild(download_button);
                     info_div.appendChild(table);
                     info_div.appendChild(member_header);
                     info_div.appendChild(member_list);
@@ -389,8 +402,6 @@
                                     chart.resize();
                                 });
                                 chart.resize();
-
-
                             });
                         });
                 }
