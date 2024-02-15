@@ -5,6 +5,7 @@ function create_dag(
   element_id = "dag",
   ignore_size = false,
   host = "",
+  scale = 1,
 ) {
   return fetch(host + "data/dag/" + clique_type + "/" + clique_id + ".json")
     .then((response) => response.json())
@@ -21,10 +22,9 @@ function create_dag(
         //   Math.sqrt(width * width + height * height) /
         //     (60 + Math.log(clique_data.nodes.length)),
         // );
-        let new_size = (13 / 672) * height;
+        let new_size = (13 / 672) * height * scale;
         // let new_size = (26 / 1518) * height + (13 / 1518) * width;
         new_size = Math.min(new_size, 20);
-        console.log(new_size);
         return new_size;
       }
       function autoSymbolSize() {

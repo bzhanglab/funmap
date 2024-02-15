@@ -1,10 +1,12 @@
 
 # Compress file to min.js
 
-
+build: compress
+      @echo "Building markdown files"
+      @python3 build.py
 
 compress:
-      if [ ! -d assets/js/min ]; then \
+      @if [ ! -d assets/js/min ]; then \
             mkdir assets/js/min; \
       fi
       @echo "Compressing JS files"

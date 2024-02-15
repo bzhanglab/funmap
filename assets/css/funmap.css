@@ -115,7 +115,7 @@ body {
 }
 
 #dag-container {
-    top: 25%;
+    top: 35%;
     right: 0;
     padding: 0%;
     width: 35%;
@@ -168,7 +168,7 @@ body {
 }
 
 #dag-tab-container {
-    top: 35%;
+    top: 45%;
     right: 33.95%;
     padding-bottom: 0.2%;
     transform: translate(0%, 0%) rotate(-90deg);

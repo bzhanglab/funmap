@@ -78,8 +78,8 @@
     <div id="filler" style="height: 100%">
         <h1>FunMap Gene Neighborhood Search</h1>
         <div class="centering">
-            <small style="color: var(--color-body-light)">Gene Neighborhood: Top 50 nodes with highest random walk
-                probability starting from a gene of interest.</small>
+            <p style="color: var(--color-body-light); text-align: center;">Gene Neighborhood: Top 50 nodes with highest random walk
+                probability starting from a gene of interest.</p>
             <h3 style="text-align: center">Gene Symbol</h3>
             <div class="container">
                 <input type="text" list="genes" class="text" id="clique_id" name="clique_id" value="RBM34" />
@@ -182,7 +182,7 @@
                             go_id.innerHTML = `<a href="https://amigo.geneontology.org/amigo/term/${go_id_text}" target="_blank">${go_id_text}</a>`;
                             go_term.innerHTML = data[go_cat].set_name;
                             let fdr_val = parseFloat(data[go_cat].fdr);
-                            fdr.innerHTML = fdr_val != 0.0 ? fdr_val.toExponential(5) : "< 2.2e-16";
+                            fdr.innerHTML = fdr_val != 0.0 ? fdr_val.toExponential(2) : "< 2.20e-16";
                             row.appendChild(go_category);
                             row.appendChild(go_id);
                             row.appendChild(go_term);

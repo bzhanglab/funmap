@@ -27,10 +27,14 @@
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
-            justify-content: center;
             -webkit-box-sizing: border-box;
             -moz-box-sizing: border-box;
             box-sizing: border-box;
+            gap: 0;
+            column-gap: 0pt;
+            align-content: flex-start;
+            flex-grow: 0;
+            justify-content: center
         }
 
         button {
@@ -59,10 +63,10 @@
         }
 
         #filler {
-            display: flex;
+            display: block;
             flex-direction: column;
             /* justify-content: center; */
-            align-items: center;
+            align-content: flex-start;
         }
 
         .result {
@@ -74,11 +78,15 @@
             height: 50%;
             flex-direction: column;
             justify-self: center;
-            text-align: center;
             flex: 1;
-            margin:0;
-            gap: 0%;
+            margin: 0;
+            /* margin-bottom: 5%; */
         }
+
+        .result:last-child {
+            margin-bottom: 5%;
+        }
+
         .result_sub {
             display: flex;
             justify-content: center;
@@ -86,18 +94,30 @@
             vertical-align: center;
             flex-direction: row;
             justify-self: center;
-            text-align: center;
             flex: 1;
             height: 100%;
         }
 
+        #search_container {
+            display: table;
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            width: 90%;
+            margin: 5%;
+            margin-bottom: 0pt;
+
+        }
+
         #result_container {
             display: flex;
-            text-align: center;
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            margin-top: 5%;
+            width: 100%;
         }
+
         .info_div {
             width: 60%;
             padding-right: 5%;
@@ -110,6 +130,23 @@
         .subtitle {
             color: var(--color-body-light)
         }
+
+        .dag {
+            width: 100%;
+            height: 20vw;
+            border: 1px solid var(--color-body);
+        }
+
+        .search_area {
+            display: table-cell;
+            margin: 0;
+            width: 33%;
+            padding-right: 10%;
+            padding-left: 10%;
+        }
+        #gene_search_error {
+    white-space: normal;
+}
     </style>
 </head>
 
@@ -117,124 +154,97 @@
     <div id="filler" style="height: 100%">
         <h1>FunMap Clique Search</h1>
         <div class="centering">
-            <small style="color: var(--color-body-light)">Fully connected subnetworks with limited overlap to other
-                cliques identified with the clique enumeration (ICE) algorithm</small>
-            <h3 style="text-align: center">Clique ID</h3>
-            <div class="container">
-                <input type="text" class="text" id="clique_id" name="clique_id" value="Clique ID: 160" />
-                <button id="search_button">Search</button>
-            </div>
-        </div>
-        
-        <div id="result_container" class="centering" style="height: 100%;">
-            <div class="result">
-                <h4 id="clique_title" style="flex: 1; height:min-content; margin: 0pt; column-gap: 0pt">Clique: </h4>
-                <div class="result_sub" style="column-gap: 0pt;">
-                    <div class="info_div">
-                        <h5 class="info_heading">GO Enrichment</h5>
-                        <small class="subtitle">Highest enriched GO terms for clique using
-                            over-representation analysis</small>
-                        <table style="margin-top: 1em;">
-                            <thead>
-                                <tr>
-                                    <th>GO Category</th>
-                                    <th>Go ID</th>
-                                    <th>Go Term</th>
-                                    <th>FDR</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table_body"></tbody>
-                        </table>
-                        <h5 style="margin-bottom: 0pt">Clique Members</h5>
-                        <div id="members">
-                        </div>
-                        <button id="download_button">Download Clique</button>
-                    </div>
-                    <div style="flex-grow:1;">
-                        <div id="dag" style="width: 100%; height: 100%; border: 1px solid black"></div>
-                        <p style="color: var(--color-body-light); font-size: var(--unit); text-align: center">
-                            Scroll to zoom, click and drag to move nodes.
-                        <p>
+            <p style="color: var(--color-body-light); text-align: center">Fully connected subnetworks with limited
+                overlap to other
+                cliques identified with the clique enumeration (ICE) algorithm
+                <br>
+                Search either by Clique ID or Gene Symbol to view the clique and its GO enrichment.
+            </p>
+            <div id="search_container">
+                <div class="search_area">
+                    <h3 style="text-align: center">Clique ID</h3>
+                    <div class="container">
+                        <input style="width: 80%" type="text" class="text" id="clique_id" name="clique_id" value="Clique ID: 160" />
+                        <button style="width: 20%" id="search_button">Search</button>
                     </div>
                 </div>
-                
+                <div class="search_area">
+                    <h3 style="text-align: center">Gene Symbol</h3>
+                    <div class="container">
+                        <input style="width: 80%" list="genes" type="text" class="text" id="gene_id" name="gene_id" value="MRPL22" />
+                        <datalist id="genes"></datalist>
+                        <button style="width: 20%" id="gene_search_button">Search</button>
+                        <p style="color: var(--color-error); text-align: center; font-size: calc(var(--unit)); display: block; flex: 1;" 
+                            id="gene_search_error"></p>
+                    </div>
+                </div>
             </div>
+            <p id="search_results" style="text-align: center"></p>
+        </div>
+
+        <div id="result_container" class="centering">
         </div>
         <script>
-            function get_dag(clique_id) {
-                let clique_type = "dense_modules";
-                dag_chart = create_dag(
-                    echarts,
-                    clique_type,
-                    clique_id,
-                    "dag",
-                    (ignore_size = true),
-                    (host = "../"),
-                );
-                dag_chart.then((chart) => {
-                    let member_data = chart.getOption().series[0].nodes;
-                    let member_list = document.getElementById("members");
-                    let member_text = "<p>";
-                    for (let i = 0; i < member_data.length; i++) {
-                        let member = member_data[i];
-                        member_text += member.name;
-                        if (i != member_data.length - 1) {
-                            member_text += ", ";
-                        }
-                    }
-                    member_text += "</p>";
-                    member_list.innerHTML = member_text;
+            let search_error = document.getElementById("gene_search_error");
+            let gene_json = "../data/clique_genes.json";
+            let gene_element = "genes";
+            let gene_to_clique = "../data/gene_to_clique.json";
+            fetch(gene_to_clique)
+                .then((res) => res.json())
+                .then((gene_data) => {
+                    gene_to_clique = gene_data;
                 });
-                fetch(`../data/go/clique/${clique_id}.json`)
-                    .then((res) => res.json())
-                    .then((data) => {
-                        let table_body = document.getElementById("table_body");
-                        document.getElementById("clique_title").innerHTML = `Clique ID: ${clique_id}`;
-                        table_body.innerHTML = "";
-                        let categories = ["gobp", "gomf", "gocc"];
-                        let category_name = {
-                            gobp: "Biological Process",
-                            gomf: "Molecular Function",
-                            gocc: "Cellular Component",
-                        };
-                        for (let i = 0; i < categories.length; i++) {
-                            let go_cat = categories[i];
-                            let row = document.createElement("tr");
-                            let go_category = document.createElement("td");
-                            let go_id = document.createElement("td");
-                            let go_term = document.createElement("td");
-                            let fdr = document.createElement("td");
-                            go_category.innerHTML = category_name[go_cat];
-                            let go_id_text = data[go_cat].set;
-                            go_id.innerHTML = `<a href="https://amigo.geneontology.org/amigo/term/${go_id_text}" target="_blank">${go_id_text}</a>`;
-                            go_term.innerHTML = data[go_cat].set_name;
-                            let fdr_val = parseFloat(data[go_cat].fdr);
-                            fdr.innerHTML = fdr_val != 0.0 ? fdr_val.toExponential(5) : "< 2.2e-16";
-                            row.appendChild(go_category);
-                            row.appendChild(go_id);
-                            row.appendChild(go_term);
-                            row.appendChild(fdr);
-                            table_body.appendChild(row);
-                        }
-                    });
-                let download_button = document.getElementById("download_button");
-                download_button.onclick = function () {
-                    window.open(`../data/dag/dense_modules/${clique_id}.json`, "_blank");
-                };
-            }
-            let button = document.getElementById("search_button");
-            button.addEventListener("click", function () {
+            fetch(gene_json)
+                .then((res) => res.json())
+                .then((gene_data) => {
+                    let genelist = document.getElementById(gene_element);
+                    for (let i = 0; i < gene_data.length; i++) {
+                        let option = document.createElement("option");
+                        option.value = gene_data[i];
+                        genelist.appendChild(option);
+                    }
+                });
+            let search_results = document.getElementById("search_results");
+            let clique_button = document.getElementById("search_button");
+            clique_button.addEventListener("click", function () {
                 let clique_id = document.getElementById("clique_id").value;
                 clique_id = "C" + clique_id.split("Clique ID: ")[1];
-                get_dag(clique_id);
+                search_results.innerHTML = "";
+                search_error.innerHTML = "";
+                create_dags([clique_id]);
             });
-            get_dag("C160");
+            let gene_button = document.getElementById("gene_search_button");
+            gene_button.addEventListener("click", function () {
+                if (!gene_to_clique) {
+                    search_error.innerHTML = "Gene to clique data not loaded yet. Please try again.";
+                    return;
+                } else if (!gene_to_clique[document.getElementById("gene_id").value]) {
+                    search_error.innerHTML = "Gene not found in any cliques. Please use the dropdown to select valid genes.";
+                    return;
+                }
+                search_error.innerHTML = "";
+                let gene_id = document.getElementById("gene_id").value;
+                let found_cliques = gene_to_clique[gene_id]
+                let clique_form = found_cliques.length > 1 ? "cliques" : "clique";
+                search_results.innerHTML = `${gene_id} is a member of ${found_cliques.length} ${clique_form}: ${found_cliques.join(", ").replace(/C/g, "")}`;
+                if (gene_to_clique[gene_id]) {
+                    create_dags(found_cliques);
+                }
+            });
             document
                 .getElementById("clique_id")
                 .addEventListener("keyup", function (event) {
                     event.preventDefault();
                     if (event.keyCode === 13) {
                         document.getElementById("search_button").click();
+                    }
+                });
+            document
+                .getElementById("gene_id")
+                .addEventListener("keyup", function (event) {
+                    event.preventDefault();
+                    if (event.keyCode === 13) {
+                        gene_button.click();
                     }
                 });
             document.getElementById("clique_id").oninput = function () {
@@ -247,34 +257,145 @@
             document.getElementById("clique_id").focus();
 
             function create_dags(clique_ids) {
-                let dag_charts = [];
+                let result_container = document.getElementById("result_container");
+                result_container.innerHTML = "";
                 for (let i = 0; i < clique_ids.length; i++) {
                     let head_div = document.createElement("div");
                     head_div.id = `head_div_${i}`;
                     head_div.className = "result";
+                    if (i != 0) head_div.appendChild(document.createElement("hr"));
+                    let h4 = document.createElement("h4");
+                    h4.id = `clique_title_${i}`;
+                    h4.style.flex = "1";
+                    h4.style.height = "min-content";
+                    h4.style.margin = "0pt";
+                    h4.style.columnGap = "0pt";
+                    h4.innerHTML = `Clique ID: ${clique_ids[i].replace("C", "")}`;
+                    head_div.appendChild(h4);
+                    let result_sub = document.createElement("div");
+                    result_sub.id = `result_sub_${i}`;
+                    result_sub.className = "result_sub";
                     let info_div = document.createElement("div");
                     info_div.id = `info_div_${i}`;
+                    info_div.className = "info_div";
+                    let table_header = document.createElement("h5");
+                    table_header.className = "info_heading";
+                    table_header.innerHTML = "GO Enrichment";
+                    let subtitle = document.createElement("small");
+                    subtitle.className = "subtitle";
+                    subtitle.innerHTML = "Highest enriched GO terms for clique using over-representation analysis";
+                    info_div.appendChild(table_header);
+                    info_div.appendChild(subtitle);
+                    let table = document.createElement("table");
+                    table.style.marginTop = "1em";
+                    let thead = document.createElement("thead");
+                    let tr = document.createElement("tr");
+                    let th1 = document.createElement("th");
+                    th1.innerHTML = "GO Category";
+                    let th2 = document.createElement("th");
+                    th2.innerHTML = "Go ID";
+                    let th3 = document.createElement("th");
+                    th3.innerHTML = "Go Term";
+                    let th4 = document.createElement("th");
+                    th4.innerHTML = "FDR";
+                    tr.appendChild(th1);
+                    tr.appendChild(th2);
+                    tr.appendChild(th3);
+                    tr.appendChild(th4);
+                    thead.appendChild(tr);
+                    let table_body = document.createElement("tbody");
+                    table_body.id = `table_body_${i}`;
+                    table.appendChild(thead);
                     let clique_id = clique_ids[i];
-                    let clique_type = "clique";
-                    let dag_chart = create_dag(
-                        echarts,
-                        clique_type,
-                        clique_id,
-                        "dag",
-                        (ignore_size = true),
-                        (host = "../"),
-                    );
-                    dag_chart.then((chart) => {
-                        chart.dispatchAction({
-                            type: "highlight",
-                            seriesIndex: 0,
-                            name: clique_id,
+                    let clique_type = "dense_modules";
+                    let dag_container = document.createElement("div");
+                    dag_container.style.flexGrow = "1";
+                    let member_header = document.createElement("h5");
+                    member_header.class = "info_heading";
+                    member_header.innerHTML = "Clique Members";
+                    info_div.appendChild(member_header);
+                    let member_list = document.createElement("div");
+                    let dag_div = document.createElement("div");
+                    dag_div.id = `dag_${i}`;
+                    dag_div.className = "dag";
+                    let dag_p = document.createElement("p");
+                    dag_p.style.color = "var(--color-body-light)";
+                    dag_p.style.fontSize = "var(--unit)";
+                    dag_p.style.textAlign = "center";
+                    dag_p.innerHTML = "Scroll to zoom, click and drag to move nodes.";
+                    dag_container.appendChild(dag_div);
+                    dag_container.appendChild(dag_p);
+                    info_div.appendChild(table);
+                    info_div.appendChild(member_header);
+                    info_div.appendChild(member_list);
+                    result_sub.appendChild(info_div);
+                    result_sub.appendChild(dag_container);
+                    head_div.appendChild(result_sub);
+                    result_container.appendChild(head_div);
+                    fetch(`../data/go/clique/${clique_id}.json`)
+                        .then((res) => res.json())
+                        .then((data) => {
+                            table_body.innerHTML = "";
+                            let categories = ["gobp", "gomf", "gocc"];
+                            let category_name = {
+                                gobp: "Biological Process",
+                                gomf: "Molecular Function",
+                                gocc: "Cellular Component",
+                            };
+                            for (let i = 0; i < categories.length; i++) {
+                                let go_cat = categories[i];
+                                let row = document.createElement("tr");
+                                let go_category = document.createElement("td");
+                                let go_id = document.createElement("td");
+                                let go_term = document.createElement("td");
+                                let fdr = document.createElement("td");
+                                go_category.innerHTML = category_name[go_cat];
+                                let go_id_text = data[go_cat].set;
+                                go_id.innerHTML = `<a href="https://amigo.geneontology.org/amigo/term/${go_id_text}" target="_blank">${go_id_text}</a>`;
+                                go_term.innerHTML = data[go_cat].set_name;
+                                let fdr_val = parseFloat(data[go_cat].fdr);
+                                fdr.innerHTML = fdr_val != 0.0 ? fdr_val.toExponential(2) : "< 2.20e-16";
+                                row.appendChild(go_category);
+                                row.appendChild(go_id);
+                                row.appendChild(go_term);
+                                row.appendChild(fdr);
+                                table_body.appendChild(row);
+                            }
+                            table.appendChild(table_body);
+                        }).then(() => {
+                            dag_chart = create_dag(
+                                echarts,
+                                clique_type,
+                                clique_id,
+                                dag_div.id,
+                                (ignore_size = true),
+                                (host = "../"),
+                                scale = 1.15
+                            );
+                            dag_chart.then((chart) => {
+                                let member_data = chart.getOption().series[0].nodes;
+
+                                let member_text = "<p>";
+                                for (let i = 0; i < member_data.length; i++) {
+                                    let member = member_data[i];
+                                    member_text += member.name;
+                                    if (i != member_data.length - 1) {
+                                        member_text += ", ";
+                                    }
+                                }
+                                member_text += "</p>";
+                                member_list.innerHTML = member_text;
+                                window.addEventListener("resize", function () {
+                                    chart.resize();
+                                });
+                                chart.resize();
+
+
+                            });
                         });
-                    });
-                    dag_charts.push(dag_chart);
                 }
-                return dag_charts;
             }
+            create_dags(["C160"]);
         </script>
 </body>
 

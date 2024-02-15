@@ -67,7 +67,7 @@ function funmap(echarts, config = {}) {
                   setFontWeight(chartData);
                   var chartOptions = {
                     title: {
-                      text: "FunMap Hierarchical Organization",
+                      text: "FunMap Hierarchal Organization",
                       left: "center",
                       textStyle: {
                         fontSize: 30,
@@ -422,7 +422,15 @@ function funmap(echarts, config = {}) {
                         seriesIndex: 0,
                         name: modules,
                       });
+                      
+                        let search_msg = document.getElementById("search_msg");
+                        search_msg.className = "search_info"
+                        search_msg.innerHTML = `Gene found in modules: ${modules.join(", ")}.`;
                       update_dag_chart(modules[modules.length - 1], gene);
+                    } else {
+                      let search_msg = document.getElementById("search_msg");
+                      search_msg.className = "search_error"
+                      search_msg.innerHTML = "Gene not found in any module.";
                     }
                   });
                 });
