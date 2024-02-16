@@ -186,7 +186,7 @@ function clique_page(echarts) {
             table_header.innerHTML = "GO Enrichment";
             let subtitle = document.createElement("small");
             subtitle.className = "subtitle";
-            subtitle.innerHTML = "Highest enriched GO terms for clique using over-representation analysis";
+            subtitle.innerHTML = "Top enriched GO terms for clique using over-representation analysis";
             info_div.appendChild(table_header);
             info_div.appendChild(subtitle);
             let table = document.createElement("table");
@@ -221,14 +221,14 @@ function clique_page(echarts) {
             dag_p.style.color = "var(--color-body-light)";
             dag_p.style.fontSize = "var(--unit)";
             dag_p.style.textAlign = "center";
-            dag_p.innerHTML = "Scroll to zoom, click and drag to move nodes.";
-            let download_button = document.createElement("button");
-            download_button.id = `download_button_${i}`;
-            download_button.className = "download_button";
-            download_button.innerHTML = "Download Clique";
+            dag_p.innerHTML = "Gene significance across 5 cohorts (signed -log<sub>10</sub> meta-<i>p</i>).<br>Scroll to zoom, click and drag to move nodes.";
+            // let download_button = document.createElement("button");
+            // download_button.id = `download_button_${i}`;
+            // download_button.className = "download_button";
+            // download_button.innerHTML = "Download Clique";
             dag_container.appendChild(dag_div);
             dag_container.appendChild(dag_p);
-            dag_container.appendChild(download_button);
+            // dag_container.appendChild(download_button);
             info_div.appendChild(table);
             result_sub.appendChild(info_div);
             result_sub.appendChild(dag_container);
@@ -273,10 +273,10 @@ function clique_page(echarts) {
                             tumor_expression_table.style.marginTop = "1em";
                             let tumor_expression_header = document.createElement("h5");
                             tumor_expression_header.className = "info_heading";
-                            tumor_expression_header.innerHTML = "Tumor Expression";
+                            tumor_expression_header.innerHTML = "Tumor Expression by Cohort";
                             let tumor_expression_subtitle = document.createElement("small");
                             tumor_expression_subtitle.className = "subtitle";
-                            tumor_expression_subtitle.innerHTML = "Tumor expression of genes in the clique";
+                            tumor_expression_subtitle.innerHTML = "The <i>p</i>-values were derived from difference in average protein abundance of clique genes between tumor and normal samples by Wilcoxon rank-sum test.";
                             info_div.appendChild(tumor_expression_header);
                             info_div.appendChild(tumor_expression_subtitle);
                             info_div.appendChild(tumor_expression_table);
@@ -285,10 +285,10 @@ function clique_page(echarts) {
                             survival_table.style.marginTop = "1em";
                             let survival_header = document.createElement("h5");
                             survival_header.className = "info_heading";
-                            survival_header.innerHTML = "Patient Overall Survival";
+                            survival_header.innerHTML = "Patient Overall Survival by Cohort";
                             let survival_subtitle = document.createElement("small");
                             survival_subtitle.className = "subtitle";
-                            survival_subtitle.innerHTML = "Survival analysis of genes in the clique";
+                            survival_subtitle.innerHTML = "Logrank <i>p</i>-values were derived from Cox-proportional hazard models using average protein abundance of clique genes stratified by median.";
                             info_div.appendChild(survival_header);
                             info_div.appendChild(survival_subtitle);
                             info_div.appendChild(survival_table);
@@ -321,16 +321,16 @@ function clique_page(echarts) {
                                 member_text += "</p>";
                                 member_list.innerHTML = member_text;
                                 member_subtitle.innerHTML = `${member_data.length} members`;
-                                info_div.appendChild(member_header);
-                                info_div.appendChild(member_subtitle);
-                                info_div.appendChild(member_list);
+                                dag_container.appendChild(member_header);
+                                dag_container.appendChild(member_subtitle);
+                                dag_container.appendChild(member_list);
                                 window.addEventListener("resize", function () {
                                     chart.resize();
                                 });
                                 chart.resize();
-                                download_button.onclick = function () {
-                                    download(chart.getOption().series[0], `clique_${clique_id.replace("C", "")}.json`);
-                                };
+                                // download_button.onclick = function () {
+                                //     download(chart.getOption().series[0], `clique_${clique_id.replace("C", "")}.json`);
+                                // };
                                 if (gene_id != null) {
                                     chart.dispatchAction({
                                         type: "highlight",

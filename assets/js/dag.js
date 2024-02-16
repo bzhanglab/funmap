@@ -159,8 +159,8 @@ function create_dag(
             top: "bottom",
           },
           text: [
-            "Signed log10 meta-p\n\nHigher in Tumor vs. Normal",
-            "Lower in Tumor vs. Normal",
+            "Tumor\nOver-expressed",
+            "Tumor\nUnder-expressed",
           ],
           precision: 3,
           inRange: {

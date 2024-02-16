@@ -112,12 +112,12 @@
                 <h5 style="margin-bottom: 0pt">Neighborhood Members</h5>
                 <div id="members">
                 </div>
-                <button id="download_button">Download Neighborhood</button>
+                <!-- <button id="download_button">Download Neighborhood</button> -->
             </div>
             <div style="flex-grow:1;">
                 <div id="dag" style="width: 100%; height: 100%; border: 1px solid black"></div>
                 <p style="color: var(--color-body-light); font-size: var(--unit); text-align: center">
-                    Scroll to zoom, click and drag to move nodes.
+                    Gene significance across 5 cohorts (signed -log<sub>10</sub> meta-<i>p</i>).<br>Scroll to zoom, click and drag to move nodes.
                 <p>
             </div>
         </div>
@@ -188,10 +188,10 @@
                     }
                     member_text += "</p>";
                     member_list.innerHTML = member_text;
-                    let download_button = document.getElementById("download_button");
-                    download_button.onclick = function () {
-                        download(chart.getOption().series[0], `${gene_id}_neighborhood.json`)
-                    };
+                    // let download_button = document.getElementById("download_button");
+                    // download_button.onclick = function () {
+                    //     download(chart.getOption().series[0], `${gene_id}_neighborhood.json`)
+                    // };
                 });
                 fetch(`../data/go/gene/${gene_id}.json`)
                     .then((res) => res.json())
