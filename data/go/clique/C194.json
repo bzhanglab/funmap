@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0004386", "set_name": "helicase activity", "fdr": "1"}, "gobp": {"set": "GO:0035562", "set_name": "negative regulation of chromatin binding", "fdr": "0.018168245"}, "gocc": {"set": "GO:0000785", "set_name": "chromatin", "fdr": "0.5111547"}}
+{"gomf": {"set": "GO:0004386", "set_name": "helicase activity", "p": "0.001041082", "fdr": "1"}, "gobp": {"set": "GO:0035562", "set_name": "negative regulation of chromatin binding", "p": "1.98E-06", "fdr": "0.018168245"}, "gocc": {"set": "GO:0000785", "set_name": "chromatin", "p": "0.001369518", "fdr": "0.5111547"}}

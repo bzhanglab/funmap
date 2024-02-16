@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0042393", "set_name": "histone binding", "fdr": "1"}, "gobp": {"set": "GO:1903311", "set_name": "regulation of mRNA metabolic process", "fdr": "1"}, "gocc": {"set": "GO:0005845", "set_name": "mRNA cap binding complex", "fdr": "1"}}
+{"gomf": {"set": "GO:0042393", "set_name": "histone binding", "p": "0.002384948", "fdr": "1"}, "gobp": {"set": "GO:1903311", "set_name": "regulation of mRNA metabolic process", "p": "2.15E-04", "fdr": "1"}, "gocc": {"set": "GO:0005845", "set_name": "mRNA cap binding complex", "p": "0.004448032", "fdr": "1"}}

@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0003779", "set_name": "actin binding", "fdr": "1.73E-12"}, "gobp": {"set": "GO:0008154", "set_name": "actin polymerization or depolymerization", "fdr": "0"}, "gocc": {"set": "GO:0005885", "set_name": "Arp2/3 protein complex", "fdr": "1.14E-11"}}
+{"gomf": {"set": "GO:0003779", "set_name": "actin binding", "p": "8.88E-16", "fdr": "1.73E-12"}, "gobp": {"set": "GO:0008154", "set_name": "actin polymerization or depolymerization", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0005885", "set_name": "Arp2/3 protein complex", "p": "8.99E-15", "fdr": "1.14E-11"}}

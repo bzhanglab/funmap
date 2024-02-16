@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0001228", "set_name": "DNA-binding transcription activator activity, RNA polymerase II-specific", "fdr": "1"}, "gobp": {"set": "NA", "set_name": "NA", "fdr": "1"}, "gocc": {"set": "NA", "set_name": "NA", "fdr": "1"}}
+{"gomf": {"set": "GO:0001228", "set_name": "DNA-binding transcription activator activity, RNA polymerase II-specific", "p": "0.022615946", "fdr": "1"}, "gobp": {"set": "NA", "set_name": "NA", "p": "1", "fdr": "1"}, "gocc": {"set": "NA", "set_name": "NA", "p": "1", "fdr": "1"}}

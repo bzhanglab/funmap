@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0003779", "set_name": "actin binding", "fdr": "9.41E-08"}, "gobp": {"set": "GO:0006936", "set_name": "muscle contraction", "fdr": "4.93E-06"}, "gocc": {"set": "GO:0030016", "set_name": "myofibril", "fdr": "1.18E-10"}}
+{"gomf": {"set": "GO:0003779", "set_name": "actin binding", "p": "4.84E-11", "fdr": "9.41E-08"}, "gobp": {"set": "GO:0006936", "set_name": "muscle contraction", "p": "5.38E-10", "fdr": "4.93E-06"}, "gocc": {"set": "GO:0030016", "set_name": "myofibril", "p": "1.07E-13", "fdr": "1.18E-10"}}

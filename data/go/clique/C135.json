@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0030695", "set_name": "GTPase regulator activity", "fdr": "2.64E-07"}, "gobp": {"set": "GO:0046649", "set_name": "lymphocyte activation", "fdr": "6.14E-09"}, "gocc": {"set": "GO:0001891", "set_name": "phagocytic cup", "fdr": "0.015681429"}}
+{"gomf": {"set": "GO:0030695", "set_name": "GTPase regulator activity", "p": "1.36E-10", "fdr": "2.64E-07"}, "gobp": {"set": "GO:0046649", "set_name": "lymphocyte activation", "p": "6.70E-13", "fdr": "6.14E-09"}, "gocc": {"set": "GO:0001891", "set_name": "phagocytic cup", "p": "1.29E-05", "fdr": "0.015681429"}}

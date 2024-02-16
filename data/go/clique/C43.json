@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0016887", "set_name": "ATPase activity", "fdr": "2.14E-04"}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "fdr": "2.41E-08"}, "gocc": {"set": "GO:0000781", "set_name": "chromosome, telomeric region", "fdr": "1.58E-07"}}
+{"gomf": {"set": "GO:0016887", "set_name": "ATPase activity", "p": "2.03E-07", "fdr": "2.14E-04"}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": "2.63E-12", "fdr": "2.41E-08"}, "gocc": {"set": "GO:0000781", "set_name": "chromosome, telomeric region", "p": "1.25E-10", "fdr": "1.58E-07"}}

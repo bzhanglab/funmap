@@ -24,9 +24,6 @@ function clique_page(echarts) {
         for (let i = 0; i < data["rows"].length; i++) {
             let th = document.createElement("th");
             let val = data["rows"][i];
-            if (val == "Hazard Ratio") {
-                val = "<abbr title=\"Explanation of Hazard Ratio\">Hazard Ratio</abbr>";
-            }
             th.innerHTML = val;
             header.appendChild(th);
         }
@@ -200,15 +197,20 @@ function clique_page(echarts) {
             let th3 = document.createElement("th");
             th3.innerHTML = "Go Term";
             let th4 = document.createElement("th");
-            th4.innerHTML = "FDR";
+            th4.innerHTML = "<i>p</i>-Value";
+            th4.style.whiteSpace = "nowrap";
+            let th5 = document.createElement("th");
+            th5.innerHTML = "FDR";
             tr.appendChild(th1);
             tr.appendChild(th2);
             tr.appendChild(th3);
             tr.appendChild(th4);
+            tr.appendChild(th5);
             thead.appendChild(tr);
             let table_body = document.createElement("tbody");
             table_body.id = `table_body_${i}`;
             table.appendChild(thead);
+            table.className = "long_table";
             let clique_id = clique_ids[i];
             let clique_type = "dense_modules";
             let dag_container = document.createElement("div");
@@ -250,16 +252,20 @@ function clique_page(echarts) {
                         let go_category = document.createElement("td");
                         let go_id = document.createElement("td");
                         let go_term = document.createElement("td");
+                        let p_col = document.createElement("td");
                         let fdr = document.createElement("td");
                         go_category.innerHTML = category_name[go_cat];
                         let go_id_text = data[go_cat].set;
                         go_id.innerHTML = `<a href="https://amigo.geneontology.org/amigo/term/${go_id_text}" target="_blank">${go_id_text}</a>`;
                         go_term.innerHTML = data[go_cat].set_name;
+                        let p_val = parseFloat(data[go_cat].p);
+                        p_col.innerHTML = p_val != 0.0 ? p_val.toExponential(2) : "< 2.20e-16";
                         let fdr_val = parseFloat(data[go_cat].fdr);
                         fdr.innerHTML = fdr_val != 0.0 ? fdr_val.toExponential(2) : "< 2.20e-16";
                         row.appendChild(go_category);
                         row.appendChild(go_id);
                         row.appendChild(go_term);
+                        row.appendChild(p_col);
                         row.appendChild(fdr);
                         table_body.appendChild(row);
                     }

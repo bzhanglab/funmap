@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0017056", "set_name": "structural constituent of nuclear pore", "fdr": "0"}, "gobp": {"set": "GO:0031503", "set_name": "protein-containing complex localization", "fdr": "0"}, "gocc": {"set": "GO:0005635", "set_name": "nuclear envelope", "fdr": "0"}}
+{"gomf": {"set": "GO:0017056", "set_name": "structural constituent of nuclear pore", "p": "0", "fdr": "0"}, "gobp": {"set": "GO:0031503", "set_name": "protein-containing complex localization", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0005635", "set_name": "nuclear envelope", "p": "0", "fdr": "0"}}

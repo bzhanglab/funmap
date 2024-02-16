@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0019787", "set_name": "ubiquitin-like protein transferase activity", "fdr": "1"}, "gobp": {"set": "GO:0006310", "set_name": "DNA recombination", "fdr": "4.24E-07"}, "gocc": {"set": "GO:0030915", "set_name": "Smc5-Smc6 complex", "fdr": "0"}}
+{"gomf": {"set": "GO:0019787", "set_name": "ubiquitin-like protein transferase activity", "p": "0.002204875", "fdr": "1"}, "gobp": {"set": "GO:0006310", "set_name": "DNA recombination", "p": "4.62E-11", "fdr": "4.24E-07"}, "gocc": {"set": "GO:0030915", "set_name": "Smc5-Smc6 complex", "p": "0", "fdr": "0"}}

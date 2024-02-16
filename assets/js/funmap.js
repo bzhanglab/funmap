@@ -78,6 +78,7 @@ function funmap(echarts, config = {}) {
                     tooltip: {
                       trigger: "item",
                       triggerOn: "mousemove",
+                      confine: true,
                       formatter: function (params, ticket, callback) {
                         node_go = go_data[params.name];
                         let hallmark_string = "";
@@ -96,11 +97,17 @@ function funmap(echarts, config = {}) {
                         if (hallmark_string == "") {
                           hallmark_string = "No Hallmarks";
                         }
-                        var content = `<h1 style="text-align:center;">${params.name}</h1><h2>Cancer Hallmarks: ${hallmark_string}</h2><br><h3 style="text-align:center;">Top GO Terms</h3><table style="width: 100%"><thead><tr><th>GO Category</th><th>GO ID</th><th>Name</th><th>p-Value</th></tr></thead><tbody><tr><td>Biological Process</td><td>${node_go["gobp"]["id"]}</td><td>${node_go["gobp"]["name"]}</td><td>${node_go["gobp"]["p"] == "0" ? "< 2.20e-16" : parseFloat(node_go["gobp"]["p"]).toExponential(2)}</td></tr><tr><td>Cellular Component</td><td>${node_go["gocc"]["id"]}</td><td>${node_go["gocc"]["name"]}</td><td>${node_go["gocc"]["p"] == "0" ? "< 2.20e-16" : parseFloat(node_go["gocc"]["p"]).toExponential(2)}</td></tr><tr><td>Molecular Function</td><td>${node_go["gomf"]["id"]}</td><td>${node_go["gomf"]["name"]}</td><td>${node_go["gomf"]["p"] == "0" ? "< 2.20e-16" : parseFloat(node_go["gomf"]["p"]).toExponential(2)}</td></tr></tbody></table>`;
+                        var content = `<h5 style="text-align:center;">${params.name}</h5><h6>Cancer Hallmarks: ${hallmark_string}</h6><br><h6 style="text-align:center;">Top GO Terms</h6><table style="width: 100%" class="tooltip_table"><thead><tr><th>GO Category</th><th>GO ID</th><th>Name</th><th>p-Value</th></tr></thead><tbody><tr><td>Biological Process</td><td>${node_go["gobp"]["id"]}</td><td>${node_go["gobp"]["name"]}</td><td>${node_go["gobp"]["p"] == "0" ? "< 2.20e-16" : parseFloat(node_go["gobp"]["p"]).toExponential(2)}</td></tr><tr><td>Cellular Component</td><td>${node_go["gocc"]["id"]}</td><td>${node_go["gocc"]["name"]}</td><td>${node_go["gocc"]["p"] == "0" ? "< 2.20e-16" : parseFloat(node_go["gocc"]["p"]).toExponential(2)}</td></tr><tr><td>Molecular Function</td><td>${node_go["gomf"]["id"]}</td><td>${node_go["gomf"]["name"]}</td><td>${node_go["gomf"]["p"] == "0" ? "< 2.20e-16" : parseFloat(node_go["gomf"]["p"]).toExponential(2)}</td></tr></tbody></table>`;
                         let el = document.createElement("div");
                         el.innerHTML = content;
+                        el.style.maxWidth = "100%";
+                        el.style.textAlign = "center";
+                        el.style.fontSize = "0.55vw";
+                        el.style.lineHeight = "0.5vw";
                         return el;
                       },
+                      extraCssText: "max-width: 30%;",
+                      className: "tooltip",
                     },
                     toolbox: {
                       show: true,

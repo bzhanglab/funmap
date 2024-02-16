@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0017069", "set_name": "snRNA binding", "fdr": "0.942672884"}, "gobp": {"set": "GO:0008380", "set_name": "RNA splicing", "fdr": "0.07317738"}, "gocc": {"set": "GO:0044454", "set_name": "nuclear chromosome part", "fdr": "0.058582579"}}
+{"gomf": {"set": "GO:0017069", "set_name": "snRNA binding", "p": "4.85E-04", "fdr": "0.942672884"}, "gobp": {"set": "GO:0008380", "set_name": "RNA splicing", "p": "7.98E-06", "fdr": "0.07317738"}, "gocc": {"set": "GO:0044454", "set_name": "nuclear chromosome part", "p": "7.32E-05", "fdr": "0.058582579"}}

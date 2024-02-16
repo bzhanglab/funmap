@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0003682", "set_name": "chromatin binding", "fdr": "0.98688369"}, "gobp": {"set": "GO:0006338", "set_name": "chromatin remodeling", "fdr": "1"}, "gocc": {"set": "GO:0010369", "set_name": "chromocenter", "fdr": "1"}}
+{"gomf": {"set": "GO:0003682", "set_name": "chromatin binding", "p": "5.07E-04", "fdr": "0.98688369"}, "gobp": {"set": "GO:0006338", "set_name": "chromatin remodeling", "p": "0.001533263", "fdr": "1"}, "gocc": {"set": "GO:0010369", "set_name": "chromocenter", "p": "0.003640405", "fdr": "1"}}

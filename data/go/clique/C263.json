@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0051537", "set_name": "2 iron, 2 sulfur cluster binding", "fdr": "1"}, "gobp": {"set": "GO:0042026", "set_name": "protein refolding", "fdr": "1"}, "gocc": {"set": "GO:0005758", "set_name": "mitochondrial intermembrane space", "fdr": "1"}}
+{"gomf": {"set": "GO:0051537", "set_name": "2 iron, 2 sulfur cluster binding", "p": "0.005617964", "fdr": "1"}, "gobp": {"set": "GO:0042026", "set_name": "protein refolding", "p": "0.005655029", "fdr": "1"}, "gocc": {"set": "GO:0005758", "set_name": "mitochondrial intermembrane space", "p": "0.012314408", "fdr": "1"}}

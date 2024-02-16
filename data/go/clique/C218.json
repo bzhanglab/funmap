@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0003735", "set_name": "structural constituent of ribosome", "fdr": "3.16E-04"}, "gobp": {"set": "GO:0006412", "set_name": "translation", "fdr": "2.07E-07"}, "gocc": {"set": "GO:0022626", "set_name": "cytosolic ribosome", "fdr": "2.66E-05"}}
+{"gomf": {"set": "GO:0003735", "set_name": "structural constituent of ribosome", "p": "1.63E-07", "fdr": "3.16E-04"}, "gobp": {"set": "GO:0006412", "set_name": "translation", "p": "2.40E-11", "fdr": "2.07E-07"}, "gocc": {"set": "GO:0022626", "set_name": "cytosolic ribosome", "p": "2.10E-08", "fdr": "2.66E-05"}}

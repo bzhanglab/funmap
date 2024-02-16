@@ -1,1 +1,1 @@
-{"gomf": {"set": "NA", "set_name": "NA", "fdr": "1"}, "gobp": {"set": "GO:0003341", "set_name": "cilium movement", "fdr": "0.218342993"}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "fdr": "1"}}
+{"gomf": {"set": "NA", "set_name": "NA", "p": "1", "fdr": "1"}, "gobp": {"set": "GO:0003341", "set_name": "cilium movement", "p": "2.38E-05", "fdr": "0.218342993"}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": "0.003129381", "fdr": "1"}}

@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0048408", "set_name": "epidermal growth factor binding", "fdr": "1"}, "gobp": {"set": "GO:0042113", "set_name": "B cell activation", "fdr": "1"}, "gocc": {"set": "GO:0097268", "set_name": "cytoophidium", "fdr": "1"}}
+{"gomf": {"set": "GO:0048408", "set_name": "epidermal growth factor binding", "p": "0.002083116", "fdr": "1"}, "gobp": {"set": "GO:0042113", "set_name": "B cell activation", "p": "0.002544063", "fdr": "1"}, "gocc": {"set": "GO:0097268", "set_name": "cytoophidium", "p": "0.001214575", "fdr": "1"}}

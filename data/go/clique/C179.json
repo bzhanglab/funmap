@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0003923", "set_name": "GPI-anchor transamidase activity", "fdr": "0"}, "gobp": {"set": "GO:0016255", "set_name": "attachment of GPI anchor to protein", "fdr": "0"}, "gocc": {"set": "GO:0042765", "set_name": "GPI-anchor transamidase complex", "fdr": "0"}}
+{"gomf": {"set": "GO:0003923", "set_name": "GPI-anchor transamidase activity", "p": "0", "fdr": "0"}, "gobp": {"set": "GO:0016255", "set_name": "attachment of GPI anchor to protein", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0042765", "set_name": "GPI-anchor transamidase complex", "p": "0", "fdr": "0"}}

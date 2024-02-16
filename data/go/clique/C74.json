@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0003729", "set_name": "mRNA binding", "fdr": "0.446273084"}, "gobp": {"set": "GO:0046784", "set_name": "viral mRNA export from host cell nucleus", "fdr": "2.71E-10"}, "gocc": {"set": "GO:0000347", "set_name": "THO complex", "fdr": "2.24E-12"}}
+{"gomf": {"set": "GO:0003729", "set_name": "mRNA binding", "p": "2.29E-04", "fdr": "0.446273084"}, "gobp": {"set": "GO:0046784", "set_name": "viral mRNA export from host cell nucleus", "p": "3.94E-14", "fdr": "2.71E-10"}, "gocc": {"set": "GO:0000347", "set_name": "THO complex", "p": "3.55E-15", "fdr": "2.24E-12"}}

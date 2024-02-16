@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0017160", "set_name": "Ral GTPase binding", "fdr": "2.72E-08"}, "gobp": {"set": "GO:0006893", "set_name": "Golgi to plasma membrane transport", "fdr": "1.11E-06"}, "gocc": {"set": "GO:0099023", "set_name": "tethering complex", "fdr": "0"}}
+{"gomf": {"set": "GO:0017160", "set_name": "Ral GTPase binding", "p": "1.40E-11", "fdr": "2.72E-08"}, "gobp": {"set": "GO:0006893", "set_name": "Golgi to plasma membrane transport", "p": "2.42E-10", "fdr": "1.11E-06"}, "gocc": {"set": "GO:0099023", "set_name": "tethering complex", "p": "0", "fdr": "0"}}

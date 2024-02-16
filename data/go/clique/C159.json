@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0045503", "set_name": "dynein light chain binding", "fdr": "8.13E-05"}, "gobp": {"set": "GO:0003341", "set_name": "cilium movement", "fdr": "0.035568381"}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "fdr": "4.74E-08"}}
+{"gomf": {"set": "GO:0045503", "set_name": "dynein light chain binding", "p": "4.18E-08", "fdr": "8.13E-05"}, "gobp": {"set": "GO:0003341", "set_name": "cilium movement", "p": "3.88E-06", "fdr": "0.035568381"}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": "3.75E-11", "fdr": "4.74E-08"}}

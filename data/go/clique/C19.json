@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0050662", "set_name": "coenzyme binding", "fdr": "4.97E-07"}, "gobp": {"set": "GO:0016054", "set_name": "organic acid catabolic process", "fdr": "0"}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "fdr": "0"}}
+{"gomf": {"set": "GO:0050662", "set_name": "coenzyme binding", "p": "2.55E-10", "fdr": "4.97E-07"}, "gobp": {"set": "GO:0016054", "set_name": "organic acid catabolic process", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "p": "0", "fdr": "0"}}

@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0008134", "set_name": "transcription factor binding", "fdr": "0.104112991"}, "gobp": {"set": "GO:0007296", "set_name": "vitellogenesis", "fdr": "1"}, "gocc": {"set": "GO:0033553", "set_name": "rDNA heterochromatin", "fdr": "1"}}
+{"gomf": {"set": "GO:0008134", "set_name": "transcription factor binding", "p": "5.35E-05", "fdr": "0.104112991"}, "gobp": {"set": "GO:0007296", "set_name": "vitellogenesis", "p": "0.002515854", "fdr": "1"}, "gocc": {"set": "GO:0033553", "set_name": "rDNA heterochromatin", "p": "0.002023676", "fdr": "1"}}

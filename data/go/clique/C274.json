@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0030911", "set_name": "TPR domain binding", "fdr": "0.004432425"}, "gobp": {"set": "GO:0009408", "set_name": "response to heat", "fdr": "5.65E-04"}, "gocc": {"set": "GO:0044294", "set_name": "dendritic growth cone", "fdr": "0.005432586"}}
+{"gomf": {"set": "GO:0030911", "set_name": "TPR domain binding", "p": "3.26E-06", "fdr": "0.004432425"}, "gobp": {"set": "GO:0009408", "set_name": "response to heat", "p": "6.89E-08", "fdr": "5.65E-04"}, "gocc": {"set": "GO:0044294", "set_name": "dendritic growth cone", "p": "4.30E-06", "fdr": "0.005432586"}}

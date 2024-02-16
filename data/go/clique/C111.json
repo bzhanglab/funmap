@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0003779", "set_name": "actin binding", "fdr": "3.47E-04"}, "gobp": {"set": "GO:0007229", "set_name": "integrin-mediated signaling pathway", "fdr": "0.039889029"}, "gocc": {"set": "GO:0005925", "set_name": "focal adhesion", "fdr": "1.07E-10"}}
+{"gomf": {"set": "GO:0003779", "set_name": "actin binding", "p": "1.78E-07", "fdr": "3.47E-04"}, "gobp": {"set": "GO:0007229", "set_name": "integrin-mediated signaling pathway", "p": "4.35E-06", "fdr": "0.039889029"}, "gocc": {"set": "GO:0005925", "set_name": "focal adhesion", "p": "2.20E-13", "fdr": "1.07E-10"}}

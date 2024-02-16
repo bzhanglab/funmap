@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0004407", "set_name": "histone deacetylase activity", "fdr": "1"}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "fdr": "5.18E-09"}, "gocc": {"set": "GO:0016607", "set_name": "nuclear speck", "fdr": "3.01E-10"}}
+{"gomf": {"set": "GO:0004407", "set_name": "histone deacetylase activity", "p": "0.001220713", "fdr": "1"}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": "5.65E-13", "fdr": "5.18E-09"}, "gocc": {"set": "GO:0016607", "set_name": "nuclear speck", "p": "2.38E-13", "fdr": "3.01E-10"}}

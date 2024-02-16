@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0008270", "set_name": "zinc ion binding", "fdr": "8.95E-08"}, "gobp": {"set": "GO:0010043", "set_name": "response to zinc ion", "fdr": "0"}, "gocc": {"set": "GO:0048471", "set_name": "perinuclear region of cytoplasm", "fdr": "3.97E-08"}}
+{"gomf": {"set": "GO:0008270", "set_name": "zinc ion binding", "p": "4.60E-11", "fdr": "8.95E-08"}, "gobp": {"set": "GO:0010043", "set_name": "response to zinc ion", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0048471", "set_name": "perinuclear region of cytoplasm", "p": "3.15E-11", "fdr": "3.97E-08"}}

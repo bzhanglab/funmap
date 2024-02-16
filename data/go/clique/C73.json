@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0070051", "set_name": "fibrinogen binding", "fdr": "0.011396871"}, "gobp": {"set": "GO:0002576", "set_name": "platelet degranulation", "fdr": "1.25E-06"}, "gocc": {"set": "GO:0031091", "set_name": "platelet alpha granule", "fdr": "1.92E-08"}}
+{"gomf": {"set": "GO:0070051", "set_name": "fibrinogen binding", "p": "5.86E-06", "fdr": "0.011396871"}, "gobp": {"set": "GO:0002576", "set_name": "platelet degranulation", "p": "3.32E-10", "fdr": "1.25E-06"}, "gocc": {"set": "GO:0031091", "set_name": "platelet alpha granule", "p": "1.52E-11", "fdr": "1.92E-08"}}

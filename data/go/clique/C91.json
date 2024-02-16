@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0030515", "set_name": "snoRNA binding", "fdr": "2.16E-13"}, "gobp": {"set": "GO:0022613", "set_name": "ribonucleoprotein complex biogenesis", "fdr": "0"}, "gocc": {"set": "GO:0044452", "set_name": "nucleolar part", "fdr": "0"}}
+{"gomf": {"set": "GO:0030515", "set_name": "snoRNA binding", "p": "1.11E-16", "fdr": "2.16E-13"}, "gobp": {"set": "GO:0022613", "set_name": "ribonucleoprotein complex biogenesis", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0044452", "set_name": "nucleolar part", "p": "0", "fdr": "0"}}

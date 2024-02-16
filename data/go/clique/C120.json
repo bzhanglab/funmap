@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0031996", "set_name": "thioesterase binding", "fdr": "1"}, "gobp": {"set": "GO:0051225", "set_name": "spindle assembly", "fdr": "0"}, "gocc": {"set": "GO:0070652", "set_name": "HAUS complex", "fdr": "0"}}
+{"gomf": {"set": "GO:0031996", "set_name": "thioesterase binding", "p": "0.001875195", "fdr": "1"}, "gobp": {"set": "GO:0051225", "set_name": "spindle assembly", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0070652", "set_name": "HAUS complex", "p": "0", "fdr": "0"}}

@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0016853", "set_name": "isomerase activity", "fdr": "0.428037713"}, "gobp": {"set": "GO:0006066", "set_name": "alcohol metabolic process", "fdr": "0"}, "gocc": {"set": "GO:0005811", "set_name": "lipid droplet", "fdr": "0.423220828"}}
+{"gomf": {"set": "GO:0016853", "set_name": "isomerase activity", "p": "2.20E-04", "fdr": "0.428037713"}, "gobp": {"set": "GO:0006066", "set_name": "alcohol metabolic process", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0005811", "set_name": "lipid droplet", "p": "3.35E-04", "fdr": "0.423220828"}}

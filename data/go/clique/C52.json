@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0045296", "set_name": "cadherin binding", "fdr": "1"}, "gobp": {"set": "GO:0006888", "set_name": "ER to Golgi vesicle-mediated transport", "fdr": "0"}, "gocc": {"set": "GO:0005798", "set_name": "Golgi-associated vesicle", "fdr": "0"}}
+{"gomf": {"set": "GO:0045296", "set_name": "cadherin binding", "p": "0.00118429", "fdr": "1"}, "gobp": {"set": "GO:0006888", "set_name": "ER to Golgi vesicle-mediated transport", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0005798", "set_name": "Golgi-associated vesicle", "p": "0", "fdr": "0"}}

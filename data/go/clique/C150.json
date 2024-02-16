@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0003729", "set_name": "mRNA binding", "fdr": "0.446273084"}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "fdr": "0.010101875"}, "gocc": {"set": "GO:0016607", "set_name": "nuclear speck", "fdr": "0.004099278"}}
+{"gomf": {"set": "GO:0003729", "set_name": "mRNA binding", "p": "2.29E-04", "fdr": "0.446273084"}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": "1.17E-06", "fdr": "0.010101875"}, "gocc": {"set": "GO:0016607", "set_name": "nuclear speck", "p": "3.25E-06", "fdr": "0.004099278"}}

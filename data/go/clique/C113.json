@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0038023", "set_name": "signaling receptor activity", "fdr": "0.058076613"}, "gobp": {"set": "GO:0006954", "set_name": "inflammatory response", "fdr": "0.285539239"}, "gocc": {"set": "GO:0043196", "set_name": "varicosity", "fdr": "1"}}
+{"gomf": {"set": "GO:0038023", "set_name": "signaling receptor activity", "p": "4.34E-05", "fdr": "0.058076613"}, "gobp": {"set": "GO:0006954", "set_name": "inflammatory response", "p": "3.11E-05", "fdr": "0.285539239"}, "gocc": {"set": "GO:0043196", "set_name": "varicosity", "p": "0.001821493", "fdr": "1"}}

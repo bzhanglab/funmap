@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0005200", "set_name": "structural constituent of cytoskeleton", "fdr": "1"}, "gobp": {"set": "GO:0031424", "set_name": "keratinization", "fdr": "0"}, "gocc": {"set": "GO:0001533", "set_name": "cornified envelope", "fdr": "1.26E-12"}}
+{"gomf": {"set": "GO:0005200", "set_name": "structural constituent of cytoskeleton", "p": "8.86E-04", "fdr": "1"}, "gobp": {"set": "GO:0031424", "set_name": "keratinization", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0001533", "set_name": "cornified envelope", "p": "9.99E-16", "fdr": "1.26E-12"}}

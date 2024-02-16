@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0008017", "set_name": "microtubule binding", "fdr": "1.23E-04"}, "gobp": {"set": "GO:0051301", "set_name": "cell division", "fdr": "0"}, "gocc": {"set": "GO:0000793", "set_name": "condensed chromosome", "fdr": "0"}}
+{"gomf": {"set": "GO:0008017", "set_name": "microtubule binding", "p": "6.32E-08", "fdr": "1.23E-04"}, "gobp": {"set": "GO:0051301", "set_name": "cell division", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0000793", "set_name": "condensed chromosome", "p": "0", "fdr": "0"}}

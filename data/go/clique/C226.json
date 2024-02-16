@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0008017", "set_name": "microtubule binding", "fdr": "1"}, "gobp": {"set": "GO:0035082", "set_name": "axoneme assembly", "fdr": "1.49E-05"}, "gocc": {"set": "GO:0005930", "set_name": "axoneme", "fdr": "3.93E-05"}}
+{"gomf": {"set": "GO:0008017", "set_name": "microtubule binding", "p": "0.036351189", "fdr": "1"}, "gobp": {"set": "GO:0035082", "set_name": "axoneme assembly", "p": "1.62E-09", "fdr": "1.49E-05"}, "gocc": {"set": "GO:0005930", "set_name": "axoneme", "p": "6.22E-08", "fdr": "3.93E-05"}}

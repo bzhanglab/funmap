@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0008307", "set_name": "structural constituent of muscle", "fdr": "0.022074632"}, "gobp": {"set": "GO:0006936", "set_name": "muscle contraction", "fdr": "5.22E-07"}, "gocc": {"set": "GO:0043292", "set_name": "contractile fiber", "fdr": "0"}}
+{"gomf": {"set": "GO:0008307", "set_name": "structural constituent of muscle", "p": "1.13E-05", "fdr": "0.022074632"}, "gobp": {"set": "GO:0006936", "set_name": "muscle contraction", "p": "5.69E-11", "fdr": "5.22E-07"}, "gocc": {"set": "GO:0043292", "set_name": "contractile fiber", "p": "0", "fdr": "0"}}

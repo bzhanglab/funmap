@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0003735", "set_name": "structural constituent of ribosome", "fdr": "0"}, "gobp": {"set": "GO:0022411", "set_name": "cellular component disassembly", "fdr": "0"}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "fdr": "0"}}
+{"gomf": {"set": "GO:0003735", "set_name": "structural constituent of ribosome", "p": "0", "fdr": "0"}, "gobp": {"set": "GO:0022411", "set_name": "cellular component disassembly", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "p": "0", "fdr": "0"}}

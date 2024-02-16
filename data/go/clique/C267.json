@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0045296", "set_name": "cadherin binding", "fdr": "0.001303666"}, "gobp": {"set": "GO:0071680", "set_name": "response to indole-3-methanol", "fdr": "1.27E-06"}, "gocc": {"set": "GO:0016342", "set_name": "catenin complex", "fdr": "4.35E-09"}}
+{"gomf": {"set": "GO:0045296", "set_name": "cadherin binding", "p": "6.70E-07", "fdr": "0.001303666"}, "gobp": {"set": "GO:0071680", "set_name": "response to indole-3-methanol", "p": "2.77E-10", "fdr": "1.27E-06"}, "gocc": {"set": "GO:0016342", "set_name": "catenin complex", "p": "3.44E-12", "fdr": "4.35E-09"}}

@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0038023", "set_name": "signaling receptor activity", "fdr": "3.06E-08"}, "gobp": {"set": "GO:0046649", "set_name": "lymphocyte activation", "fdr": "0"}, "gocc": {"set": "GO:0042613", "set_name": "MHC class II protein complex", "fdr": "7.29E-12"}}
+{"gomf": {"set": "GO:0038023", "set_name": "signaling receptor activity", "p": "1.57E-11", "fdr": "3.06E-08"}, "gobp": {"set": "GO:0046649", "set_name": "lymphocyte activation", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:0042613", "set_name": "MHC class II protein complex", "p": "5.77E-15", "fdr": "7.29E-12"}}

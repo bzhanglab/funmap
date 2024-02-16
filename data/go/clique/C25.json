@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0030506", "set_name": "ankyrin binding", "fdr": "0.001211184"}, "gobp": {"set": "GO:0048821", "set_name": "erythrocyte development", "fdr": "6.02E-04"}, "gocc": {"set": "GO:0030863", "set_name": "cortical cytoskeleton", "fdr": "4.45E-10"}}
+{"gomf": {"set": "GO:0030506", "set_name": "ankyrin binding", "p": "6.23E-07", "fdr": "0.001211184"}, "gobp": {"set": "GO:0048821", "set_name": "erythrocyte development", "p": "6.56E-08", "fdr": "6.02E-04"}, "gocc": {"set": "GO:0030863", "set_name": "cortical cytoskeleton", "p": "3.52E-13", "fdr": "4.45E-10"}}

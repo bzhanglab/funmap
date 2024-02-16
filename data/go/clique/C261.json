@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0004311", "set_name": "farnesyltranstransferase activity", "fdr": "1"}, "gobp": {"set": "GO:0045337", "set_name": "farnesyl diphosphate biosynthetic process", "fdr": "1"}, "gocc": {"set": "NA", "set_name": "NA", "fdr": "1"}}
+{"gomf": {"set": "GO:0004311", "set_name": "farnesyltranstransferase activity", "p": "0.00125026", "fdr": "1"}, "gobp": {"set": "GO:0045337", "set_name": "farnesyl diphosphate biosynthetic process", "p": "0.001677764", "fdr": "1"}, "gocc": {"set": "NA", "set_name": "NA", "p": "1", "fdr": "1"}}

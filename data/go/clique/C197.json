@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0016887", "set_name": "ATPase activity", "fdr": "0.001401408"}, "gobp": {"set": "GO:0006270", "set_name": "DNA replication initiation", "fdr": "4.87E-09"}, "gocc": {"set": "GO:0098687", "set_name": "chromosomal region", "fdr": "1.25E-07"}}
+{"gomf": {"set": "GO:0016887", "set_name": "ATPase activity", "p": "7.21E-07", "fdr": "0.001401408"}, "gobp": {"set": "GO:0006270", "set_name": "DNA replication initiation", "p": "5.30E-13", "fdr": "4.87E-09"}, "gocc": {"set": "GO:0098687", "set_name": "chromosomal region", "p": "9.92E-11", "fdr": "1.25E-07"}}

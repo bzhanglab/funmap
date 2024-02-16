@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0019864", "set_name": "IgG binding", "fdr": "0.047785967"}, "gobp": {"set": "GO:0006954", "set_name": "inflammatory response", "fdr": "2.44E-05"}, "gocc": {"set": "GO:0009986", "set_name": "cell surface", "fdr": "1.28E-04"}}
+{"gomf": {"set": "GO:0019864", "set_name": "IgG binding", "p": "4.00E-05", "fdr": "0.047785967"}, "gobp": {"set": "GO:0006954", "set_name": "inflammatory response", "p": "2.66E-09", "fdr": "2.44E-05"}, "gocc": {"set": "GO:0009986", "set_name": "cell surface", "p": "1.01E-07", "fdr": "1.28E-04"}}

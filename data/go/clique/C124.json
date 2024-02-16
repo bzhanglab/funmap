@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0000149", "set_name": "SNARE binding", "fdr": "0.445166081"}, "gobp": {"set": "GO:0099518", "set_name": "vesicle cytoskeletal trafficking", "fdr": "0"}, "gocc": {"set": "GO:1904115", "set_name": "axon cytoplasm", "fdr": "0"}}
+{"gomf": {"set": "GO:0000149", "set_name": "SNARE binding", "p": "2.29E-04", "fdr": "0.445166081"}, "gobp": {"set": "GO:0099518", "set_name": "vesicle cytoskeletal trafficking", "p": "0", "fdr": "0"}, "gocc": {"set": "GO:1904115", "set_name": "axon cytoplasm", "p": "0", "fdr": "0"}}
