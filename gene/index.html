@@ -84,7 +84,7 @@
                 probability starting from a gene of interest.</p>
             <h3 style="text-align: center">Gene Symbol</h3>
             <div class="container">
-                <input type="text" list="genes" class="text" id="clique_id" name="clique_id" value="RBM34" />
+                <input type="text" list="genes" class="text" id="gene_id" name="gene_id" value="RBM34" />
                 <datalist id="genes"></datalist>
                 <button id="search_button">Search</button>
 
@@ -125,6 +125,7 @@
             let gene_json = "../data/genes.json";
             let gene_element = "genes";
             let all_gene_data = [];
+            let gene_button = document.getElementById("search_button");
             function download(json_object, file_name = "clique.json") {
                 let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json_object));
                 let downloadAnchorNode = document.createElement("a");
@@ -144,13 +145,27 @@
                         option.value = gene_data[i];
                         genelist.appendChild(option);
                     }
+                    if (window.location.search) {
+                        let params = new URLSearchParams(window.location.search);
+                        
+                        let gene_id = params.get("gene_id");
+                        if (gene_id) {
+                            document.getElementById("gene_id").value = gene_id;
+                            gene_button.click();
+                        }
+                        else {
+                            get_dag("RBM34");
+                        }
+                    } else {
+                        get_dag("RBM34");
+                    }
                 });
-            function get_dag(clique_id) {
+            function get_dag(gene_id) {
                 let clique_type = "gene";
                 let dag_chart = create_dag(
                     echarts,
                     clique_type,
-                    clique_id,
+                    gene_id,
                     "dag",
                     (ignore_size = true),
                     (host = "../"),
@@ -159,7 +174,7 @@
                     chart.dispatchAction({
                         type: "highlight",
                         seriesIndex: 0,
-                        name: clique_id,
+                        name: gene_id,
                     });
                     let member_data = chart.getOption().series[0].nodes;
                     let member_list = document.getElementById("members");
@@ -175,14 +190,14 @@
                     member_list.innerHTML = member_text;
                     let download_button = document.getElementById("download_button");
                     download_button.onclick = function () {
-                        download(chart.getOption().series[0], `${clique_id}_neighborhood.json`)
+                        download(chart.getOption().series[0], `${gene_id}_neighborhood.json`)
                     };
                 });
-                fetch(`../data/go/gene/${clique_id}.json`)
+                fetch(`../data/go/gene/${gene_id}.json`)
                     .then((res) => res.json())
                     .then((data) => {
                         let table_body = document.getElementById("table_body");
-                        document.getElementById("gene_title").innerHTML = `Gene: ${clique_id}`;
+                        document.getElementById("gene_title").innerHTML = `Gene: ${gene_id}`;
                         table_body.innerHTML = "";
                         let categories = ["gobp", "gomf", "gocc"];
                         let category_name = {
@@ -214,7 +229,7 @@
             }
             let button = document.getElementById("search_button");
             button.addEventListener("click", function () {
-                let gene_id = document.getElementById("clique_id").value;
+                let gene_id = document.getElementById("gene_id").value;
                 if (gene_id == "") {
                     document.getElementById("gene_search_error").innerHTML = "Please enter a gene symbol";
                     return;
@@ -223,11 +238,12 @@
                     return;
                 }
                 document.getElementById("gene_search_error").innerHTML = "";
+                window.history.pushState({}, "", `?gene_id=${gene_id}`);
                 get_dag(gene_id);
             });
-            get_dag("RBM34");
+            
             document
-                .getElementById("clique_id")
+                .getElementById("gene_id")
                 .addEventListener("keyup", function (event) {
                     event.preventDefault();
                     if (event.keyCode === 13) {
