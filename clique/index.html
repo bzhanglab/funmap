@@ -181,7 +181,7 @@
                     <h3 style="text-align: center">Gene Symbol</h3>
                     <div class="container">
                         <input style="width: 80%" list="genes" type="text" class="text" id="gene_id" name="gene_id"
-                            value="MRPL22" />
+                            value="MRPL22" placeholder="Gene Symbol (ex: MRPL22)"/>
                         <datalist id="genes"></datalist>
                         <button style="width: 20%" id="gene_search_button">Search</button>
                         <p style="color: var(--color-error); text-align: center; font-size: calc(var(--unit)); display: block; flex: 1;"
@@ -204,9 +204,56 @@
                 downloadAnchorNode.click();
                 downloadAnchorNode.remove();
             }
-            function isNumeric(n) {
+            function isInt(n) {
                 return !isNaN(parseInt(n)) && isFinite(n);
             }
+
+            function isNumeric(n) {
+                return !isNaN(parseFloat(n)) && isFinite(n);
+            }
+
+            function createTable(data) {
+                let table = document.createElement("table");
+                let thead = document.createElement("thead");
+                let tbody = document.createElement("tbody");
+                let header = document.createElement("tr");
+                for (let i = 0; i < data["rows"].length; i++) {
+                    let th = document.createElement("th");
+                    let val = data["rows"][i];
+                    if (val == "Hazard Ratio") {
+                        val = "<abbr title=\"Explanation of Hazard Ratio\">Hazard Ratio</abbr>";
+                    }
+                    th.innerHTML = val;
+                    header.appendChild(th);
+                }
+                thead.appendChild(header);
+                table.appendChild(thead);
+                for (let i = 0; i < data["data"].length; i++) {
+                    let row = document.createElement("tr");
+                    for (let j = 0; j < data["data"][i].length; j++) {
+                        let td = document.createElement("td");
+                        let val = data["data"][i][j];
+                        if (isNumeric(val)) {
+                            val = parseFloat(val);
+                            if (val == 0) {
+                                val = "< 2.20e-16";
+                            } else if (Math.abs(val) > 0.001 && Math.abs(val) < 1000) {
+                                val = val.toPrecision(3);
+                            } else {
+                                val = val.toExponential(2);
+                            }
+                        } else if (val == null) {
+                            val = "Not Available";
+                        }
+                        td.innerHTML = val;
+                        row.appendChild(td);
+                    }
+                    tbody.appendChild(row);
+                }
+                table.appendChild(tbody);
+                return table;
+            }
+
             let gene_search_error = document.getElementById("gene_search_error");
             let clique_search_error = document.getElementById("clique_search_error");
             let gene_json = "../data/clique_genes.json";
@@ -226,6 +273,23 @@
                         option.value = gene_data[i];
                         genelist.appendChild(option);
                     }
+                    if (window.location.search) {
+                        let params = new URLSearchParams(window.location.search);
+                        let clique_id = params.get("clique_id");
+                        if (clique_id) {
+                            clique_id = "C" + clique_id;
+                            document.getElementById("clique_id").value = `Clique ID: ${clique_id.replace("C", "")}`;
+                            clique_button.click();
+                        }
+                        let gene_id = params.get("gene_id");
+                        if (gene_id) {
+                            document.getElementById("gene_id").value = gene_id;
+                            gene_button.click();
+                        }
+                        if (!clique_id && !gene_id) create_dags(["C160"]);
+                    } else {
+                        create_dags(["C160"]);
+                    }
                 });
             let search_results = document.getElementById("search_results");
             let clique_button = document.getElementById("search_button");
@@ -233,7 +297,7 @@
                 gene_search_error.innerHTML = "";
                 let clique_id = document.getElementById("clique_id").value;
                 clique_id = "C" + clique_id.split("Clique ID: ")[1];
-                if (!clique_id || !isNumeric(clique_id.replace("C", ""))) {
+                if (!clique_id || !isInt(clique_id.replace("C", ""))) {
                     clique_search_error.innerHTML = "Please enter a valid Clique ID between 1 and 281.";
                     return;
                 }
@@ -243,6 +307,7 @@
                 }
                 search_results.innerHTML = "";
                 clique_search_error.innerHTML = "";
+                window.history.pushState({}, "", `?clique_id=${clique_id.replace("C", "")}`);
                 create_dags([clique_id]);
             });
             let gene_button = document.getElementById("gene_search_button");
@@ -261,6 +326,7 @@
                 let clique_form = found_cliques.length > 1 ? "cliques" : "clique";
                 search_results.innerHTML = `${gene_id} is a member of ${found_cliques.length} ${clique_form}: ${found_cliques.join(", ").replace(/C/g, "")}`;
                 if (gene_to_clique[gene_id]) {
+                    window.history.pushState({}, "", `?gene_id=${gene_id}`);
                     create_dags(found_cliques, gene_id);
                 }
             });
@@ -297,14 +363,14 @@
                     head_div.id = `head_div_${i}`;
                     head_div.className = "result";
                     if (i != 0) head_div.appendChild(document.createElement("hr"));
-                    let h4 = document.createElement("h4");
-                    h4.id = `clique_title_${i}`;
-                    h4.style.flex = "1";
-                    h4.style.height = "min-content";
-                    h4.style.margin = "0pt";
-                    h4.style.columnGap = "0pt";
-                    h4.innerHTML = `Clique ID: ${clique_ids[i].replace("C", "")}`;
-                    head_div.appendChild(h4);
+                    let clique_title_header = document.createElement("h3");
+                    clique_title_header.id = `clique_title_${i}`;
+                    clique_title_header.style.flex = "1";
+                    clique_title_header.style.height = "min-content";
+                    clique_title_header.style.margin = "0pt";
+                    clique_title_header.style.columnGap = "0pt";
+                    clique_title_header.innerHTML = `Clique ID: ${clique_ids[i].replace("C", "")}`;
+                    head_div.appendChild(clique_title_header);
                     let result_sub = document.createElement("div");
                     result_sub.id = `result_sub_${i}`;
                     result_sub.className = "result_sub";
@@ -343,12 +409,7 @@
                     let clique_type = "dense_modules";
                     let dag_container = document.createElement("div");
                     dag_container.style.flexGrow = "1";
-                    let member_header = document.createElement("h5");
-                    member_header.className = "info_heading";
-                    member_header.innerHTML = "Clique Members";
-                    let member_subtitle = document.createElement("small");
-                    member_subtitle.className = "subtitle";
-                    let member_list = document.createElement("div");
+
                     let dag_div = document.createElement("div");
                     dag_div.id = `dag_${i}`;
                     dag_div.className = "dag";
@@ -365,9 +426,6 @@
                     dag_container.appendChild(dag_p);
                     dag_container.appendChild(download_button);
                     info_div.appendChild(table);
-                    info_div.appendChild(member_header);
-                    info_div.appendChild(member_subtitle);
-                    info_div.appendChild(member_list);
                     result_sub.appendChild(info_div);
                     result_sub.appendChild(dag_container);
                     head_div.appendChild(result_sub);
@@ -403,48 +461,86 @@
                             }
                             table.appendChild(table_body);
                         }).then(() => {
-                            dag_chart = create_dag(
-                                echarts,
-                                clique_type,
-                                clique_id,
-                                dag_div.id,
-                                (ignore_size = true),
-                                (host = "../"),
-                                scale = 1.15
-                            );
-                            dag_chart.then((chart) => {
-                                let member_data = chart.getOption().series[0].nodes;
-
-                                let member_text = "<p>";
-                                for (let i = 0; i < member_data.length; i++) {
-                                    let member = member_data[i];
-                                    member_text += member.name;
-                                    if (i != member_data.length - 1) {
-                                        member_text += ", ";
-                                    }
-                                }
-                                member_text += "</p>";
-                                member_list.innerHTML = member_text;
-                                member_subtitle.innerHTML = `${member_data.length} members`;
-                                window.addEventListener("resize", function () {
-                                    chart.resize();
-                                });
-                                chart.resize();
-                                download_button.onclick = function () {
-                                    download(chart.getOption().series[0], `clique_${clique_id.replace("C", "")}.json`);
-                                };
-                                if (gene_id != null) {
-                                    chart.dispatchAction({
-                                        type: "highlight",
-                                        seriesIndex: 0,
-                                        name: gene_id,
+                            fetch("../data/table/clique/" + clique_id + ".json")
+                                .then((res) => res.json())
+                                .then((data) => {
+                                    //  Tumor expression
+                                    let tumor_expression_table = createTable(data["tumor_expression"]);
+                                    tumor_expression_table.style.marginTop = "1em";
+                                    let tumor_expression_header = document.createElement("h5");
+                                    tumor_expression_header.className = "info_heading";
+                                    tumor_expression_header.innerHTML = "Tumor Expression";
+                                    let tumor_expression_subtitle = document.createElement("small");
+                                    tumor_expression_subtitle.className = "subtitle";
+                                    tumor_expression_subtitle.innerHTML = "Tumor expression of genes in the clique";
+                                    info_div.appendChild(tumor_expression_header);
+                                    info_div.appendChild(tumor_expression_subtitle);
+                                    info_div.appendChild(tumor_expression_table);
+                                    // Survival
+                                    let survival_table = createTable(data["survival"]);
+                                    survival_table.style.marginTop = "1em";
+                                    let survival_header = document.createElement("h5");
+                                    survival_header.className = "info_heading";
+                                    survival_header.innerHTML = "Patient Overall Survival";
+                                    let survival_subtitle = document.createElement("small");
+                                    survival_subtitle.className = "subtitle";
+                                    survival_subtitle.innerHTML = "Survival analysis of genes in the clique";
+                                    info_div.appendChild(survival_header);
+                                    info_div.appendChild(survival_subtitle);
+                                    info_div.appendChild(survival_table);
+                                }).then(() => {
+                                    dag_chart = create_dag(
+                                        echarts,
+                                        clique_type,
+                                        clique_id,
+                                        dag_div.id,
+                                        (ignore_size = true),
+                                        (host = "../"),
+                                        scale = 1.15
+                                    );
+                                    dag_chart.then((chart) => {
+                                        let member_header = document.createElement("h5");
+                                        member_header.className = "info_heading";
+                                        member_header.innerHTML = "Clique Members";
+                                        let member_subtitle = document.createElement("small");
+                                        member_subtitle.className = "subtitle";
+                                        let member_list = document.createElement("div");
+                                        let member_data = chart.getOption().series[0].nodes;
+                                        let member_text = "<p>";
+                                        for (let i = 0; i < member_data.length; i++) {
+                                            let member = member_data[i];
+                                            member_text += member.name;
+                                            if (i != member_data.length - 1) {
+                                                member_text += ", ";
+                                            }
+                                        }
+                                        member_text += "</p>";
+                                        member_list.innerHTML = member_text;
+                                        member_subtitle.innerHTML = `${member_data.length} members`;
+                                        info_div.appendChild(member_header);
+                                        info_div.appendChild(member_subtitle);
+                                        info_div.appendChild(member_list);
+                                        window.addEventListener("resize", function () {
+                                            chart.resize();
+                                        });
+                                        chart.resize();
+                                        download_button.onclick = function () {
+                                            download(chart.getOption().series[0], `clique_${clique_id.replace("C", "")}.json`);
+                                        };
+                                        if (gene_id != null) {
+                                            chart.dispatchAction({
+                                                type: "highlight",
+                                                seriesIndex: 0,
+                                                name: gene_id,
+                                            });
+                                        }
                                     });
-                                }
-                            });
+                                });
                         });
                 }
             }
-            create_dags(["C160"]);
+
+
         </script>
 </body>
 
