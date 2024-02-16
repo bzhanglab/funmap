@@ -195,6 +195,15 @@
         <div id="result_container" class="centering">
         </div>
         <script>
+            function download(json_object, file_name = "clique.json") {
+                let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json_object));
+                let downloadAnchorNode = document.createElement("a");
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", file_name);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            }
             function isNumeric(n) {
                 return !isNaN(parseInt(n)) && isFinite(n);
             }
@@ -252,7 +261,7 @@
                 let clique_form = found_cliques.length > 1 ? "cliques" : "clique";
                 search_results.innerHTML = `${gene_id} is a member of ${found_cliques.length} ${clique_form}: ${found_cliques.join(", ").replace(/C/g, "")}`;
                 if (gene_to_clique[gene_id]) {
-                    create_dags(found_cliques);
+                    create_dags(found_cliques, gene_id);
                 }
             });
             document
@@ -280,7 +289,7 @@
             };
             document.getElementById("clique_id").focus();
 
-            function create_dags(clique_ids) {
+            function create_dags(clique_ids, gene_id = null) {
                 let result_container = document.getElementById("result_container");
                 result_container.innerHTML = "";
                 for (let i = 0; i < clique_ids.length; i++) {
@@ -335,9 +344,10 @@
                     let dag_container = document.createElement("div");
                     dag_container.style.flexGrow = "1";
                     let member_header = document.createElement("h5");
-                    member_header.class = "info_heading";
+                    member_header.className = "info_heading";
                     member_header.innerHTML = "Clique Members";
-                    info_div.appendChild(member_header);
+                    let member_subtitle = document.createElement("small");
+                    member_subtitle.className = "subtitle";
                     let member_list = document.createElement("div");
                     let dag_div = document.createElement("div");
                     dag_div.id = `dag_${i}`;
@@ -351,14 +361,12 @@
                     download_button.id = `download_button_${i}`;
                     download_button.className = "download_button";
                     download_button.innerHTML = "Download Clique";
-                    download_button.onclick = function () {
-                        window.open(`../data/dag/dense_modules/${clique_id}.json`, "_blank");
-                    };
                     dag_container.appendChild(dag_div);
                     dag_container.appendChild(dag_p);
                     dag_container.appendChild(download_button);
                     info_div.appendChild(table);
                     info_div.appendChild(member_header);
+                    info_div.appendChild(member_subtitle);
                     info_div.appendChild(member_list);
                     result_sub.appendChild(info_div);
                     result_sub.appendChild(dag_container);
@@ -417,10 +425,21 @@
                                 }
                                 member_text += "</p>";
                                 member_list.innerHTML = member_text;
+                                member_subtitle.innerHTML = `${member_data.length} members`;
                                 window.addEventListener("resize", function () {
                                     chart.resize();
                                 });
                                 chart.resize();
+                                download_button.onclick = function () {
+                                    download(chart.getOption().series[0], `clique_${clique_id.replace("C", "")}.json`);
+                                };
+                                if (gene_id != null) {
+                                    chart.dispatchAction({
+                                        type: "highlight",
+                                        seriesIndex: 0,
+                                        name: gene_id,
+                                    });
+                                }
                             });
                         });
                 }

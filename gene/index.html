@@ -13,6 +13,7 @@
         html {
             background: none;
         }
+
         body {
             overflow-x: hidden;
         }
@@ -78,16 +79,18 @@
     <div id="filler" style="height: 100%">
         <h1>FunMap Gene Neighborhood Search</h1>
         <div class="centering">
-            <p style="color: var(--color-body-light); text-align: center;">Gene Neighborhood: Top 50 nodes with highest random walk
+            <p style="color: var(--color-body-light); text-align: center;">Gene Neighborhood: Top 50 nodes with highest
+                random walk
                 probability starting from a gene of interest.</p>
             <h3 style="text-align: center">Gene Symbol</h3>
             <div class="container">
                 <input type="text" list="genes" class="text" id="clique_id" name="clique_id" value="RBM34" />
                 <datalist id="genes"></datalist>
                 <button id="search_button">Search</button>
-                
+
             </div>
-            <p style="color: var(--color-error); text-align: center; font-size: calc(var(--unit)); display: block; flex: 1;" id="gene_search_error"></p>
+            <p style="color: var(--color-error); text-align: center; font-size: calc(var(--unit)); display: block; flex: 1;"
+                id="gene_search_error"></p>
         </div>
         <h4 id="gene_title">Gene: </h4>
         <div class="result">
@@ -122,6 +125,15 @@
             let gene_json = "../data/genes.json";
             let gene_element = "genes";
             let all_gene_data = [];
+            function download(json_object, file_name = "clique.json") {
+                let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json_object));
+                let downloadAnchorNode = document.createElement("a");
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", file_name);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            }
             fetch(gene_json)
                 .then((res) => res.json())
                 .then((gene_data) => {
@@ -161,6 +173,10 @@
                     }
                     member_text += "</p>";
                     member_list.innerHTML = member_text;
+                    let download_button = document.getElementById("download_button");
+                    download_button.onclick = function () {
+                        download(chart.getOption().series[0], `${clique_id}_neighborhood.json`)
+                    };
                 });
                 fetch(`../data/go/gene/${clique_id}.json`)
                     .then((res) => res.json())
@@ -194,10 +210,7 @@
                             table_body.appendChild(row);
                         }
                     });
-                    let download_button = document.getElementById("download_button");
-                    download_button.onclick = function() {
-                        window.open(`../data/dag/gene/${clique_id}.json`, "_blank");
-                    };
+
             }
             let button = document.getElementById("search_button");
             button.addEventListener("click", function () {
@@ -221,8 +234,8 @@
                         document.getElementById("search_button").click();
                     }
                 });
-            
-            
+
+
         </script>
 </body>
 
