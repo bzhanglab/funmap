@@ -242,7 +242,7 @@ function update_dag(chart, clique_type, clique_id, host = "") {
 				chart.setOption({
 					// vertically center title
 					title: {
-						text: "Too many nodes to display.",
+						text: `${clique_id}\nToo many nodes to display.`,
 						top: "middle",
 					},
 					series: [
@@ -266,9 +266,6 @@ function update_dag(chart, clique_type, clique_id, host = "") {
 						links: clique_data.edges,
 					},
 				],
-				visualMap: {
-					text: null,
-				},
 			});
 			return chart;
 		});

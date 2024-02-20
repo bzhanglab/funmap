@@ -101,9 +101,9 @@ function funmap(echarts, config = {}) {
 												if (hallmark_string === "") {
 													hallmark_string = "No Hallmarks";
 												}
-												const content = `<h5 style="text-align:center;">${
+												const content = `<h5 style="max-width: 100%; text-align:center; word-break: break-all; white-space: normal;">${
 													params.name
-												}</h5><h6>Cancer Hallmarks: ${hallmark_string}</h6><br><h6 style="text-align:center;">Top GO Terms</h6><table style="width: 100%" class="tooltip_table"><thead><tr><th>GO Category</th><th>GO ID</th><th>Name</th><th>p-Value</th></tr></thead><tbody><tr><td>Biological Process</td><td>${
+												}</h5><h6 style="max-width: 100%; text-align:center; word-break: break-all; white-space: normal">Cancer Hallmarks: ${hallmark_string}</h6><br><h6 style="text-align:center;">Top GO Terms</h6><table style="width: 100%" class="tooltip_table"><thead><tr><th>GO Category</th><th>GO ID</th><th>Name</th><th>p-Value</th></tr></thead><tbody><tr><td>Biological Process</td><td>${
 													node_go.gobp.id
 												}</td><td>${node_go.gobp.name}</td><td>${
 													node_go.gobp.p === "0"
@@ -344,8 +344,8 @@ function funmap(echarts, config = {}) {
 
 									const dag = create_dag(
 										echarts,
-										"dense_modules",
-										"C195",
+										"hierarchal_modules",
+										"L2_M2",
 										"dag",
 										false, // ignore_size
 										"../", // host
@@ -366,6 +366,7 @@ function funmap(echarts, config = {}) {
 											"../", // host
 										);
 										res.then((result) => {
+											timeout_id++;
 											if (result) {
 												dag_chart = result;
 												if (!is_open["dag-tab-container"]) {
@@ -382,7 +383,6 @@ function funmap(echarts, config = {}) {
 												if (!is_open["dag-tab-container"]) {
 													dagTabContainer.dispatchEvent(new Event("click"));
 												}
-												timeout_id++;
 												setTimeout(
 													(old_timeout_id) => {
 														if (
