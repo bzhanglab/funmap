@@ -24,9 +24,9 @@ function clique_page(echarts) {
 		const thead = document.createElement("thead");
 		const tbody = document.createElement("tbody");
 		const header = document.createElement("tr");
-		for (let i = 0; i < data.rows.length; i++) {
+		for (let i = 0; i < data.columns.length; i++) {
 			const th = document.createElement("th");
-			const val = data.rows[i];
+			const val = data.columns[i];
 			th.innerHTML = val;
 			header.appendChild(th);
 		}
