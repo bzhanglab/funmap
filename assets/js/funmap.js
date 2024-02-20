@@ -32,6 +32,7 @@ function funmap(echarts, config = {}) {
 	const funmap_json = config.funmap_json || "../data/funmap.json";
 	const main_element = config.main_chart || "chart";
 	const pie_element = config.pie_chart || "pie_chart";
+	let timeout_id = 0;
 	fetch(gene_json)
 		.then((res) => res.json())
 		.then((gene_data) => {
@@ -367,11 +368,6 @@ function funmap(echarts, config = {}) {
 										res.then((result) => {
 											if (result) {
 												dag_chart = result;
-												if (!has_shown_dag) {
-													dagTabContainer.style.display = "block";
-													// dagContainer.style.display = "block";
-													has_shown_dag = true;
-												}
 												if (!is_open["dag-tab-container"]) {
 													dagTabContainer.dispatchEvent(new Event("click"));
 												}
@@ -383,11 +379,22 @@ function funmap(echarts, config = {}) {
 													});
 												}
 											} else {
-												if (is_open["dag-tab-container"]) {
+												if (!is_open["dag-tab-container"]) {
 													dagTabContainer.dispatchEvent(new Event("click"));
 												}
-												dagTabContainer.style.display = "none";
-												has_shown_dag = false;
+												timeout_id++;
+												setTimeout(
+													(old_timeout_id) => {
+														if (
+															is_open["dag-tab-container"] &&
+															old_timeout_id === timeout_id
+														) {
+															dagTabContainer.dispatchEvent(new Event("click"));
+														}
+													},
+													2000,
+													timeout_id,
+												);
 											}
 										});
 									};

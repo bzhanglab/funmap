@@ -42,7 +42,7 @@
         <div id="chart" style="width: 100%; height: 100%"></div>
         <div id="legend-tab-container" class="tab-container"><b>∨</b> Legend</div>
         <div id="search-tab-container" class="tab-container"><b>∨</b> Search</div>
-        <div id="dag-tab-container" class="tab-container" style="display: none">
+        <div id="dag-tab-container" class="tab-container">
             <b>∨</b> Graph
         </div>
         <div id="legend-container" class="side-container">
@@ -120,9 +120,6 @@
         const legend_timeout = 3000;
         const search_timeout = 3000;
         const dag_timeout = 3000;
-        let has_shown_dag = false;
-        dagContainer.style.right = "-35.2%"; // Hide initially
-        dagTabContainer.style.right = "-1.15%";
         let timeout_id = 0;
         let is_open = {}
         setTimeout(() => {
