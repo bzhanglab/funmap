@@ -11,7 +11,8 @@ function clique_page(echarts) {
 		downloadAnchorNode.remove();
 	}
 	function isInt(n) {
-		return !Number.isNaN(parseInt(n)) && Number.isFinite(n);
+		const num = parseInt(n);
+		return !Number.isNaN(num) && Number.isFinite(num);
 	}
 
 	function isNumeric(n) {
@@ -150,13 +151,13 @@ function clique_page(echarts) {
 	});
 	document.getElementById("clique_id").addEventListener("keyup", (event) => {
 		event.preventDefault();
-		if (event.keyCode === 13) {
+		if (event.keyCode === 13 || event.key === "Enter") {
 			document.getElementById("search_button").click();
 		}
 	});
 	document.getElementById("gene_id").addEventListener("keyup", (event) => {
 		event.preventDefault();
-		if (event.keyCode === 13) {
+		if (event.keyCode === 13 || event.key === "Enter") {
 			gene_button.click();
 		}
 	});

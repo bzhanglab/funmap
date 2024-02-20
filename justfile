@@ -1,6 +1,3 @@
-
-# Compress file to min.js
-
 check:
       @echo "Running biome checks"
       @biome check assets/js/clique.js
@@ -8,7 +5,14 @@ check:
       @biome check assets/js/funmap.js
       @biome check assets/js/dense.js
 
-build: check compress
+js-ci:
+      @echo "Running biome CI"
+      @biome ci assets/js/clique.js
+      @biome ci assets/js/dag.js
+      @biome ci assets/js/funmap.js
+      @biome ci assets/js/dense.js
+
+build: js-ci compress
       @echo "Building markdown files"
       @python3 build.py
 
