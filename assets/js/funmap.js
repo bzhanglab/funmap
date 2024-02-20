@@ -369,16 +369,12 @@ function funmap(echarts, config = {}) {
 												dag_chart = result;
 												if (!has_shown_dag) {
 													dagTabContainer.style.display = "block";
-													dagContainer.style.display = "block";
+													// dagContainer.style.display = "block";
 													has_shown_dag = true;
 												}
-												dagTabContainer.dispatchEvent(new Event("mouseenter"));
-												setTimeout(() => {
-													timeout_id += 1;
-													dagTabContainer.dispatchEvent(
-														new Event("mouseleave"),
-													);
-												}, 1000);
+												if (!is_open["dag-tab-container"]) {
+													dagTabContainer.dispatchEvent(new Event("click"));
+												}
 												if (gene != null) {
 													dag_chart.dispatchAction({
 														type: "highlight",
@@ -387,10 +383,10 @@ function funmap(echarts, config = {}) {
 													});
 												}
 											} else {
+												if (is_open["dag-tab-container"]) {
+													dagTabContainer.dispatchEvent(new Event("click"));
+												}
 												dagTabContainer.style.display = "none";
-												dagContainer.style.display = "none";
-												dagContainer.style.right = "-35.2%"; // Hide
-												dagTabContainer.style.right = "-1.15%";
 												has_shown_dag = false;
 											}
 										});

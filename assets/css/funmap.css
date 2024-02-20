@@ -123,6 +123,7 @@ body {
 }
 
 .tab-container {
+    cursor: pointer;
     background: white;
     position: absolute;
     /* Adjust the distance from the left side */
