@@ -3,13 +3,20 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>FunMap Clique Search</title>
+    <title>FunMap Dense Module Search</title>
     <script src="../assets/js/echarts.min.js"></script>
     <script src="../assets/js/min/dag.min.js"></script>
     <script src="../assets/js/min/clique.min.js"></script>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="../assets/css/funmap.css" />
     <link rel="stylesheet" type="text/css" href="../assets/css/gd.min.css" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
     <style>
         html {
             background: none;
@@ -165,9 +172,10 @@
 
 <body>
     <div id="filler" style="height: 100%">
-        <h1>FunMap Clique Search</h1>
+        <h1>FunMap Dense Module Search</h1>
         <div class="centering">
-            <p style="color: var(--color-body-light); text-align: center">Fully connected subnetworks with limited
+            <p style="color: var(--color-body-light); text-align: center">Dense modules: Fully connected subnetworks,
+                known as cliques, with limited
                 overlap to other
                 cliques identified with the clique enumeration (ICE) algorithm
                 <br>
@@ -205,4 +213,5 @@
             clique_page(echarts);
         </script>
 </body>
+
 </html>
