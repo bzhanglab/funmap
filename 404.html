@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="http-equiv" content="refresh" content="3;url=./index.html">
+    <title>404 - Page Not Found</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .redirect {
+            font-size: 1.5em;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>404 - Page Not Found</h1>
+        <p>Oops! Looks like you're lost.</p>
+        <p class="redirect">You will be redirected to the <a href="./index.html">home page</a> in <span
+                id="countdown">3</span> seconds.</p>
+    </div>
+    <script>
+        setTimeout(function () {
+            window.location.href = './';
+        }, 3000);
+
+        // Countdown timer
+        var countdown = 3;
+        setInterval(function () {
+            countdown--;
+            document.getElementById('countdown').innerText = countdown;
+        }, 1000);
+    </script>
+</body>
+
+</html>
