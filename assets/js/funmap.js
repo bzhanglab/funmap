@@ -101,9 +101,9 @@ function funmap(echarts, config = {}) {
 												if (hallmark_string === "") {
 													hallmark_string = "No Hallmarks";
 												}
-												const content = `<h5 style="max-width: 100%; text-align:center; word-break: break-all; white-space: normal;">${
+												const content = `<h5 style="max-width: 100%; text-align:center; word-break: normal; white-space: normal;">${
 													params.name
-												}</h5><h6 style="max-width: 100%; text-align:center; word-break: break-all; white-space: normal">Cancer Hallmarks: ${hallmark_string}</h6><br><h6 style="text-align:center;">Top GO Terms</h6><table style="width: 100%" class="tooltip_table"><thead><tr><th>GO Category</th><th>GO ID</th><th>Name</th><th>p-Value</th></tr></thead><tbody><tr><td>Biological Process</td><td>${
+												}</h5><h6 style="max-width: 100%; text-align:center; word-break: normal; white-space: normal">Cancer Hallmarks: ${hallmark_string}</h6><br><h6 style="text-align:center;">Top GO Terms</h6><table style="width: 100%" class="tooltip_table"><thead><tr><th>GO Category</th><th>GO ID</th><th>Name</th><th>p-Value</th></tr></thead><tbody><tr><td>Biological Process</td><td>${
 													node_go.gobp.id
 												}</td><td>${node_go.gobp.name}</td><td>${
 													node_go.gobp.p === "0"

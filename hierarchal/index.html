@@ -137,18 +137,17 @@
             open_container_pos,
             open_tab_pos,
         ) {
+
+            container.style[direction] = closed_container_pos;
+            tab.style[direction] = closed_tab_pos;
+            const current_text = tab.textContent;
+            tab.textContent = current_text.replace("∨", "∧");
+            is_open[tab.id] = false;
+
             if (start_open) {
-                container.style[direction] = open_container_pos;
-                tab.style[direction] = open_tab_pos;
-                const current_text = tab.textContent;
-                tab.textContent = current_text.replace("∧", "∨");
-                is_open[tab.id] = true;
-            } else {
-                container.style[direction] = closed_container_pos;
-                tab.style[direction] = closed_tab_pos;
-                const current_text = tab.textContent;
-                tab.textContent = current_text.replace("∨", "∧");
-                is_open[tab.id] = false;
+                setTimeout(() => {
+                    tab.click();
+                }, 1000);
             }
 
             tab.addEventListener("click", () => {
