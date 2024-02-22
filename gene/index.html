@@ -9,11 +9,11 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="../assets/css/funmap.css" />
     <link rel="stylesheet" type="text/css" href="../assets/css/gd.min.css" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+    <link rel="manifest" href="../site.webmanifest">
+    <link rel="mask-icon" href="../safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
     <style>
@@ -124,7 +124,8 @@
             <div style="flex-grow:1;">
                 <div id="dag" style="width: 100%; height: 100%; border: 1px solid black"></div>
                 <p style="color: var(--color-body-light); font-size: var(--unit); text-align: center">
-                    Gene significance across 5 cohorts (signed -log<sub>10</sub> meta-<i>p</i>).<br>Scroll to zoom, click and drag to move nodes.
+                    Gene significance across 5 cohorts (signed -log<sub>10</sub> meta-<i>p</i>).<br>Scroll to zoom,
+                    click and drag to move nodes.
                 <p>
             </div>
         </div>
@@ -154,7 +155,7 @@
                     }
                     if (window.location.search) {
                         let params = new URLSearchParams(window.location.search);
-                        
+
                         let gene_id = params.get("gene_id");
                         if (gene_id) {
                             document.getElementById("gene_id").value = gene_id;
@@ -248,7 +249,7 @@
                 window.history.pushState({}, "", `?gene_id=${gene_id}`);
                 get_dag(gene_id);
             });
-            
+
             document
                 .getElementById("gene_id")
                 .addEventListener("keyup", function (event) {
