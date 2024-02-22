@@ -142,7 +142,7 @@
                     </thead>
                     <tbody id="table_body"></tbody>
                 </table>
-
+                <div id="left_div_child" style="height: 100%; width: 100%;"></div>
                 <!-- <button id="download_button">Download Neighborhood</button> -->
             </div>
             <div style="flex-grow:1;">
@@ -322,7 +322,8 @@
                             tumor_subtitle.className = "subtitle";
                             tumor_subtitle.innerHTML = "The <i>p</i>-values were derived from difference in average protein abundance of clique genes between tumor and normal samples by Wilcoxon rank-sum test.";
                             const tumor_table = createTable(clin_data["tumor_expression"]);
-                            let left_div = document.getElementById("left_div");
+                            let left_div = document.getElementById("left_div_child");
+                            left_div.innerHTML = "";
                             left_div.appendChild(tumor_header);
                             left_div.appendChild(tumor_subtitle);
                             left_div.appendChild(tumor_table);
