@@ -161,6 +161,7 @@
             let gene_element = "genes";
             let all_gene_data = [];
             let gene_button = document.getElementById("search_button");
+            let displayed_chart = null;
             function download(json_object, file_name = "clique.json") {
                 let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(json_object));
                 let downloadAnchorNode = document.createElement("a");
@@ -264,6 +265,8 @@
                         seriesIndex: 0,
                         name: gene_id,
                     });
+                    displayed_chart = chart;
+                    chart.resize();
                     let member_data = chart.getOption().series[0].nodes;
                     let member_list = document.getElementById("members");
                     let member_text = "<small style=\"color: var(--color-body-light)\">Sorted from highest to lowest random walk probability</small><p>";
@@ -337,6 +340,9 @@
                             left_div.appendChild(surv_header);
                             left_div.appendChild(surv_subtitle);
                             left_div.appendChild(survival_table);
+                            if (displayed_chart) {
+                                displayed_chart.resize();
+                            }
                         });
                     });
 
