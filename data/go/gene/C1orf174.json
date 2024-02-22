@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gocc":{"set":"GO:0035770","set_name":"ribonucleoprotein granule","fdr":0.0060567861419400185}}
+{"gomf": {"set": "GO:0035064", "set_name": "methylated histone binding", "p": 0.02762115, "fdr": 1.0}, "gobp": {"set": "GO:0032460", "set_name": "negative regulation of protein oligomerization", "p": 0.001218922, "fdr": 1.0}, "gocc": {"set": "GO:0000932", "set_name": "P-body", "p": 0.003677379, "fdr": 0.778753339}}

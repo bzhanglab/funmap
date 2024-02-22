@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0030055","set_name":"cell-substrate junction","fdr":1.268590429188413e-6},"gobp":{"set":"GO:0007015","set_name":"actin filament organization","fdr":1.016196004012308e-14},"gomf":{"set":"GO:0003779","set_name":"actin binding","fdr":8.343785546874486e-20}}
+{"gomf": {"set": "GO:0003779", "set_name": "actin binding", "p": 0.0, "fdr": 0.0}, "gobp": {"set": "GO:0008154", "set_name": "actin polymerization or depolymerization", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0015629", "set_name": "actin cytoskeleton", "p": 2.89e-15, "fdr": 1.94e-12}}

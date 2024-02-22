@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gobp":{"set":"GO:0061512","set_name":"protein localization to cilium","fdr":0.06307665587737832},"gocc":{"set":"GO:0035869","set_name":"ciliary transition zone","fdr":0.2506862771571674}}
+{"gomf": {"set": "GO:0043014", "set_name": "alpha-tubulin binding", "p": 0.004281217, "fdr": 1.0}, "gobp": {"set": "GO:0061512", "set_name": "protein localization to cilium", "p": 0.000368, "fdr": 0.840501303}, "gocc": {"set": "GO:0001750", "set_name": "photoreceptor outer segment", "p": 0.000103, "fdr": 0.069236104}}

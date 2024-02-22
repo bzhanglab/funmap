@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0003712","set_name":"transcription coregulator activity","fdr":0.0011308568838946053},"gobp":{"set":"GO:0008380","set_name":"RNA splicing","fdr":9.206508149231859e-7},"gocc":{"set":"GO:0098687","set_name":"chromosomal region","fdr":3.6679867557754105e-8}}
+{"gomf": {"set": "GO:0003682", "set_name": "chromatin binding", "p": 1.22e-10, "fdr": 1.09e-07}, "gobp": {"set": "GO:0008380", "set_name": "RNA splicing", "p": 8.12e-12, "fdr": 4.17e-08}, "gocc": {"set": "GO:0000228", "set_name": "nuclear chromosome", "p": 3.1e-11, "fdr": 2.09e-08}}

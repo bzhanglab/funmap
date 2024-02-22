@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0006260","set_name":"DNA replication","fdr":0.3969077380844789},"gocc":{"set":"GO:0000786","set_name":"nucleosome","fdr":0.2668873429261338},"gomf":{"set":"GO:0003697","set_name":"single-stranded DNA binding","fdr":0.338476837751288}}
+{"gomf": {"set": "GO:0003697", "set_name": "single-stranded DNA binding", "p": 0.000643, "fdr": 0.571364206}, "gobp": {"set": "GO:0006260", "set_name": "DNA replication", "p": 0.000456, "fdr": 1.0}, "gocc": {"set": "GO:0035267", "set_name": "NuA4 histone acetyltransferase complex", "p": 0.002710081, "fdr": 0.910587131}}

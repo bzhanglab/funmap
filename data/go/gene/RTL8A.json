@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0006997","set_name":"nucleus organization","fdr":0.05842982886198076},"gocc":{"set":"GO:0005635","set_name":"nuclear envelope","fdr":0.5419233612222135},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0060589", "set_name": "nucleoside-triphosphatase regulator activity", "p": 0.00098, "fdr": 0.444695847}, "gobp": {"set": "GO:0006998", "set_name": "nuclear envelope organization", "p": 1.21e-06, "fdr": 0.006237626}, "gocc": {"set": "GO:0005637", "set_name": "nuclear inner membrane", "p": 2.22e-05, "fdr": 0.014933908}}

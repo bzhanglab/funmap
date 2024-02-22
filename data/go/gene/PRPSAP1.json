@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0000287","set_name":"magnesium ion binding","fdr":0.31337598641456943},"gobp":{"set":"GO:0045116","set_name":"protein neddylation","fdr":5.6213289912774165e-11},"gocc":{"set":"GO:0008180","set_name":"COP9 signalosome","fdr":1.0850903172348478e-10}}
+{"gomf": {"set": "GO:0000287", "set_name": "magnesium ion binding", "p": 0.006101872, "fdr": 1.0}, "gobp": {"set": "GO:0000338", "set_name": "protein deneddylation", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0008180", "set_name": "COP9 signalosome", "p": 1.54e-13, "fdr": 1.04e-10}}

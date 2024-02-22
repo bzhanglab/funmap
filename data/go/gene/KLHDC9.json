@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0007018","set_name":"microtubule-based movement","fdr":1.1986467919188605e-12},"gocc":{"set":"GO:0031514","set_name":"motile cilium","fdr":7.718016183485249e-15},"gomf":{"set":"GO:0045505","set_name":"dynein intermediate chain binding","fdr":0.02996370555337323}}
+{"gomf": {"set": "GO:0003777", "set_name": "microtubule motor activity", "p": 8.12e-10, "fdr": 7.21e-07}, "gobp": {"set": "GO:0035082", "set_name": "axoneme assembly", "p": 4.66e-15, "fdr": 2.4e-11}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

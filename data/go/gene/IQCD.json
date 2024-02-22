@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0044782","set_name":"cilium organization","fdr":7.681649642601682e-18},"gocc":{"set":"GO:0031514","set_name":"motile cilium","fdr":1.7424479333515998e-23},"gomf":{"set":"GO:0003774","set_name":"cytoskeletal motor activity","fdr":0.4992662821617205}}
+{"gomf": {"set": "GO:0045503", "set_name": "dynein light chain binding", "p": 1.3e-06, "fdr": 0.001156719}, "gobp": {"set": "GO:0030031", "set_name": "cell projection assembly", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

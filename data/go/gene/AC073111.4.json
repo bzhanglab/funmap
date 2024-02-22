@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gocc":{"set":"GO:0005814","set_name":"centriole","fdr":0.2963696678148607},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0019888", "set_name": "protein phosphatase regulator activity", "p": 0.016474815, "fdr": 1.0}, "gobp": {"set": "GO:0018345", "set_name": "protein palmitoylation", "p": 0.00182941, "fdr": 1.0}, "gocc": {"set": "GO:0044450", "set_name": "microtubule organizing center part", "p": 0.002121097, "fdr": 0.861336993}}

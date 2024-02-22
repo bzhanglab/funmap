@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0016874","set_name":"ligase activity","fdr":2.460545388454172e-6},"gobp":{"set":"GO:0006520","set_name":"amino acid metabolic process","fdr":4.702813500352555e-13},"gocc":{"set":"GO:0005759","set_name":"mitochondrial matrix","fdr":1.9767142015193246e-39}}
+{"gomf": {"set": "GO:0050662", "set_name": "coenzyme binding", "p": 1.41e-10, "fdr": 1.26e-07}, "gobp": {"set": "GO:0009081", "set_name": "branched-chain amino acid metabolic process", "p": 5.09e-13, "fdr": 1.31e-09}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "p": 0.0, "fdr": 0.0}}

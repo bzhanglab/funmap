@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0008380","set_name":"RNA splicing","fdr":1.556190106730587e-12},"gomf":{"set":"GO:0003729","set_name":"mRNA binding","fdr":0.29333095495795014},"gocc":{"set":"GO:0016607","set_name":"nuclear speck","fdr":3.11534645259319e-8}}
+{"gomf": {"set": "GO:0043175", "set_name": "RNA polymerase core enzyme binding", "p": 0.001005213, "fdr": 0.287009557}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": 9.1e-12, "fdr": 2.99e-08}, "gocc": {"set": "GO:0016607", "set_name": "nuclear speck", "p": 1.11e-11, "fdr": 7.43e-09}}

@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0008180","set_name":"COP9 signalosome","fdr":9.611569564871724e-9},"gobp":{"set":"GO:0045116","set_name":"protein neddylation","fdr":6.847622762984809e-9},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0017112", "set_name": "Rab guanyl-nucleotide exchange factor activity", "p": 8.78e-12, "fdr": 7.79e-09}, "gobp": {"set": "GO:0000338", "set_name": "protein deneddylation", "p": 5.33e-15, "fdr": 2.74e-11}, "gocc": {"set": "GO:0030008", "set_name": "TRAPP complex", "p": 2.55e-12, "fdr": 1.72e-09}}

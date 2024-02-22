@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gocc":{"set":"GO:0070160","set_name":"tight junction","fdr":0.004689899979470491},"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0}}
+{"gomf": {"set": "GO:0002162", "set_name": "dystroglycan binding", "p": 0.001074967, "fdr": 0.954570426}, "gobp": {"set": "GO:0016266", "set_name": "O-glycan processing", "p": 0.000403, "fdr": 0.730911633}, "gocc": {"set": "GO:0016324", "set_name": "apical plasma membrane", "p": 1.71e-05, "fdr": 0.010204645}}

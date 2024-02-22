@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0140053","set_name":"mitochondrial gene expression","fdr":3.961215560870073e-27},"gocc":{"set":"GO:0005840","set_name":"ribosome","fdr":9.758188463446824e-26},"gomf":{"set":"GO:0003735","set_name":"structural constituent of ribosome","fdr":8.856915307073295e-21}}
+{"gomf": {"set": "GO:0003735", "set_name": "structural constituent of ribosome", "p": 0.0, "fdr": 0.0}, "gobp": {"set": "GO:0006412", "set_name": "translation", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "p": 0.0, "fdr": 0.0}}

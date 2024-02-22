@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0005814","set_name":"centriole","fdr":0.2963696678148607},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gobp":{"set":"GO:0035148","set_name":"tube formation","fdr":0.22824237224983462}}
+{"gomf": {"set": "GO:0004721", "set_name": "phosphoprotein phosphatase activity", "p": 0.01362697, "fdr": 1.0}, "gobp": {"set": "GO:0048701", "set_name": "embryonic cranial skeleton morphogenesis", "p": 0.000171, "fdr": 0.347166036}, "gocc": {"set": "GO:0044450", "set_name": "microtubule organizing center part", "p": 2.36e-05, "fdr": 0.015854332}}

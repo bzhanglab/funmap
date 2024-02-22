@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0}}
+{"gomf": {"set": "GO:0004402", "set_name": "histone acetyltransferase activity", "p": 0.025613929, "fdr": 1.0}, "gobp": {"set": "GO:0016578", "set_name": "histone deubiquitination", "p": 0.003697774, "fdr": 1.0}, "gocc": {"set": "GO:0005671", "set_name": "Ada2/Gcn5/Ada3 transcription activator complex", "p": 0.001602021, "fdr": 0.626132998}}

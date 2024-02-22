@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gobp":{"set":"GO:0051156","set_name":"glucose 6-phosphate metabolic process","fdr":0.140197143336185}}
+{"gomf": {"set": "GO:0061630", "set_name": "ubiquitin protein ligase activity", "p": 0.023083268, "fdr": 1.0}, "gobp": {"set": "GO:0038202", "set_name": "TORC1 signaling", "p": 6.41e-06, "fdr": 0.032952948}, "gocc": {"set": "GO:0038201", "set_name": "TOR complex", "p": 9.26e-08, "fdr": 6.22e-05}}

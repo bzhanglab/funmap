@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0031983","set_name":"vesicle lumen","fdr":3.2527710904377686e-24},"gomf":{"set":"GO:0043177","set_name":"organic acid binding","fdr":0.006243251030679977},"gobp":{"set":"GO:0042742","set_name":"defense response to bacterium","fdr":2.348723266842918e-8}}
+{"gomf": {"set": "GO:0050786", "set_name": "RAGE receptor binding", "p": 1.89e-05, "fdr": 0.009614628}, "gobp": {"set": "GO:0002444", "set_name": "myeloid leukocyte mediated immunity", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0031983", "set_name": "vesicle lumen", "p": 0.0, "fdr": 0.0}}

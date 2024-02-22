@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0006354","set_name":"DNA-templated transcription elongation","fdr":1.1159456272905473e-27},"gomf":{"set":"GO:0003729","set_name":"mRNA binding","fdr":0.006579521825546484},"gocc":{"set":"GO:0005681","set_name":"spliceosomal complex","fdr":1.2001974628594974e-7}}
+{"gomf": {"set": "GO:0003713", "set_name": "transcription coactivator activity", "p": 1.64e-05, "fdr": 0.014312384}, "gobp": {"set": "GO:0098781", "set_name": "ncRNA transcription", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0032039", "set_name": "integrator complex", "p": 0.0, "fdr": 0.0}}

@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0061631", "set_name": "ubiquitin conjugating enzyme activity", "p": 0.006413646, "fdr": 1.0}, "gobp": {"set": "GO:1902074", "set_name": "response to salt", "p": 0.001115511, "fdr": 1.0}, "gocc": {"set": "GO:0005766", "set_name": "primary lysosome", "p": 0.03085867, "fdr": 1.0}}

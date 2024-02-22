@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0000228","set_name":"nuclear chromosome","fdr":7.416264513993422e-8},"gomf":{"set":"GO:0003697","set_name":"single-stranded DNA binding","fdr":4.960569808760963e-6},"gobp":{"set":"GO:0071103","set_name":"DNA conformation change","fdr":8.72201122111237e-8}}
+{"gomf": {"set": "GO:0004386", "set_name": "helicase activity", "p": 1.59e-08, "fdr": 1.41e-05}, "gobp": {"set": "GO:0006260", "set_name": "DNA replication", "p": 2.32e-11, "fdr": 1.19e-07}, "gocc": {"set": "GO:0042555", "set_name": "MCM complex", "p": 1.97e-12, "fdr": 1.33e-09}}

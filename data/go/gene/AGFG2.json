@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0048193","set_name":"Golgi vesicle transport","fdr":5.4924232299502444e-11},"gomf":{"set":"GO:0000149","set_name":"SNARE binding","fdr":0.8710178608342071},"gocc":{"set":"GO:0099023","set_name":"vesicle tethering complex","fdr":3.483670791456558e-25}}
+{"gomf": {"set": "GO:0017160", "set_name": "Ral GTPase binding", "p": 1.63e-07, "fdr": 0.000144}, "gobp": {"set": "GO:0048193", "set_name": "Golgi vesicle transport", "p": 1.85e-09, "fdr": 9.5e-06}, "gocc": {"set": "GO:0099023", "set_name": "tethering complex", "p": 0.0, "fdr": 0.0}}

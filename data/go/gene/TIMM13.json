@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0005759","set_name":"mitochondrial matrix","fdr":7.8944389717143e-23},"gobp":{"set":"GO:0007005","set_name":"mitochondrion organization","fdr":2.800921706314465e-15},"gomf":{"set":"GO:0009055","set_name":"electron transfer activity","fdr":0.017777442307120677}}
+{"gomf": {"set": "GO:0009055", "set_name": "electron transfer activity", "p": 3.68e-06, "fdr": 0.003271762}, "gobp": {"set": "GO:0045333", "set_name": "cellular respiration", "p": 1.55e-13, "fdr": 7.94e-10}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "p": 0.0, "fdr": 0.0}}

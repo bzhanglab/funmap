@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0001533","set_name":"cornified envelope","fdr":6.398342136961589e-16},"gobp":{"set":"GO:0045216","set_name":"cell-cell junction organization","fdr":2.1903862240699353e-12},"gomf":{"set":"GO:0045296","set_name":"cadherin binding","fdr":4.416421216665635e-15}}
+{"gomf": {"set": "GO:0050839", "set_name": "cell adhesion molecule binding", "p": 0.0, "fdr": 0.0}, "gobp": {"set": "GO:0045216", "set_name": "cell-cell junction organization", "p": 2e-15, "fdr": 6.84e-12}, "gocc": {"set": "GO:0070161", "set_name": "anchoring junction", "p": 0.0, "fdr": 0.0}}

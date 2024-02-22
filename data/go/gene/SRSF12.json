@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0006260","set_name":"DNA replication","fdr":3.38228134303591e-7},"gocc":{"set":"GO:0000228","set_name":"nuclear chromosome","fdr":1.291042766526181e-6},"gomf":{"set":"GO:0042393","set_name":"histone binding","fdr":0.007271781193174934}}
+{"gomf": {"set": "GO:0042393", "set_name": "histone binding", "p": 8.92e-06, "fdr": 0.007919611}, "gobp": {"set": "GO:0006260", "set_name": "DNA replication", "p": 5.11e-10, "fdr": 2.62e-06}, "gocc": {"set": "GO:0000228", "set_name": "nuclear chromosome", "p": 6.77e-08, "fdr": 4.55e-05}}

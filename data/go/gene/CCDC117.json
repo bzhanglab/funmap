@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0005681","set_name":"spliceosomal complex","fdr":6.43435408978668e-9},"gomf":{"set":"GO:0003729","set_name":"mRNA binding","fdr":0.34472322465605065},"gobp":{"set":"GO:0006397","set_name":"mRNA processing","fdr":2.3082795585798632e-8}}
+{"gomf": {"set": "GO:0003713", "set_name": "transcription coactivator activity", "p": 0.000136, "fdr": 0.120688541}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": 3.01e-13, "fdr": 9.72e-10}, "gocc": {"set": "GO:0005684", "set_name": "U2-type spliceosomal complex", "p": 6.34e-13, "fdr": 4.26e-10}}

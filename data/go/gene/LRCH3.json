@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0150034","set_name":"distal axon","fdr":0.014613214494842531},"gomf":{"set":"GO:0051020","set_name":"GTPase binding","fdr":0.017110775932388616},"gobp":{"set":"GO:0007015","set_name":"actin filament organization","fdr":0.06648866696552642}}
+{"gomf": {"set": "GO:0017048", "set_name": "Rho GTPase binding", "p": 1.67e-06, "fdr": 0.001481483}, "gobp": {"set": "GO:0006801", "set_name": "superoxide metabolic process", "p": 1.98e-06, "fdr": 0.010148067}, "gocc": {"set": "GO:0150034", "set_name": "distal axon", "p": 0.000123, "fdr": 0.059169293}}

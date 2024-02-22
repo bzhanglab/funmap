@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gocc":{"set":"GO:0015030","set_name":"Cajal body","fdr":0.2837325549070315},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0001161", "set_name": "intronic transcription regulatory region sequence-specific DNA binding", "p": 0.001051709, "fdr": 0.298426884}, "gobp": {"set": "GO:0035721", "set_name": "intraciliary retrograde transport", "p": 0.00101656, "fdr": 1.0}, "gocc": {"set": "GO:0015030", "set_name": "Cajal body", "p": 0.000835, "fdr": 0.560939907}}

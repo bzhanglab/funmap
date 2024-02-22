@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0009055","set_name":"electron transfer activity","fdr":0.000027185666811260947},"gobp":{"set":"GO:0044282","set_name":"small molecule catabolic process","fdr":3.7593005645221284e-17},"gocc":{"set":"GO:0005759","set_name":"mitochondrial matrix","fdr":2.0564595921238005e-27}}
+{"gomf": {"set": "GO:0048037", "set_name": "cofactor binding", "p": 2.74e-14, "fdr": 2.04e-11}, "gobp": {"set": "GO:0016054", "set_name": "organic acid catabolic process", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "p": 0.0, "fdr": 0.0}}

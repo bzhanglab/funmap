@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0022900","set_name":"electron transport chain","fdr":1.836200949673103e-81},"gocc":{"set":"GO:0070469","set_name":"respirasome","fdr":7.839723614043621e-103},"gomf":{"set":"GO:0009055","set_name":"electron transfer activity","fdr":5.15876629677842e-67}}
+{"gomf": {"set": "GO:0009055", "set_name": "electron transfer activity", "p": 0.0, "fdr": 0.0}, "gobp": {"set": "GO:0006753", "set_name": "nucleoside phosphate metabolic process", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0019866", "set_name": "organelle inner membrane", "p": 0.0, "fdr": 0.0}}

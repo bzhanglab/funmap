@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0005681","set_name":"spliceosomal complex","fdr":1.3318120515333274e-11},"gomf":{"set":"GO:0003712","set_name":"transcription coregulator activity","fdr":0.0022277423364952613},"gobp":{"set":"GO:0006397","set_name":"mRNA processing","fdr":8.086306715732822e-12}}
+{"gomf": {"set": "GO:0003682", "set_name": "chromatin binding", "p": 1.46e-07, "fdr": 0.00013}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": 3.22e-15, "fdr": 8.55e-12}, "gocc": {"set": "GO:0005681", "set_name": "spliceosomal complex", "p": 1.78e-15, "fdr": 1.19e-12}}

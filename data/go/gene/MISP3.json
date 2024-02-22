@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0005759","set_name":"mitochondrial matrix","fdr":1.091689689019662e-6},"gomf":{"set":"GO:0051287","set_name":"NAD binding","fdr":0.00002171440118703714},"gobp":{"set":"GO:0044282","set_name":"small molecule catabolic process","fdr":1.4493492400769e-11}}
+{"gomf": {"set": "GO:0048037", "set_name": "cofactor binding", "p": 9.91e-10, "fdr": 8.8e-07}, "gobp": {"set": "GO:0044282", "set_name": "small molecule catabolic process", "p": 1.73e-11, "fdr": 8.91e-08}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "p": 5.54e-08, "fdr": 3.73e-05}}

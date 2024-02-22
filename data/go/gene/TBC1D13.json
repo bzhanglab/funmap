@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0021915","set_name":"neural tube development","fdr":0.0504756058706623},"gocc":{"set":"GO:0099568","set_name":"cytoplasmic region","fdr":0.057075869122939174},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0000030", "set_name": "mannosyltransferase activity", "p": 3.86e-05, "fdr": 0.034287182}, "gobp": {"set": "GO:0097502", "set_name": "mannosylation", "p": 6.82e-05, "fdr": 0.350534574}, "gocc": {"set": "GO:0044441", "set_name": "ciliary part", "p": 1.64e-05, "fdr": 0.005799417}}

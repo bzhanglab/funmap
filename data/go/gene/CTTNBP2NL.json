@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0032963","set_name":"collagen metabolic process","fdr":0.00003451349614399659},"gomf":{"set":"GO:0005518","set_name":"collagen binding","fdr":0.03836450781002338},"gocc":{"set":"GO:0036452","set_name":"ESCRT complex","fdr":0.0008438810282980724}}
+{"gomf": {"set": "GO:0008143", "set_name": "poly(A) binding", "p": 7.73e-05, "fdr": 0.047040512}, "gobp": {"set": "GO:0032963", "set_name": "collagen metabolic process", "p": 3.41e-08, "fdr": 0.000175}, "gocc": {"set": "GO:0036452", "set_name": "ESCRT complex", "p": 3.73e-06, "fdr": 0.0010501}}

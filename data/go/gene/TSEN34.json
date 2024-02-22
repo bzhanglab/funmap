@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0030515","set_name":"snoRNA binding","fdr":1.276403136412502e-6},"gobp":{"set":"GO:0016072","set_name":"rRNA metabolic process","fdr":1.1443144841430143e-22},"gocc":{"set":"GO:0030684","set_name":"preribosome","fdr":3.7513380366429643e-28}}
+{"gomf": {"set": "GO:0030515", "set_name": "snoRNA binding", "p": 4.47e-09, "fdr": 3.97e-06}, "gobp": {"set": "GO:0034660", "set_name": "ncRNA metabolic process", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0030684", "set_name": "preribosome", "p": 0.0, "fdr": 0.0}}

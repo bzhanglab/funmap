@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0001216","set_name":"DNA-binding transcription activator activity","fdr":0.2063653728506953},"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0}}
+{"gomf": {"set": "GO:0140101", "set_name": "catalytic activity, acting on a tRNA", "p": 0.007120545, "fdr": 1.0}, "gobp": {"set": "GO:0043039", "set_name": "tRNA aminoacylation", "p": 0.007471921, "fdr": 1.0}, "gocc": {"set": "GO:0000786", "set_name": "nucleosome", "p": 0.04756983, "fdr": 1.0}}

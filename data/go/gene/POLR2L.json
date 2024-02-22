@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0005681","set_name":"spliceosomal complex","fdr":3.925181660233593e-31},"gomf":{"set":"GO:0003729","set_name":"mRNA binding","fdr":3.245882180823791e-8},"gobp":{"set":"GO:0006397","set_name":"mRNA processing","fdr":2.012647084007585e-39}}
+{"gomf": {"set": "GO:0017069", "set_name": "snRNA binding", "p": 2.54e-08, "fdr": 1.24e-05}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0016607", "set_name": "nuclear speck", "p": 0.0, "fdr": 0.0}}

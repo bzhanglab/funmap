@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0006909","set_name":"phagocytosis","fdr":6.221384465132257e-14},"gomf":{"set":"GO:0003779","set_name":"actin binding","fdr":0.0005684181549774303},"gocc":{"set":"GO:0001891","set_name":"phagocytic cup","fdr":9.229614182679744e-6}}
+{"gomf": {"set": "GO:0003779", "set_name": "actin binding", "p": 1.26e-06, "fdr": 0.00112227}, "gobp": {"set": "GO:0046649", "set_name": "lymphocyte activation", "p": 2e-15, "fdr": 1.03e-11}, "gocc": {"set": "GO:0001891", "set_name": "phagocytic cup", "p": 1.99e-08, "fdr": 1.34e-05}}

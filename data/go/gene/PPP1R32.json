@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0015631","set_name":"tubulin binding","fdr":0.01017552156267255},"gobp":{"set":"GO:0044782","set_name":"cilium organization","fdr":7.681649642601682e-18},"gocc":{"set":"GO:0099568","set_name":"cytoplasmic region","fdr":9.573185190867499e-27}}
+{"gomf": {"set": "GO:0015631", "set_name": "tubulin binding", "p": 2.08e-05, "fdr": 0.018495401}, "gobp": {"set": "GO:0044782", "set_name": "cilium organization", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

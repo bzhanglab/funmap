@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0007059","set_name":"chromosome segregation","fdr":3.48677624950535e-25},"gomf":{"set":"GO:0003697","set_name":"single-stranded DNA binding","fdr":2.017351123967288e-7},"gocc":{"set":"GO:0098687","set_name":"chromosomal region","fdr":8.696906061668313e-20}}
+{"gomf": {"set": "GO:0003697", "set_name": "single-stranded DNA binding", "p": 2.93e-07, "fdr": 0.00026}, "gobp": {"set": "GO:0051301", "set_name": "cell division", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0098687", "set_name": "chromosomal region", "p": 0.0, "fdr": 0.0}}

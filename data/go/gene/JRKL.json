@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0008380","set_name":"RNA splicing","fdr":5.940713382398187e-9},"gomf":{"set":"GO:0003729","set_name":"mRNA binding","fdr":0.006579521825546484},"gocc":{"set":"GO:0005681","set_name":"spliceosomal complex","fdr":0.000029172328640061194}}
+{"gomf": {"set": "GO:0003729", "set_name": "mRNA binding", "p": 0.000361, "fdr": 0.320896014}, "gobp": {"set": "GO:0000375", "set_name": "RNA splicing, via transesterification reactions", "p": 4.44e-16, "fdr": 2.28e-12}, "gocc": {"set": "GO:0044452", "set_name": "nucleolar part", "p": 2.1e-09, "fdr": 1.41e-06}}

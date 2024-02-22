@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0016874","set_name":"ligase activity","fdr":0.00934571526193037},"gobp":{"set":"GO:0007005","set_name":"mitochondrion organization","fdr":1.096827370961439e-12},"gocc":{"set":"GO:0005759","set_name":"mitochondrial matrix","fdr":6.7759695975955575e-16}}
+{"gomf": {"set": "GO:0004812", "set_name": "aminoacyl-tRNA ligase activity", "p": 2.36e-08, "fdr": 1.05e-05}, "gobp": {"set": "GO:0007005", "set_name": "mitochondrion organization", "p": 2.6e-14, "fdr": 1.33e-10}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "p": 0.0, "fdr": 0.0}}

@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0048193","set_name":"Golgi vesicle transport","fdr":1.755497481182649e-36},"gocc":{"set":"GO:0030135","set_name":"coated vesicle","fdr":1.0286962487719152e-18},"gomf":{"set":"GO:0000149","set_name":"SNARE binding","fdr":0.057060990648849404}}
+{"gomf": {"set": "GO:0008565", "set_name": "protein transporter activity", "p": 2.55e-05, "fdr": 0.022643647}, "gobp": {"set": "GO:0048193", "set_name": "Golgi vesicle transport", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0000139", "set_name": "Golgi membrane", "p": 0.0, "fdr": 0.0}}

@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0045296","set_name":"cadherin binding","fdr":6.645907581608065e-10},"gobp":{"set":"GO:0045103","set_name":"intermediate filament-based process","fdr":0.00009594468238117799},"gocc":{"set":"GO:0005912","set_name":"adherens junction","fdr":0.000017106146602481377}}
+{"gomf": {"set": "GO:0045296", "set_name": "cadherin binding", "p": 7.1e-12, "fdr": 6.31e-09}, "gobp": {"set": "GO:0031424", "set_name": "keratinization", "p": 4.26e-08, "fdr": 0.000219}, "gocc": {"set": "GO:0005882", "set_name": "intermediate filament", "p": 7.71e-09, "fdr": 5.18e-06}}

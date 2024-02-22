@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0005543","set_name":"phospholipid binding","fdr":0.0004931015905270932},"gobp":{"set":"GO:0016197","set_name":"endosomal transport","fdr":4.76291394806401e-11},"gocc":{"set":"GO:0005769","set_name":"early endosome","fdr":5.578342786151427e-9}}
+{"gomf": {"set": "GO:0035091", "set_name": "phosphatidylinositol binding", "p": 1.21e-06, "fdr": 0.001072367}, "gobp": {"set": "GO:0016482", "set_name": "cytosolic transport", "p": 3.33e-09, "fdr": 1.71e-05}, "gocc": {"set": "GO:0005769", "set_name": "early endosome", "p": 2.26e-11, "fdr": 1.52e-08}}

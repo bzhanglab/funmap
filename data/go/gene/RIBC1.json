@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0001539","set_name":"cilium or flagellum-dependent cell motility","fdr":7.456423398700038e-13},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gocc":{"set":"GO:0031514","set_name":"motile cilium","fdr":1.4301949553320458e-30}}
+{"gomf": {"set": "GO:0045504", "set_name": "dynein heavy chain binding", "p": 1.13e-05, "fdr": 0.010078289}, "gobp": {"set": "GO:0044782", "set_name": "cilium organization", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0},"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0015081", "set_name": "sodium ion transmembrane transporter activity", "p": 0.009815117, "fdr": 1.0}, "gobp": {"set": "GO:2000773", "set_name": "negative regulation of cellular senescence", "p": 0.001513529, "fdr": 1.0}, "gocc": {"set": "GO:0036477", "set_name": "somatodendritic compartment", "p": 0.04142265, "fdr": 1.0}}

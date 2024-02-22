@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0015631","set_name":"tubulin binding","fdr":0.47057291797629786},"gobp":{"set":"GO:0044782","set_name":"cilium organization","fdr":2.1617009663002534e-16},"gocc":{"set":"GO:0099568","set_name":"cytoplasmic region","fdr":1.1258389061032332e-21}}
+{"gomf": {"set": "GO:0045504", "set_name": "dynein heavy chain binding", "p": 0.001098837, "fdr": 0.83014076}, "gobp": {"set": "GO:0044782", "set_name": "cilium organization", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

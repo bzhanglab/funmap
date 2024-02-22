@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0000149","set_name":"SNARE binding","fdr":0.00011779615550311633},"gocc":{"set":"GO:0005774","set_name":"vacuolar membrane","fdr":1.9025957265032368e-23},"gobp":{"set":"GO:0016197","set_name":"endosomal transport","fdr":3.1846263563021396e-18}}
+{"gomf": {"set": "GO:0000149", "set_name": "SNARE binding", "p": 3.12e-07, "fdr": 0.000277}, "gobp": {"set": "GO:0016197", "set_name": "endosomal transport", "p": 3.84e-14, "fdr": 1.97e-10}, "gocc": {"set": "GO:0044437", "set_name": "vacuolar part", "p": 0.0, "fdr": 0.0}}

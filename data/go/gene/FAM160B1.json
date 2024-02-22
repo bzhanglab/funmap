@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gocc":{"set":"GO:0005875","set_name":"microtubule associated complex","fdr":0.000012597150378547701},"gobp":{"set":"GO:0016197","set_name":"endosomal transport","fdr":0.00003060311401032936}}
+{"gomf": {"set": "GO:0008565", "set_name": "protein transporter activity", "p": 0.000452, "fdr": 0.401771358}, "gobp": {"set": "GO:0048193", "set_name": "Golgi vesicle transport", "p": 2.22e-16, "fdr": 1.14e-12}, "gocc": {"set": "GO:0030904", "set_name": "retromer complex", "p": 1.31e-06, "fdr": 0.00049}}

@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gocc":{"set":"GO:0099568","set_name":"cytoplasmic region","fdr":0.057075869122939174},"gobp":{"set":"GO:0021915","set_name":"neural tube development","fdr":0.011560074625093696}}
+{"gomf": {"set": "GO:0019206", "set_name": "nucleoside kinase activity", "p": 0.002468548, "fdr": 1.0}, "gobp": {"set": "GO:0021915", "set_name": "neural tube development", "p": 0.000132, "fdr": 0.679890203}, "gocc": {"set": "GO:0044441", "set_name": "ciliary part", "p": 1.72e-06, "fdr": 0.000722}}

@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0003012","set_name":"muscle system process","fdr":1.4864280355224247e-6},"gomf":{"set":"GO:0003779","set_name":"actin binding","fdr":0.10147464305268988},"gocc":{"set":"GO:0043292","set_name":"contractile fiber","fdr":1.3828688046177557e-10}}
+{"gomf": {"set": "GO:0008307", "set_name": "structural constituent of muscle", "p": 0.000631, "fdr": 0.314045753}, "gobp": {"set": "GO:0006936", "set_name": "muscle contraction", "p": 1.45e-10, "fdr": 7.45e-07}, "gocc": {"set": "GO:0044449", "set_name": "contractile fiber part", "p": 1.19e-13, "fdr": 7.99e-11}}

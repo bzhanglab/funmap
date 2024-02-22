@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0008380","set_name":"RNA splicing","fdr":4.152990670669387e-10},"gocc":{"set":"GO:0005681","set_name":"spliceosomal complex","fdr":1.991273044684505e-6},"gomf":{"set":"GO:0042393","set_name":"histone binding","fdr":0.06697342683796177}}
+{"gomf": {"set": "GO:0042393", "set_name": "histone binding", "p": 8.67e-05, "fdr": 0.077004953}, "gobp": {"set": "GO:0008380", "set_name": "RNA splicing", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005681", "set_name": "spliceosomal complex", "p": 4.54e-08, "fdr": 2e-05}}

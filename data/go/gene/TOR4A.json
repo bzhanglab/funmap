@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0060589","set_name":"nucleoside-triphosphatase regulator activity","fdr":0.00006623360449571327},"gocc":{"set":"GO:0001891","set_name":"phagocytic cup","fdr":0.009338612169554278},"gobp":{"set":"GO:0006909","set_name":"phagocytosis","fdr":4.460127845519998e-7}}
+{"gomf": {"set": "GO:0030695", "set_name": "GTPase regulator activity", "p": 5.84e-07, "fdr": 0.000519}, "gobp": {"set": "GO:0006909", "set_name": "phagocytosis", "p": 4.4e-08, "fdr": 0.00019}, "gocc": {"set": "GO:0045121", "set_name": "membrane raft", "p": 7.91e-06, "fdr": 0.001817727}}

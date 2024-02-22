@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0005496","set_name":"steroid binding","fdr":0.04704400320698973},"gocc":{"set":"GO:0031201","set_name":"SNARE complex","fdr":0.0020006496133826543},"gobp":{"set":"GO:0048193","set_name":"Golgi vesicle transport","fdr":3.717713912196195e-8}}
+{"gomf": {"set": "GO:0000149", "set_name": "SNARE binding", "p": 0.000219, "fdr": 0.09808313}, "gobp": {"set": "GO:0006890", "set_name": "retrograde vesicle-mediated transport, Golgi to ER", "p": 2.01e-12, "fdr": 1.03e-08}, "gocc": {"set": "GO:0005782", "set_name": "peroxisomal matrix", "p": 8.19e-07, "fdr": 0.000275}}

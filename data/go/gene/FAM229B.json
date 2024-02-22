@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0007018","set_name":"microtubule-based movement","fdr":7.6022650927525e-17},"gomf":{"set":"GO:0045505","set_name":"dynein intermediate chain binding","fdr":0.0014725338846608342},"gocc":{"set":"GO:0031514","set_name":"motile cilium","fdr":4.704931923482457e-18}}
+{"gomf": {"set": "GO:0045503", "set_name": "dynein light chain binding", "p": 9.19e-07, "fdr": 0.00059}, "gobp": {"set": "GO:0030031", "set_name": "cell projection assembly", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

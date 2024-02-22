@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0043588","set_name":"skin development","fdr":1.0862506335076524e-19},"gocc":{"set":"GO:0001533","set_name":"cornified envelope","fdr":3.854542236605668e-24},"gomf":{"set":"GO:0030280","set_name":"structural constituent of skin epidermis","fdr":8.636760154528116e-8}}
+{"gomf": {"set": "GO:0005149", "set_name": "interleukin-1 receptor binding", "p": 1.24e-09, "fdr": 1.1e-06}, "gobp": {"set": "GO:0030855", "set_name": "epithelial cell differentiation", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0001533", "set_name": "cornified envelope", "p": 0.0, "fdr": 0.0}}

@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0016607","set_name":"nuclear speck","fdr":0.011632865651875714},"gomf":{"set":"GO:0004518","set_name":"nuclease activity","fdr":0.22418978518338062},"gobp":{"set":"GO:0006401","set_name":"RNA catabolic process","fdr":0.0013349538807440665}}
+{"gomf": {"set": "GO:0004540", "set_name": "ribonuclease activity", "p": 7.3e-05, "fdr": 0.035755616}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": 3e-07, "fdr": 0.001541986}, "gocc": {"set": "GO:0035145", "set_name": "exon-exon junction complex", "p": 9.88e-05, "fdr": 0.03488833}}

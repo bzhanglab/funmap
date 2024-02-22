@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0034708","set_name":"methyltransferase complex","fdr":0.0006870292633363076},"gomf":{"set":"GO:0003729","set_name":"mRNA binding","fdr":0.006579521825546484},"gobp":{"set":"GO:0006397","set_name":"mRNA processing","fdr":0.00025530802949814757}}
+{"gomf": {"set": "GO:0003682", "set_name": "chromatin binding", "p": 1.41e-05, "fdr": 0.012512807}, "gobp": {"set": "GO:0006403", "set_name": "RNA localization", "p": 6.43e-07, "fdr": 0.002183261}, "gocc": {"set": "GO:0034708", "set_name": "methyltransferase complex", "p": 1.09e-05, "fdr": 0.007305743}}

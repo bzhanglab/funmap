@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0099568","set_name":"cytoplasmic region","fdr":0.006470728453384533},"gobp":{"set":"GO:0021915","set_name":"neural tube development","fdr":0.0504756058706623},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0019206", "set_name": "nucleoside kinase activity", "p": 0.002468548, "fdr": 1.0}, "gobp": {"set": "GO:0045540", "set_name": "regulation of cholesterol biosynthetic process", "p": 1.19e-08, "fdr": 3.06e-05}, "gocc": {"set": "GO:0044441", "set_name": "ciliary part", "p": 1.72e-06, "fdr": 0.000722}}

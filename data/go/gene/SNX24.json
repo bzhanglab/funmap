@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0003924","set_name":"GTPase activity","fdr":0.024273837177846865},"gocc":{"set":"GO:0030133","set_name":"transport vesicle","fdr":0.2640761708181046},"gobp":{"set":"GO:0007033","set_name":"vacuole organization","fdr":0.05009505405853971}}
+{"gomf": {"set": "GO:0019003", "set_name": "GDP binding", "p": 4.07e-06, "fdr": 0.003616449}, "gobp": {"set": "GO:0032482", "set_name": "Rab protein signal transduction", "p": 2.19e-07, "fdr": 0.001123824}, "gocc": {"set": "GO:0030133", "set_name": "transport vesicle", "p": 0.000672, "fdr": 0.21478664}}

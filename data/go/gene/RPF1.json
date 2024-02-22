@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0019843","set_name":"rRNA binding","fdr":3.130123388514947e-6},"gocc":{"set":"GO:0030684","set_name":"preribosome","fdr":9.48368998142434e-41},"gobp":{"set":"GO:0022613","set_name":"ribonucleoprotein complex biogenesis","fdr":2.802467150607246e-51}}
+{"gomf": {"set": "GO:0008097", "set_name": "5S rRNA binding", "p": 1.56e-05, "fdr": 0.01382978}, "gobp": {"set": "GO:0034660", "set_name": "ncRNA metabolic process", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0030684", "set_name": "preribosome", "p": 0.0, "fdr": 0.0}}

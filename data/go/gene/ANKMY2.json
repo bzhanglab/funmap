@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0005840","set_name":"ribosome","fdr":9.758188463446824e-26},"gomf":{"set":"GO:0003735","set_name":"structural constituent of ribosome","fdr":6.762278577672084e-28},"gobp":{"set":"GO:0002181","set_name":"cytoplasmic translation","fdr":1.3987038147477806e-33}}
+{"gomf": {"set": "GO:0003735", "set_name": "structural constituent of ribosome", "p": 0.0, "fdr": 0.0}, "gobp": {"set": "GO:0006412", "set_name": "translation", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005840", "set_name": "ribosome", "p": 0.0, "fdr": 0.0}}

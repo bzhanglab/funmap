@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0048193","set_name":"Golgi vesicle transport","fdr":0.09606915001391542},"gocc":{"set":"GO:0030133","set_name":"transport vesicle","fdr":5.298782479921132e-6},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0002162", "set_name": "dystroglycan binding", "p": 0.000987, "fdr": 0.876844207}, "gobp": {"set": "GO:0048193", "set_name": "Golgi vesicle transport", "p": 4.3e-06, "fdr": 0.016093906}, "gocc": {"set": "GO:0000139", "set_name": "Golgi membrane", "p": 1.26e-08, "fdr": 8.44e-06}}

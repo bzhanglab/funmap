@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0003779","set_name":"actin binding","fdr":0.5395614512394381},"gobp":{"set":"GO:0048193","set_name":"Golgi vesicle transport","fdr":5.860078776877492e-7},"gocc":{"set":"GO:0048475","set_name":"coated membrane","fdr":0.0001175537048071137}}
+{"gomf": {"set": "GO:0000146", "set_name": "microfilament motor activity", "p": 0.00304783, "fdr": 1.0}, "gobp": {"set": "GO:0006888", "set_name": "ER to Golgi vesicle-mediated transport", "p": 6.03e-13, "fdr": 3.1e-09}, "gocc": {"set": "GO:0000139", "set_name": "Golgi membrane", "p": 6.78e-12, "fdr": 4.55e-09}}

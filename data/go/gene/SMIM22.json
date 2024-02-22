@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:1990778","set_name":"protein localization to cell periphery","fdr":0.09606915001391542},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gocc":{"set":"GO:0070160","set_name":"tight junction","fdr":0.004689899979470491}}
+{"gomf": {"set": "GO:0002162", "set_name": "dystroglycan binding", "p": 0.000987, "fdr": 0.875823915}, "gobp": {"set": "GO:0072659", "set_name": "protein localization to plasma membrane", "p": 1.87e-05, "fdr": 0.071866567}, "gocc": {"set": "GO:0016324", "set_name": "apical plasma membrane", "p": 1.29e-05, "fdr": 0.00830495}}

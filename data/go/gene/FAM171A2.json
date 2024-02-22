@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0072562","set_name":"blood microparticle","fdr":0.00004303270781891746},"gomf":{"set":"GO:0030546","set_name":"signaling receptor activator activity","fdr":0.003921534148742558},"gobp":{"set":"GO:0070482","set_name":"response to oxygen levels","fdr":5.744160880286218e-14}}
+{"gomf": {"set": "GO:0005179", "set_name": "hormone activity", "p": 7.02e-06, "fdr": 0.006231829}, "gobp": {"set": "GO:0001666", "set_name": "response to hypoxia", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005938", "set_name": "cell cortex", "p": 5.3e-07, "fdr": 0.000356}}

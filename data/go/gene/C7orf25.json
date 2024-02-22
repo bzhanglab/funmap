@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gomf":{"set":"GO:0042826","set_name":"histone deacetylase binding","fdr":0.016849742707978486},"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0}}
+{"gomf": {"set": "GO:0005254", "set_name": "chloride channel activity", "p": 0.003815619, "fdr": 1.0}, "gobp": {"set": "GO:0051205", "set_name": "protein insertion into membrane", "p": 0.004479153, "fdr": 1.0}, "gocc": {"set": "GO:0000812", "set_name": "Swr1 complex", "p": 0.03831516, "fdr": 1.0}}

@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0001848","set_name":"complement binding","fdr":0.0002869708494794526},"gocc":{"set":"GO:0031983","set_name":"vesicle lumen","fdr":1.2586194498040828e-32},"gobp":{"set":"GO:0006959","set_name":"humoral immune response","fdr":1.2629451911059054e-11}}
+{"gomf": {"set": "GO:0004252", "set_name": "serine-type endopeptidase activity", "p": 1.39e-07, "fdr": 0.000115}, "gobp": {"set": "GO:0002444", "set_name": "myeloid leukocyte mediated immunity", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0031983", "set_name": "vesicle lumen", "p": 0.0, "fdr": 0.0}}

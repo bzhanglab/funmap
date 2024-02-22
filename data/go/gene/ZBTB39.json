@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0000803","set_name":"sex chromosome","fdr":0.02092578982188635},"gobp":{"set":"GO:0034728","set_name":"nucleosome organization","fdr":0.011884402994221641},"gomf":{"set":"GO:0031491","set_name":"nucleosome binding","fdr":0.0022617137677892105}}
+{"gomf": {"set": "GO:0031491", "set_name": "nucleosome binding", "p": 2.39e-06, "fdr": 0.00212383}, "gobp": {"set": "GO:0034728", "set_name": "nucleosome organization", "p": 1.92e-06, "fdr": 0.009881585}, "gocc": {"set": "GO:0000790", "set_name": "nuclear chromatin", "p": 2.18e-07, "fdr": 0.000146}}

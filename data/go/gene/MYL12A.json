@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0003779","set_name":"actin binding","fdr":1.1727526775091811e-11},"gocc":{"set":"GO:0030055","set_name":"cell-substrate junction","fdr":2.3229480471095204e-14},"gobp":{"set":"GO:0007015","set_name":"actin filament organization","fdr":2.2424798247167315e-7}}
+{"gomf": {"set": "GO:0045296", "set_name": "cadherin binding", "p": 2.44e-12, "fdr": 2.17e-09}, "gobp": {"set": "GO:0097435", "set_name": "supramolecular fiber organization", "p": 5.41e-09, "fdr": 1.64e-05}, "gocc": {"set": "GO:0070161", "set_name": "anchoring junction", "p": 0.0, "fdr": 0.0}}

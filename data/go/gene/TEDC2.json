@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0015631","set_name":"tubulin binding","fdr":0.001203121085248563},"gobp":{"set":"GO:0007059","set_name":"chromosome segregation","fdr":3.48677624950535e-25},"gocc":{"set":"GO:0098687","set_name":"chromosomal region","fdr":6.001061552529372e-13}}
+{"gomf": {"set": "GO:0003688", "set_name": "DNA replication origin binding", "p": 1.04e-06, "fdr": 0.000927}, "gobp": {"set": "GO:0051301", "set_name": "cell division", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0098687", "set_name": "chromosomal region", "p": 1.42e-13, "fdr": 9.52e-11}}

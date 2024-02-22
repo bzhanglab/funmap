@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0007059","set_name":"chromosome segregation","fdr":3.0673339712990925e-16},"gomf":{"set":"GO:0003697","set_name":"single-stranded DNA binding","fdr":2.4802849043804814e-6},"gocc":{"set":"GO:0098687","set_name":"chromosomal region","fdr":2.9062565001621585e-21}}
+{"gomf": {"set": "GO:0003697", "set_name": "single-stranded DNA binding", "p": 3.4e-07, "fdr": 0.000302}, "gobp": {"set": "GO:0044770", "set_name": "cell cycle phase transition", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0000228", "set_name": "nuclear chromosome", "p": 0.0, "fdr": 0.0}}

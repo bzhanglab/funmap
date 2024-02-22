@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0031514","set_name":"motile cilium","fdr":1.7424479333515998e-23},"gomf":{"set":"GO:0015631","set_name":"tubulin binding","fdr":0.47057291797629786},"gobp":{"set":"GO:0001539","set_name":"cilium or flagellum-dependent cell motility","fdr":4.970603446221567e-16}}
+{"gomf": {"set": "GO:0045504", "set_name": "dynein heavy chain binding", "p": 7.72e-06, "fdr": 0.006859324}, "gobp": {"set": "GO:0030031", "set_name": "cell projection assembly", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

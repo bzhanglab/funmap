@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0099023","set_name":"vesicle tethering complex","fdr":5.043665612974529e-21},"gobp":{"set":"GO:0051648","set_name":"vesicle localization","fdr":4.580345300505158e-17},"gomf":{"set":"GO:0001727","set_name":"lipid kinase activity","fdr":0.046453880628676315}}
+{"gomf": {"set": "GO:0017112", "set_name": "Rab guanyl-nucleotide exchange factor activity", "p": 0.0, "fdr": 0.0}, "gobp": {"set": "GO:0048193", "set_name": "Golgi vesicle transport", "p": 1.44e-13, "fdr": 7.37e-10}, "gocc": {"set": "GO:0030008", "set_name": "TRAPP complex", "p": 0.0, "fdr": 0.0}}

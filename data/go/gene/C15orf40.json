@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0005681","set_name":"spliceosomal complex","fdr":0.0003740236029519962},"gomf":{"set":"GO:0003729","set_name":"mRNA binding","fdr":0.0007302475539251107},"gobp":{"set":"GO:0008380","set_name":"RNA splicing","fdr":5.940713382398187e-9}}
+{"gomf": {"set": "GO:0044212", "set_name": "transcription regulatory region DNA binding", "p": 3.38e-06, "fdr": 0.002997414}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": 3.01e-13, "fdr": 1.54e-09}, "gocc": {"set": "GO:0044665", "set_name": "MLL1/2 complex", "p": 6.23e-06, "fdr": 0.002093816}}

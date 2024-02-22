@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0007005","set_name":"mitochondrion organization","fdr":5.78084111585117e-14},"gomf":{"set":"GO:0051082","set_name":"unfolded protein binding","fdr":0.017777442307120677},"gocc":{"set":"GO:0005743","set_name":"mitochondrial inner membrane","fdr":7.25127341750825e-36}}
+{"gomf": {"set": "GO:0008565", "set_name": "protein transporter activity", "p": 2.55e-05, "fdr": 0.022643647}, "gobp": {"set": "GO:0007005", "set_name": "mitochondrion organization", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005759", "set_name": "mitochondrial matrix", "p": 0.0, "fdr": 0.0}}

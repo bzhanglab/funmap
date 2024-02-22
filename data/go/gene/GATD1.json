@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0016050","set_name":"vesicle organization","fdr":1.1332885566868995e-7},"gocc":{"set":"GO:0048475","set_name":"coated membrane","fdr":2.864180960505498e-17},"gomf":{"set":"GO:0030276","set_name":"clathrin binding","fdr":0.004084698860000733}}
+{"gomf": {"set": "GO:0030276", "set_name": "clathrin binding", "p": 1.5e-10, "fdr": 1.32e-07}, "gobp": {"set": "GO:0072583", "set_name": "clathrin-dependent endocytosis", "p": 2.01e-10, "fdr": 1.03e-06}, "gocc": {"set": "GO:0030117", "set_name": "membrane coat", "p": 0.0, "fdr": 0.0}}

@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gocc":{"set":"GO:0005884","set_name":"actin filament","fdr":0.25428994094660373},"gobp":{"set":"GO:0001667","set_name":"ameboidal-type cell migration","fdr":0.02919182228746724}}
+{"gomf": {"set": "GO:0050699", "set_name": "WW domain binding", "p": 4.1e-06, "fdr": 0.003644452}, "gobp": {"set": "GO:0001525", "set_name": "angiogenesis", "p": 1.75e-05, "fdr": 0.03952383}, "gocc": {"set": "GO:0043218", "set_name": "compact myelin", "p": 1.34e-05, "fdr": 0.004515197}}

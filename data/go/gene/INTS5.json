@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0006354","set_name":"DNA-templated transcription elongation","fdr":1.1159456272905473e-27},"gomf":{"set":"GO:0003729","set_name":"mRNA binding","fdr":0.0007302475539251107},"gocc":{"set":"GO:0120114","set_name":"Sm-like protein family complex","fdr":1.7499143984255282e-8}}
+{"gomf": {"set": "GO:0003729", "set_name": "mRNA binding", "p": 2.61e-06, "fdr": 0.002314184}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0032039", "set_name": "integrator complex", "p": 0.0, "fdr": 0.0}}

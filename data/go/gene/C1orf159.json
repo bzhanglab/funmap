@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0}}
+{"gomf": {"set": "GO:0042162", "set_name": "telomeric DNA binding", "p": 0.00936215, "fdr": 1.0}, "gobp": {"set": "GO:0035418", "set_name": "protein localization to synapse", "p": 0.000761, "fdr": 1.0}, "gocc": {"set": "GO:0000151", "set_name": "ubiquitin ligase complex", "p": 0.01153473, "fdr": 1.0}}

@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0003779","set_name":"actin binding","fdr":3.1724183518116194e-14},"gocc":{"set":"GO:0043292","set_name":"contractile fiber","fdr":1.2358644746522192e-24},"gobp":{"set":"GO:0003012","set_name":"muscle system process","fdr":8.666471940652169e-13}}
+{"gomf": {"set": "GO:0003779", "set_name": "actin binding", "p": 2.22e-16, "fdr": 1.97e-13}, "gobp": {"set": "GO:0003012", "set_name": "muscle system process", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0043292", "set_name": "contractile fiber", "p": 0.0, "fdr": 0.0}}

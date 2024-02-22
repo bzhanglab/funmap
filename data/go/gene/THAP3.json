@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0003714", "set_name": "transcription corepressor activity", "p": 0.006031446, "fdr": 1.0}, "gobp": {"set": "GO:0018023", "set_name": "peptidyl-lysine trimethylation", "p": 0.000567, "fdr": 1.0}, "gocc": {"set": "GO:0032580", "set_name": "Golgi cisterna membrane", "p": 0.001247493, "fdr": 0.707638237}}

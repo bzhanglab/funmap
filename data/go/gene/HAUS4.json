@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0000228","set_name":"nuclear chromosome","fdr":9.455043678606164e-23},"gomf":{"set":"GO:0140097","set_name":"catalytic activity, acting on DNA","fdr":4.5472024841989484e-14},"gobp":{"set":"GO:0007059","set_name":"chromosome segregation","fdr":4.634776400843995e-22}}
+{"gomf": {"set": "GO:0140097", "set_name": "catalytic activity, acting on DNA", "p": 2.43e-09, "fdr": 2.16e-06}, "gobp": {"set": "GO:0051301", "set_name": "cell division", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0098687", "set_name": "chromosomal region", "p": 0.0, "fdr": 0.0}}

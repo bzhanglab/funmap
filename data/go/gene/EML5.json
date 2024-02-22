@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0097542","set_name":"ciliary tip","fdr":3.754679862616258e-24},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gobp":{"set":"GO:0044782","set_name":"cilium organization","fdr":7.541557409587758e-21}}
+{"gomf": {"set": "GO:0001103", "set_name": "RNA polymerase II repressing transcription factor binding", "p": 1.87e-07, "fdr": 0.000166}, "gobp": {"set": "GO:0030031", "set_name": "cell projection assembly", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

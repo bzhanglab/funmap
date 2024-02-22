@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0007005","set_name":"mitochondrion organization","fdr":1.2489425715582641e-16},"gocc":{"set":"GO:0019867","set_name":"outer membrane","fdr":4.431109137680631e-15},"gomf":{"set":"GO:0051287","set_name":"NAD binding","fdr":0.0007232879720065091}}
+{"gomf": {"set": "GO:0051287", "set_name": "NAD binding", "p": 3.68e-06, "fdr": 0.002439625}, "gobp": {"set": "GO:0007006", "set_name": "mitochondrial membrane organization", "p": 6.66e-16, "fdr": 3.42e-12}, "gocc": {"set": "GO:0044455", "set_name": "mitochondrial membrane part", "p": 0.0, "fdr": 0.0}}

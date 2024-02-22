@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0098791","set_name":"Golgi apparatus subcompartment","fdr":0.0023270881833324006},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gobp":{"set":"GO:0007030","set_name":"Golgi organization","fdr":0.0008796207678847032}}
+{"gomf": {"set": "GO:0070628", "set_name": "proteasome binding", "p": 0.001845515, "fdr": 1.0}, "gobp": {"set": "GO:0007030", "set_name": "Golgi organization", "p": 7.78e-06, "fdr": 0.039959817}, "gocc": {"set": "GO:0000139", "set_name": "Golgi membrane", "p": 5.4e-07, "fdr": 0.000363}}

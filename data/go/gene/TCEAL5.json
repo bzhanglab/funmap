@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0098687","set_name":"chromosomal region","fdr":0.025341633206593824},"gomf":{"set":"GO:0001098","set_name":"basal transcription machinery binding","fdr":0.3256400626718696},"gobp":{"set":"GO:0006397","set_name":"mRNA processing","fdr":0.000028885121863952698}}
+{"gomf": {"set": "GO:0050699", "set_name": "WW domain binding", "p": 6.25e-08, "fdr": 5.55e-05}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": 1.69e-09, "fdr": 7.79e-06}, "gocc": {"set": "GO:0000346", "set_name": "transcription export complex", "p": 2.3e-05, "fdr": 0.01416468}}

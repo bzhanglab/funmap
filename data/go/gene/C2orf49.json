@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0022613","set_name":"ribonucleoprotein complex biogenesis","fdr":2.981523440305632e-8},"gocc":{"set":"GO:0030684","set_name":"preribosome","fdr":5.371281556962972e-9},"gomf":{"set":"GO:0030515","set_name":"snoRNA binding","fdr":0.10403111162119962}}
+{"gomf": {"set": "GO:0030515", "set_name": "snoRNA binding", "p": 0.000375, "fdr": 0.33284828}, "gobp": {"set": "GO:0022613", "set_name": "ribonucleoprotein complex biogenesis", "p": 4.03e-09, "fdr": 2.07e-05}, "gocc": {"set": "GO:0030684", "set_name": "preribosome", "p": 1.13e-09, "fdr": 7.59e-07}}

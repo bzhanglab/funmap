@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0015631","set_name":"tubulin binding","fdr":0.07474645438599503},"gobp":{"set":"GO:0044782","set_name":"cilium organization","fdr":2.5093221469822903e-19},"gocc":{"set":"GO:0031514","set_name":"motile cilium","fdr":1.959841834008983e-21}}
+{"gomf": {"set": "GO:0045504", "set_name": "dynein heavy chain binding", "p": 0.001158998, "fdr": 0.511801221}, "gobp": {"set": "GO:0030031", "set_name": "cell projection assembly", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

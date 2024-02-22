@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0},"gomf":{"set":"GO:0001216","set_name":"DNA-binding transcription activator activity","fdr":0.12221456849834762}}
+{"gomf": {"set": "GO:0008270", "set_name": "zinc ion binding", "p": 0.010698664, "fdr": 1.0}, "gobp": {"set": "GO:0019827", "set_name": "stem cell population maintenance", "p": 0.00123844, "fdr": 1.0}, "gocc": {"set": "GO:0005657", "set_name": "replication fork", "p": 0.035288182, "fdr": 1.0}}

@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0099568","set_name":"cytoplasmic region","fdr":1.6497675130061986e-28},"gomf":{"set":"GO:0003774","set_name":"cytoskeletal motor activity","fdr":0.16685726701684975},"gobp":{"set":"GO:0001578","set_name":"microtubule bundle formation","fdr":1.3582123796503442e-18}}
+{"gomf": {"set": "GO:0045504", "set_name": "dynein heavy chain binding", "p": 5.44e-08, "fdr": 4.83e-05}, "gobp": {"set": "GO:0030031", "set_name": "cell projection assembly", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0099568", "set_name": "cytoplasmic region", "p": 0.0, "fdr": 0.0}}

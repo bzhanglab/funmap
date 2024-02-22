@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0},"gomf":{"set":"GO:0004984","set_name":"olfactory receptor activity","fdr":0.0032699373280164045},"gobp":{"set":"GO:0007586","set_name":"digestion","fdr":0.009447551106734458}}
+{"gomf": {"set": "GO:0004252", "set_name": "serine-type endopeptidase activity", "p": 1.41e-05, "fdr": 0.008875387}, "gobp": {"set": "GO:0007586", "set_name": "digestion", "p": 7.27e-06, "fdr": 0.037341712}, "gocc": {"set": "GO:0032281", "set_name": "AMPA glutamate receptor complex", "p": 0.044657499, "fdr": 1.0}}

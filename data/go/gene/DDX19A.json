@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0042162","set_name":"telomeric DNA binding","fdr":0.11479302001428635},"gobp":{"set":"GO:0006302","set_name":"double-strand break repair","fdr":0.4326613962227455},"gocc":{"set":"GO:0098687","set_name":"chromosomal region","fdr":0.025341633206593824}}
+{"gomf": {"set": "GO:0098505", "set_name": "G-rich strand telomeric DNA binding", "p": 1.13e-05, "fdr": 0.006879841}, "gobp": {"set": "GO:0006281", "set_name": "DNA repair", "p": 4.14e-05, "fdr": 0.212896971}, "gocc": {"set": "GO:0098687", "set_name": "chromosomal region", "p": 0.000201, "fdr": 0.135233746}}

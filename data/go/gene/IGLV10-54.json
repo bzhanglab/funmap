@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0002250","set_name":"adaptive immune response","fdr":2.1914018743334513e-15},"gomf":{"set":"GO:0003823","set_name":"antigen binding","fdr":0.34682619079717864},"gocc":{"set":"GO:0072562","set_name":"blood microparticle","fdr":6.577376781434913e-11}}
+{"gomf": {"set": "GO:0004866", "set_name": "endopeptidase inhibitor activity", "p": 8.94e-05, "fdr": 0.035628955}, "gobp": {"set": "GO:0002250", "set_name": "adaptive immune response", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0072562", "set_name": "blood microparticle", "p": 2.56e-13, "fdr": 1.72e-10}}

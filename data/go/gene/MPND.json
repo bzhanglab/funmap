@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0000041","set_name":"transition metal ion transport","fdr":1.0},"gocc":{"set":"GO:0000118","set_name":"histone deacetylase complex","fdr":1.0},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0004407", "set_name": "histone deacetylase activity", "p": 3.67e-05, "fdr": 0.018021085}, "gobp": {"set": "GO:0016575", "set_name": "histone deacetylation", "p": 0.000355, "fdr": 1.0}, "gocc": {"set": "GO:0005680", "set_name": "anaphase-promoting complex", "p": 0.003230335, "fdr": 1.0}}

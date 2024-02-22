@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0098727","set_name":"maintenance of cell number","fdr":0.00018031919242080904},"gocc":{"set":"GO:0000228","set_name":"nuclear chromosome","fdr":0.0009208394542814652},"gomf":{"set":"GO:1990841","set_name":"promoter-specific chromatin binding","fdr":0.0010919431047954615}}
+{"gomf": {"set": "GO:0003682", "set_name": "chromatin binding", "p": 7.65e-10, "fdr": 6.79e-07}, "gobp": {"set": "GO:0006397", "set_name": "mRNA processing", "p": 2.46e-08, "fdr": 0.000127}, "gocc": {"set": "GO:0000228", "set_name": "nuclear chromosome", "p": 1.03e-12, "fdr": 6.93e-10}}

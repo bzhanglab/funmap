@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0044782","set_name":"cilium organization","fdr":1.027171103732166e-9},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gocc":{"set":"GO:0031514","set_name":"motile cilium","fdr":2.6453792561873724e-6}}
+{"gomf": {"set": "GO:0008569", "set_name": "ATP-dependent microtubule motor activity, minus-end-directed", "p": 0.001415151, "fdr": 0.978989288}, "gobp": {"set": "GO:0044782", "set_name": "cilium organization", "p": 1.14e-10, "fdr": 5.88e-07}, "gocc": {"set": "GO:0044441", "set_name": "ciliary part", "p": 1.74e-12, "fdr": 1.17e-09}}

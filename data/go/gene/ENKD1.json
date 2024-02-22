@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gobp":{"set":"GO:0044782","set_name":"cilium organization","fdr":5.6889067528041977e-11},"gocc":{"set":"GO:0031514","set_name":"motile cilium","fdr":2.3872266906241454e-10}}
+{"gomf": {"set": "GO:0045504", "set_name": "dynein heavy chain binding", "p": 0.000983, "fdr": 0.873077811}, "gobp": {"set": "GO:0060271", "set_name": "cilium assembly", "p": 8.42e-12, "fdr": 3.12e-08}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

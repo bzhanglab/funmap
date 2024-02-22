@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0007586","set_name":"digestion","fdr":0.009447551106734458},"gocc":{"set":"GO:0005796","set_name":"Golgi lumen","fdr":0.03198315325942827},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0}}
+{"gomf": {"set": "GO:0002162", "set_name": "dystroglycan binding", "p": 0.000987, "fdr": 0.639102889}, "gobp": {"set": "GO:0019730", "set_name": "antimicrobial humoral response", "p": 7.97e-08, "fdr": 0.000409}, "gocc": {"set": "GO:0005796", "set_name": "Golgi lumen", "p": 0.000172, "fdr": 0.115471042}}

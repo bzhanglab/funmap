@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0003158","set_name":"endothelium development","fdr":0.004197168692138979},"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gocc":{"set":"GO:0009897","set_name":"external side of plasma membrane","fdr":0.09377892856022624}}
+{"gomf": {"set": "GO:0019900", "set_name": "kinase binding", "p": 0.001351267, "fdr": 0.801846811}, "gobp": {"set": "GO:0001944", "set_name": "vasculature development", "p": 1.34e-08, "fdr": 3.95e-05}, "gocc": {"set": "GO:0098552", "set_name": "side of membrane", "p": 9.92e-05, "fdr": 0.066678598}}

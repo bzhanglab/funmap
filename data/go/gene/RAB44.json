@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0001530","set_name":"lipopolysaccharide binding","fdr":0.0017933166409652365},"gocc":{"set":"GO:0031983","set_name":"vesicle lumen","fdr":3.743805938493588e-29},"gobp":{"set":"GO:0042742","set_name":"defense response to bacterium","fdr":1.960951949741824e-15}}
+{"gomf": {"set": "GO:0001530", "set_name": "lipopolysaccharide binding", "p": 1.22e-05, "fdr": 0.007597752}, "gobp": {"set": "GO:0002444", "set_name": "myeloid leukocyte mediated immunity", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0031983", "set_name": "vesicle lumen", "p": 0.0, "fdr": 0.0}}

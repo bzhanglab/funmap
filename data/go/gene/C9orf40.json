@@ -1,1 +1,1 @@
-{"gobp":{"set":"GO:0015669","set_name":"gas transport","fdr":2.301151271077087e-11},"gocc":{"set":"GO:0072562","set_name":"blood microparticle","fdr":2.300615210076992e-9},"gomf":{"set":"GO:0019825","set_name":"oxygen binding","fdr":6.851449878542063e-7}}
+{"gomf": {"set": "GO:0019825", "set_name": "oxygen binding", "p": 5.32e-07, "fdr": 0.000251}, "gobp": {"set": "GO:0042744", "set_name": "hydrogen peroxide catabolic process", "p": 4.34e-10, "fdr": 1.1e-06}, "gocc": {"set": "GO:0030863", "set_name": "cortical cytoskeleton", "p": 6.78e-11, "fdr": 4.55e-08}}

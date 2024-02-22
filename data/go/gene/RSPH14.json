@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0016776","set_name":"phosphotransferase activity, phosphate group as acceptor","fdr":0.042252714878273236},"gocc":{"set":"GO:0031514","set_name":"motile cilium","fdr":1.7125571198150473e-34},"gobp":{"set":"GO:0007018","set_name":"microtubule-based movement","fdr":2.0806032483587088e-15}}
+{"gomf": {"set": "GO:0045503", "set_name": "dynein light chain binding", "p": 1.45e-06, "fdr": 0.001290862}, "gobp": {"set": "GO:0044782", "set_name": "cilium organization", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0005929", "set_name": "cilium", "p": 0.0, "fdr": 0.0}}

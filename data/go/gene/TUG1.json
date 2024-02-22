@@ -1,1 +1,1 @@
-{"gomf":{"set":"GO:0000049","set_name":"tRNA binding","fdr":1.0},"gocc":{"set":"GO:0042579","set_name":"microbody","fdr":0.31750517575257114},"gobp":{"set":"GO:0043574","set_name":"peroxisomal transport","fdr":0.0014265254139049785}}
+{"gomf": {"set": "GO:0008022", "set_name": "protein C-terminus binding", "p": 0.000351, "fdr": 0.311346774}, "gobp": {"set": "GO:0045540", "set_name": "regulation of cholesterol biosynthetic process", "p": 7.66e-09, "fdr": 1.97e-05}, "gocc": {"set": "GO:0005778", "set_name": "peroxisomal membrane", "p": 5.72e-05, "fdr": 0.019229008}}

@@ -1,1 +1,1 @@
-{"gocc":{"set":"GO:0072562","set_name":"blood microparticle","fdr":4.1823068176079773e-23},"gomf":{"set":"GO:0061134","set_name":"peptidase regulator activity","fdr":3.440382852648865e-7},"gobp":{"set":"GO:0006959","set_name":"humoral immune response","fdr":7.75995114087213e-9}}
+{"gomf": {"set": "GO:0004866", "set_name": "endopeptidase inhibitor activity", "p": 7.82e-11, "fdr": 4.35e-08}, "gobp": {"set": "GO:0030162", "set_name": "regulation of proteolysis", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0072562", "set_name": "blood microparticle", "p": 0.0, "fdr": 0.0}}
