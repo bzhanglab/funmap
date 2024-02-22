@@ -266,6 +266,9 @@
                         name: gene_id,
                     });
                     displayed_chart = chart;
+                    window.addEventListener("resize", () => {
+                        chart.resize();
+                    });
                     chart.resize();
                     let member_data = chart.getOption().series[0].nodes;
                     let member_list = document.getElementById("members");
@@ -323,7 +326,7 @@
                             tumor_header.innerHTML = "Tumor Expression by Cohort";
                             const tumor_subtitle = document.createElement("small");
                             tumor_subtitle.className = "subtitle";
-                            tumor_subtitle.innerHTML = "The <i>p</i>-values were derived from difference in average protein abundance of clique genes between tumor and normal samples by Wilcoxon rank-sum test.";
+                            tumor_subtitle.innerHTML = `The <i>p</i>-values were derived from difference in average protein abundance of ${gene_id} between tumor and normal samples by Wilcoxon rank-sum test.`;
                             const tumor_table = createTable(clin_data["tumor_expression"]);
                             let left_div = document.getElementById("left_div_child");
                             left_div.innerHTML = "";
@@ -335,7 +338,7 @@
                             surv_header.innerHTML = "Patient Overall Survival by Cohort";
                             const surv_subtitle = document.createElement("small");
                             surv_subtitle.className = "subtitle";
-                            surv_subtitle.innerHTML = "Logrank <i>p</i>-values were derived from Cox-proportional hazard models using average protein abundance of clique genes stratified by median.";
+                            surv_subtitle.innerHTML = `Logrank <i>p</i>-values were derived from Cox-proportional hazard models using average protein abundance of ${gene_id} stratified by median.`;
                             const survival_table = createTable(clin_data["survival"]);
                             left_div.appendChild(surv_header);
                             left_div.appendChild(surv_subtitle);

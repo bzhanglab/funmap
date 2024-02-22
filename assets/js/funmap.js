@@ -152,7 +152,6 @@ function funmap(echarts, config = {}) {
 											trigger: "item",
 											triggerOn: "mousemove",
 											confine: true,
-											backgroundColor: "var(--color-body-inverted)",
 											borderColor: "var(--color-body)",
 											padding: 20,
 											formatter: (params, ticket, callback) => {
@@ -198,7 +197,6 @@ function funmap(echarts, config = {}) {
 												el.style.fontSize = "0.55vw";
 												el.style.lineHeight = "0.5vw";
 												el.style.color = "var(--color-body)";
-												el.style.backgroundColor = "var(--color-body-inverted)";
 												return el;
 											},
 											extraCssText: "max-width: 30%;",
