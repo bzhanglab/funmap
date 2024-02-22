@@ -42,12 +42,28 @@ function createTable(data) {
 		const th = document.createElement("th");
 		const val = data.columns[i];
 		th.innerHTML = val;
+		th.style.fontWeight = "700";
 		header.appendChild(th);
 	}
 	thead.appendChild(header);
 	table.appendChild(thead);
+	const has_spans = "spans" in data;
+	let cur_span = has_spans ? data.spans[0] : null;
+	let cur_span_index = 0;
+	let cur_span_start = 0;
 	for (let i = 0; i < data.data.length; i++) {
 		const row = document.createElement("tr");
+		if (has_spans) {
+			if (i === cur_span_start) {
+				const td = document.createElement("td");
+				td.innerHTML = cur_span.content;
+				td.rowSpan = cur_span.count;
+				row.appendChild(td);
+				cur_span_start += cur_span.count;
+				cur_span_index++;
+				cur_span = data.spans[cur_span_index];
+			}
+		}
 		for (let j = 0; j < data.data[i].length; j++) {
 			const td = document.createElement("td");
 			let val = data.data[i][j];
@@ -136,6 +152,9 @@ function funmap(echarts, config = {}) {
 											trigger: "item",
 											triggerOn: "mousemove",
 											confine: true,
+											backgroundColor: "var(--color-body-inverted)",
+											borderColor: "var(--color-body)",
+											padding: 20,
 											formatter: (params, ticket, callback) => {
 												let hallmark_string = "";
 												if ("hallmarks" in params.data) {
@@ -154,7 +173,7 @@ function funmap(echarts, config = {}) {
 												if (hallmark_string === "") {
 													hallmark_string = "No Hallmarks";
 												}
-												const content = `<h5 style="max-width: 100%; text-align:center; word-break: normal; white-space: normal;">${params.name}</h5><h6 style="max-width: 100%; text-align:center; word-break: normal; white-space: normal">Cancer Hallmarks: ${hallmark_string}</h6><br><h6 style="text-align:center;">Top GO Terms</h6>`;
+												const content = `<h5 style="margin-top: 0;max-width: 100%; text-align:center; word-break: normal; white-space: normal;">${params.name}</h5><h6 style="max-width: 100%; text-align:center; word-break: normal; white-space: normal">Cancer Hallmarks: ${hallmark_string}</h6><br><h6 style="text-align:center;">Top GO Terms</h6>`;
 												const el = document.createElement("div");
 												el.innerHTML = content;
 												const go_table = createTable(
@@ -178,6 +197,8 @@ function funmap(echarts, config = {}) {
 												el.style.textAlign = "center";
 												el.style.fontSize = "0.55vw";
 												el.style.lineHeight = "0.5vw";
+												el.style.color = "var(--color-body)";
+												el.style.backgroundColor = "var(--color-body-inverted)";
 												return el;
 											},
 											extraCssText: "max-width: 30%;",

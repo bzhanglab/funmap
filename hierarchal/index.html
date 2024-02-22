@@ -140,8 +140,8 @@
 
             container.style[direction] = closed_container_pos;
             tab.style[direction] = closed_tab_pos;
-            const current_text = tab.textContent;
-            tab.textContent = current_text.replace("∨", "∧");
+            const current_text = tab.innerHTML;
+            tab.innerHTML = current_text.replace("∨", "∧");
             is_open[tab.id] = false;
 
             if (start_open) {
@@ -154,14 +154,14 @@
                 if (is_open[tab.id]) {
                     container.style[direction] = closed_container_pos;
                     tab.style[direction] = closed_tab_pos;
-                    const current_text = tab.textContent;
-                    tab.textContent = current_text.replace("∨", "∧");
+                    const current_text = tab.innerHTML;
+                    tab.innerHTML = current_text.replace("∨", "∧");
                     is_open[tab.id] = false;
                 } else {
                     container.style[direction] = open_container_pos;
                     tab.style[direction] = open_tab_pos;
-                    const current_text = tab.textContent;
-                    tab.textContent = current_text.replace("∧", "∨");
+                    const current_text = tab.innerHTML;
+                    tab.innerHTML = current_text.replace("∧", "∨");
                     is_open[tab.id] = true;
                 }
             }

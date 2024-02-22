@@ -68,7 +68,6 @@
         #filler {
             display: flex;
             flex-direction: column;
-            /* justify-content: center; */
             align-items: center;
         }
 
@@ -79,11 +78,38 @@
             width: 70%;
             height: 50%;
         }
+
+        #result_container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-top: 5%;
+            width: 100%;
+        }
+
+        .info_div {
+            min-width: 60%;
+            max-width: 60%;
+            padding-right: 5%;
+        }
+
+        .info_heading {
+            margin-bottom: 0pt;
+        }
+
+        .subtitle {
+            color: var(--color-body-light)
+        }
+
+        table:last-child {
+            margin-bottom: 5%;
+        }
     </style>
 </head>
 
 <body>
-    <div id="filler" style="height: 100%">
+    <div id="filler" style="height: 100%;">
         <h1>FunMap Gene Neighborhood Search</h1>
         <div class="centering">
             <p style="color: var(--color-body-light); text-align: center;">Gene Neighborhood: Top 50 nodes with highest
@@ -100,12 +126,12 @@
                 id="gene_search_error"></p>
         </div>
         <h4 id="gene_title">Gene: </h4>
-        <div class="result">
-            <div style="width:60%; padding-right: 5%;">
+        <div class="result result_container" style="padding-bottom: 5%;">
+            <div class="info_div" id="left_div">
                 <h5 style="margin-bottom: 0pt">GO Enrichment</h5>
                 <small style="color: var(--color-body-light)">Highest enriched GO terms for gene neighborhood using
                     over-representation analysis</small>
-                <table style="margin-top: 1em;">
+                <table style="margin-top: 1em; margin-bottom: 5%;">
                     <thead>
                         <tr>
                             <th>GO Category</th>
@@ -116,9 +142,7 @@
                     </thead>
                     <tbody id="table_body"></tbody>
                 </table>
-                <h5 style="margin-bottom: 0pt">Neighborhood Members</h5>
-                <div id="members">
-                </div>
+
                 <!-- <button id="download_button">Download Neighborhood</button> -->
             </div>
             <div style="flex-grow:1;">
@@ -127,6 +151,9 @@
                     Gene significance across 5 cohorts (signed -log<sub>10</sub> meta-<i>p</i>).<br>Scroll to zoom,
                     click and drag to move nodes.
                 <p>
+                <h5 style="margin-bottom: 0pt">Neighborhood Members</h5>
+                <div id="members">
+                </div>
             </div>
         </div>
         <script>
@@ -143,6 +170,59 @@
                 downloadAnchorNode.click();
                 downloadAnchorNode.remove();
             }
+
+            function isNumeric(n) {
+                const num = parseFloat(n);
+                return !Number.isNaN(num) && Number.isFinite(num);
+            }
+
+            function createTable(data) {
+                const table = document.createElement("table");
+                const thead = document.createElement("thead");
+                const tbody = document.createElement("tbody");
+                const header = document.createElement("tr");
+                for (let i = 0; i < data.columns.length; i++) {
+                    const th = document.createElement("th");
+                    const val = data.columns[i];
+                    th.innerHTML = val;
+                    header.appendChild(th);
+                }
+                thead.appendChild(header);
+                table.appendChild(thead);
+                const has_summary = !!data.has_summary;
+                for (let i = 0; i < data.data.length; i++) {
+                    const row = document.createElement("tr");
+                    if (has_summary && i === data.data.length - 1) {
+                        row.style.fontWeight = "bold";
+                        row.style.borderBottom = "0px solid var(--color-body)";
+                    }
+                    for (let j = 0; j < data.data[i].length; j++) {
+                        const td = document.createElement("td");
+                        let val = data.data[i][j];
+                        if (isNumeric(val)) {
+                            val = parseFloat(val);
+                            if (val === 0) {
+                                val = "< 2.20e-16";
+                            } else if (Math.abs(val) > 0.001 && Math.abs(val) < 1000) {
+                                val = val.toPrecision(3);
+                            } else {
+                                val = val.toExponential(2);
+                            }
+                        } else if (val == null) {
+                            val = "Not Available";
+                        }
+                        if (has_summary && j === data.data[i].length - 2 && i === data.data.length - 1) {
+                            td.style.textAlign = "right";
+                        }
+                        td.innerHTML = val;
+                        row.appendChild(td);
+                    }
+                    tbody.appendChild(row);
+                }
+                table.appendChild(tbody);
+                return table;
+            }
+
             fetch(gene_json)
                 .then((res) => res.json())
                 .then((gene_data) => {
@@ -200,7 +280,8 @@
                     // download_button.onclick = function () {
                     //     download(chart.getOption().series[0], `${gene_id}_neighborhood.json`)
                     // };
-                });
+                })
+
                 fetch(`../data/go/gene/${gene_id}.json`)
                     .then((res) => res.json())
                     .then((data) => {
@@ -232,6 +313,30 @@
                             row.appendChild(fdr);
                             table_body.appendChild(row);
                         }
+                    }).then(() => {
+                        fetch(`../data/table/gene/${gene_id}.json`).then((res) => res.json()).then((clin_data) => {
+                            const tumor_header = document.createElement("h5");
+                            tumor_header.className = "info_heading";
+                            tumor_header.innerHTML = "Tumor Expression by Cohort";
+                            const tumor_subtitle = document.createElement("small");
+                            tumor_subtitle.className = "subtitle";
+                            tumor_subtitle.innerHTML = "The <i>p</i>-values were derived from difference in average protein abundance of clique genes between tumor and normal samples by Wilcoxon rank-sum test.";
+                            const tumor_table = createTable(clin_data["tumor_expression"]);
+                            let left_div = document.getElementById("left_div");
+                            left_div.appendChild(tumor_header);
+                            left_div.appendChild(tumor_subtitle);
+                            left_div.appendChild(tumor_table);
+                            const surv_header = document.createElement("h5");
+                            surv_header.className = "info_heading";
+                            surv_header.innerHTML = "Patient Overall Survival by Cohort";
+                            const surv_subtitle = document.createElement("small");
+                            surv_subtitle.className = "subtitle";
+                            surv_subtitle.innerHTML = "Logrank <i>p</i>-values were derived from Cox-proportional hazard models using average protein abundance of clique genes stratified by median.";
+                            const survival_table = createTable(clin_data["survival"]);
+                            left_div.appendChild(surv_header);
+                            left_div.appendChild(surv_subtitle);
+                            left_div.appendChild(survival_table);
+                        });
                     });
 
             }
@@ -258,8 +363,6 @@
                         document.getElementById("search_button").click();
                     }
                 });
-
-
         </script>
 </body>
 

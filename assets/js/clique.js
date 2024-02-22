@@ -16,7 +16,8 @@ function clique_page(echarts) {
 	}
 
 	function isNumeric(n) {
-		return !Number.isNaN(parseFloat(n)) && Number.isFinite(n);
+		const num = parseFloat(n);
+		return !Number.isNaN(num) && Number.isFinite(num);
 	}
 
 	function createTable(data) {
