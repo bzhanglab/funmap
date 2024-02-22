@@ -16,6 +16,16 @@ function uncollapse_children(node, valid_names) {
 	return [node, collapseParent];
 }
 
+function isInt(n) {
+	const num = parseInt(n);
+	return !Number.isNaN(num) && Number.isFinite(num);
+}
+
+function isNumeric(n) {
+	const num = parseFloat(n);
+	return !Number.isNaN(num) && Number.isFinite(num);
+}
+
 function toTitleCase(str) {
 	return str.replace(
 		/\w\S*/g,
@@ -23,16 +33,59 @@ function toTitleCase(str) {
 	);
 }
 
+function createTable(data) {
+	const table = document.createElement("table");
+	const thead = document.createElement("thead");
+	const tbody = document.createElement("tbody");
+	const header = document.createElement("tr");
+	for (let i = 0; i < data.columns.length; i++) {
+		const th = document.createElement("th");
+		const val = data.columns[i];
+		th.innerHTML = val;
+		header.appendChild(th);
+	}
+	thead.appendChild(header);
+	table.appendChild(thead);
+	for (let i = 0; i < data.data.length; i++) {
+		const row = document.createElement("tr");
+		for (let j = 0; j < data.data[i].length; j++) {
+			const td = document.createElement("td");
+			let val = data.data[i][j];
+			if (isNumeric(val)) {
+				val = parseFloat(val);
+				if (val === 0) {
+					val = "< 2.20e-16";
+				} else if (Math.abs(val) > 0.001 && Math.abs(val) < 1000) {
+					val = val.toPrecision(3);
+				} else {
+					val = val.toExponential(2);
+				}
+			} else if (val == null || val === "None") {
+				val = "Not Available";
+			}
+			td.innerHTML = val;
+			row.appendChild(td);
+		}
+		tbody.appendChild(row);
+	}
+	table.appendChild(tbody);
+	return table;
+}
+
 function funmap(echarts, config = {}) {
 	const gene_json = config.gene_json || "../data/genes.json";
 	const gene_element = config.gene_element || "genes";
 	const gene_to_module_json =
 		config.gene_to_module || "../data/gene_to_module.json";
-	const go_json = config.go_json || "../data/go.json";
+	const clinical_data_json =
+		config.clinical_data_json ||
+		"../data/table/hierarchal_module/clinical_data.json";
 	const funmap_json = config.funmap_json || "../data/funmap.json";
 	const main_element = config.main_chart || "chart";
 	const pie_element = config.pie_chart || "pie_chart";
+	let clinical_data = {};
 	let timeout_id = 0;
+
 	fetch(gene_json)
 		.then((res) => res.json())
 		.then((gene_data) => {
@@ -47,9 +100,10 @@ function funmap(echarts, config = {}) {
 			fetch(gene_to_module_json)
 				.then((res) => res.json())
 				.then((gene_to_module) => {
-					fetch(go_json)
+					fetch(clinical_data_json)
 						.then((res) => res.json())
-						.then((go_data) => {
+						.then((loaded_clinical_data) => {
+							clinical_data = loaded_clinical_data;
 							fetch(funmap_json)
 								.then((res) => res.json())
 								.then((chartData) => {
@@ -83,7 +137,6 @@ function funmap(echarts, config = {}) {
 											triggerOn: "mousemove",
 											confine: true,
 											formatter: (params, ticket, callback) => {
-												node_go = go_data[params.name];
 												let hallmark_string = "";
 												if ("hallmarks" in params.data) {
 													for (
@@ -101,29 +154,26 @@ function funmap(echarts, config = {}) {
 												if (hallmark_string === "") {
 													hallmark_string = "No Hallmarks";
 												}
-												const content = `<h5 style="max-width: 100%; text-align:center; word-break: normal; white-space: normal;">${
-													params.name
-												}</h5><h6 style="max-width: 100%; text-align:center; word-break: normal; white-space: normal">Cancer Hallmarks: ${hallmark_string}</h6><br><h6 style="text-align:center;">Top GO Terms</h6><table style="width: 100%" class="tooltip_table"><thead><tr><th>GO Category</th><th>GO ID</th><th>Name</th><th>p-Value</th></tr></thead><tbody><tr><td>Biological Process</td><td>${
-													node_go.gobp.id
-												}</td><td>${node_go.gobp.name}</td><td>${
-													node_go.gobp.p === "0"
-														? "< 2.20e-16"
-														: parseFloat(node_go.gobp.p).toExponential(2)
-												}</td></tr><tr><td>Cellular Component</td><td>${
-													node_go.gocc.id
-												}</td><td>${node_go.gocc.name}</td><td>${
-													node_go.gocc.p === "0"
-														? "< 2.20e-16"
-														: parseFloat(node_go.gocc.p).toExponential(2)
-												}</td></tr><tr><td>Molecular Function</td><td>${
-													node_go.gomf.id
-												}</td><td>${node_go.gomf.name}</td><td>${
-													node_go.gomf.p === "0"
-														? "< 2.20e-16"
-														: parseFloat(node_go.gomf.p).toExponential(2)
-												}</td></tr></tbody></table>`;
+												const content = `<h5 style="max-width: 100%; text-align:center; word-break: normal; white-space: normal;">${params.name}</h5><h6 style="max-width: 100%; text-align:center; word-break: normal; white-space: normal">Cancer Hallmarks: ${hallmark_string}</h6><br><h6 style="text-align:center;">Top GO Terms</h6>`;
 												const el = document.createElement("div");
 												el.innerHTML = content;
+												const go_table = createTable(
+													clinical_data[params.name].go_info,
+												);
+												go_table.style.maxWidth = "100%";
+												go_table.className = "tooltip_table";
+												el.appendChild(go_table);
+												const cohort_table = createTable(
+													clinical_data[params.name].cohort_info,
+												);
+												const cohort_heading = document.createElement("h6");
+												cohort_heading.innerHTML = "Cohort Information";
+												cohort_heading.style.textAlign = "center";
+												el.appendChild(cohort_heading);
+												cohort_table.style.maxWidth = "100%";
+												cohort_table.className = "tooltip_table";
+												el.appendChild(cohort_table);
+
 												el.style.maxWidth = "100%";
 												el.style.textAlign = "center";
 												el.style.fontSize = "0.55vw";

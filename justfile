@@ -14,7 +14,7 @@ js-ci:
 
 build: js-ci compress
       @echo "Building markdown files"
-      @python3 build.py
+      @python build.py
 
 compress:
       @if [ ! -d assets/js/min ]; then \
