@@ -208,7 +208,7 @@
                             } else {
                                 val = val.toExponential(2);
                             }
-                        } else if (val == null) {
+                        } else if (val == null || val == "None") {
                             val = "Not Available";
                         }
                         if (has_summary && j === data.data[i].length - 2 && i === data.data.length - 1) {
