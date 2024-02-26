@@ -1,1 +1,1 @@
-{"gomf": {"set": "GO:0003735", "set_name": "structural constituent of ribosome", "p": 9.82e-11, "fdr": 8.72e-08}, "gobp": {"set": "GO:0034660", "set_name": "ncRNA metabolic process", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0030684", "set_name": "preribosome", "p": 0.0, "fdr": 0.0}}
+{"gomf": {"set": "GO:0003735", "set_name": "structural constituent of ribosome", "p": 9.82e-11, "fdr": 8.72e-08}, "gobp": {"set": "GO:0006364", "set_name": "rRNA processing", "p": 0.0, "fdr": 0.0}, "gocc": {"set": "GO:0030684", "set_name": "preribosome", "p": 0.0, "fdr": 0.0}}
