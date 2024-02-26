@@ -23,6 +23,10 @@
         main {
             max-width: 70%;
         }
+
+        header nav {
+            max-width: 90%;
+        }
     </style>
 </head>
 
@@ -30,7 +34,9 @@
     <header>
         <nav>
             <ul>
-                <li><a href="hierarchal/">Visualization</a></li>
+                <li><a href="./gene/" target="_blank">Gene Neighborhoods</a></li>
+                <li><a href="./clique/" target="_blank">Dense Modules</a></li>
+                <li><a href="./hierarchal/" target="_blank">Hierarchal Organization</a></li>
                 <li><a href="https://github.com/bzhanglab/funmap">Python Package</a></li>
                 <!-- <li><a href="https://github.com/bzhanglab/funmap">Publication</a></li> -->
             </ul>
@@ -66,7 +72,6 @@
             <aside>
                 <div>
                     <h3>Visualization</h3>
-
                     <p>
                         To visualize and explore FunMap, we have developed a web application
                         that allows users to search for gene neighborhoods, dense modules, hierarchal structure, and
@@ -77,12 +82,7 @@
                         <li><a href="./clique/" target="_blank">Dense Modules</a></li>
                         <li><a href="./hierarchal/" target="_blank">Hierarchal Organization</a></li>
                     </ul>
-
                     </p>
-
-                    <a href="./hierarchal/" target="_blank"><img
-                            style="margin-left: 25%;width: 50%;border: 1px solid var(--color-body);"
-                            src="./assets/img/visualization.png"></img></a>
                 </div>
             </aside>
             <aside>
@@ -91,11 +91,12 @@
 
                     <p>
                         We have integrated FunMap with <a href="https://2024.webgestalt.org/"
-                            target="_blank">WebGestalt</a> to provide enrichment analysis for gene lists. We have also
+                            target="_blank">WebGestalt</a> to provide enrichment analysis for user provided gene lists.
+                        We have also
                         provided examples of how to use WebGestalt with FunMap.
                         <br><br>
                         For instructions on how to use WebGestalt with FunMap, please view the <a
-                            href="./webgestalt_tutorial/" target="_blank">FunMap WebGestalt Tutorial</a>
+                            href="./webgestalt_tutorial/" target="_blank">FunMap WebGestalt Tutorial</a>.
                     </p>
                 </div>
             </aside>
@@ -165,8 +166,6 @@
         <main>
             <section>
                 <ul style="color: var(--color-body-inverted)">
-                    <li><a style="color: var(--color-body-inverted)" href=" https://www.linkedomics.org">LinkedOmics</a>
-                    </li>
                     <li><a style="color: var(--color-body-inverted)"
                             href="https://github.com/bzhanglab/funmap">GitHub</a></li>
                     <li><a style="color: var(--color-body-inverted)" href="https://www.zhang-lab.org/">Bing Zhang
@@ -176,7 +175,7 @@
                 </ul>
                 <article>
                     <p>Developed by Zhiao Shi, Jonathan Lei, John Elizarraras, and Bing Zhang</p>
-                    <!--DATEBLOCK START--><p>Last updated: <time datetime="2024-02-23">February 23, 2024</time></p><!--DATEBLOCK END-->
+                    <!--DATEBLOCK START--><p>Last updated: <time datetime="2024-02-26">February 26, 2024</time></p><!--DATEBLOCK END-->
                     <!-- <p>
                         Please Cite:<br>
                         <code>
