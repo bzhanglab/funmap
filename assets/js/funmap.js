@@ -95,7 +95,7 @@ function funmap(echarts, config = {}) {
 		config.gene_to_module || "../data/gene_to_module.json";
 	const clinical_data_json =
 		config.clinical_data_json ||
-		"../data/table/hierarchal_module/clinical_data.json";
+		"../data/table/hierarchical_module/clinical_data.json";
 	const funmap_json = config.funmap_json || "../data/funmap.json";
 	const main_element = config.main_chart || "chart";
 	const pie_element = config.pie_chart || "pie_chart";
@@ -140,7 +140,7 @@ function funmap(echarts, config = {}) {
 									setFontWeight(chartData);
 									const chartOptions = {
 										title: {
-											text: "FunMap Hierarchal Organization",
+											text: "FunMap Hierarchical Organization",
 											left: "center",
 											textStyle: {
 												fontSize: 30,
@@ -413,7 +413,7 @@ function funmap(echarts, config = {}) {
 
 									const dag = create_dag(
 										echarts,
-										"hierarchal_modules",
+										"hierarchical_modules",
 										"L2_M2",
 										"dag",
 										false, // ignore_size
@@ -430,7 +430,7 @@ function funmap(echarts, config = {}) {
 									update_dag_chart = (clique_id, gene = null) => {
 										const res = update_dag(
 											dag_chart,
-											"hierarchal_modules",
+											"hierarchical_modules",
 											clique_id,
 											"../", // host
 										);

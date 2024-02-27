@@ -12,7 +12,7 @@ To run ORA with webgestalt, go to [2024.webgestalt.org](https://2024.webgestalt.
 
 ![ORA FunMap example selection](../assets/img/ora_example.png)
 
-By default, the example is set to use the FunMap Hierarchal Modules. You can also select the Dense Modules (Cliques) by clicking on the drop-down menu (red box in the figure below).
+By default, the example is set to use the FunMap Hierarchical Modules. You can also select the Dense Modules (Cliques) by clicking on the drop-down menu (red box in the figure below).
 
 ![ORA FunMap DenseModules selection](../assets/img/dense_modules.png)
 
