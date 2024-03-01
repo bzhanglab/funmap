@@ -158,21 +158,9 @@ def compute_features(cfg, feature_type, min_sample_count, output_dir):
             continue
         log.info(f"Computing pearson correlation coefficient matrix for {i}")
         x = data_dict[i].values.astype(np.float32)
-        x = x.T
-        xave = np.nanmean(x, axis=1)
-        xstd = np.nanstd(x, axis=1)
-        ztrans = x.T - xave
-        # it is possible that xstd is 0, e.g. all except one value is nan
-        # ignore the warning
-        with np.errstate(invalid='ignore'):
-            ztrans /= xstd
-        z = ztrans.T
-        z = np.ma.array(z, mask=np.isnan(z))
-        arr = np.ma.dot(z, z.T)
-        valid_pairs_matrix = np.sum(~np.logical_or(z.mask[:, np.newaxis], z.mask), axis=2)
-        arr /= valid_pairs_matrix
-        arr = np.array(arr, dtype=np.float32)
-        arr[valid_pairs_matrix < min_sample_count] = np.nan
+        df = pd.DataFrame(x)
+        corr_matrix = df.corr(method='pearson', min_periods=min_sample_count)
+        arr = corr_matrix.values
         upper_indices = np.triu_indices(arr.shape[0])
         with h5py.File(cc_dict[i], 'w') as hf:
             # only store the upper triangle part
