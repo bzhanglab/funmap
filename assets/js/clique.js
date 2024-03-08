@@ -11,12 +11,12 @@ function clique_page(echarts) {
 		downloadAnchorNode.remove();
 	}
 	function isInt(n) {
-		const num = parseInt(n);
+		const num = Number.parseInt(n);
 		return !Number.isNaN(num) && Number.isFinite(num);
 	}
 
 	function isNumeric(n) {
-		const num = parseFloat(n);
+		const num = Number.parseFloat(n);
 		return !Number.isNaN(num) && Number.isFinite(num);
 	}
 
@@ -39,7 +39,7 @@ function clique_page(echarts) {
 				const td = document.createElement("td");
 				let val = data.data[i][j];
 				if (isNumeric(val)) {
-					val = parseFloat(val);
+					val = Number.parseFloat(val);
 					if (val === 0) {
 						val = "< 2.20e-16";
 					} else if (Math.abs(val) > 0.001 && Math.abs(val) < 1000) {
@@ -109,8 +109,8 @@ function clique_page(echarts) {
 			return;
 		}
 		if (
-			parseInt(clique_id.replace("C", "")) > 281 ||
-			parseInt(clique_id.replace("C", "")) < 1
+			Number.parseInt(clique_id.replace("C", "")) > 281 ||
+			Number.parseInt(clique_id.replace("C", "")) < 1
 		) {
 			clique_search_error.innerHTML =
 				"Please enter a valid Clique ID between 1 and 281.";
@@ -278,10 +278,10 @@ function clique_page(echarts) {
 						const go_id_text = data[go_cat].set;
 						go_id.innerHTML = `<a href="https://amigo.geneontology.org/amigo/term/${go_id_text}" target="_blank">${go_id_text}</a>`;
 						go_term.innerHTML = data[go_cat].set_name;
-						const p_val = parseFloat(data[go_cat].p);
+						const p_val = Number.parseFloat(data[go_cat].p);
 						p_col.innerHTML =
 							p_val !== 0.0 ? p_val.toExponential(2) : "< 2.20e-16";
-						const fdr_val = parseFloat(data[go_cat].fdr);
+						const fdr_val = Number.parseFloat(data[go_cat].fdr);
 						fdr.innerHTML =
 							fdr_val !== 0.0 ? fdr_val.toExponential(2) : "< 2.20e-16";
 						row.appendChild(go_category);

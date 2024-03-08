@@ -17,12 +17,12 @@ function uncollapse_children(node, valid_names) {
 }
 
 function isInt(n) {
-	const num = parseInt(n);
+	const num = Number.parseInt(n);
 	return !Number.isNaN(num) && Number.isFinite(num);
 }
 
 function isNumeric(n) {
-	const num = parseFloat(n);
+	const num = Number.parseFloat(n);
 	return !Number.isNaN(num) && Number.isFinite(num);
 }
 
@@ -68,7 +68,7 @@ function createTable(data) {
 			const td = document.createElement("td");
 			let val = data.data[i][j];
 			if (isNumeric(val)) {
-				val = parseFloat(val);
+				val = Number.parseFloat(val);
 				if (val === 0) {
 					val = "< 2.20e-16";
 				} else if (Math.abs(val) > 0.001 && Math.abs(val) < 1000) {
