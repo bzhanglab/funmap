@@ -362,7 +362,7 @@ def get_config(cfg_file: Path):
         raise ValueError('data_path not specified in config file')
 
     if cfg['task'] == 'protein_func':
-        if 'filter_noncoding_gene' in cfg_dict:
+        if 'filter_noncoding_genes' in cfg_dict:
             cfg['filter_noncoding_genes'] = cfg_dict['filter_noncoding_genes']
     else:
         # ignore filter_noncoding_genes for kinase_func
