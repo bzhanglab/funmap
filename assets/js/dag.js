@@ -104,6 +104,7 @@ function create_dag(
         toolbox: {
           show: true,
           feature: {
+            restore: {},
             dataView: {
               show: true,
               title: "Data View",
