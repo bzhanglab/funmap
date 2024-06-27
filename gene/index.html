@@ -256,8 +256,10 @@
                     clique_type,
                     gene_id,
                     "dag",
-                    (ignore_size = true),
-                    (host = "../"),
+                    ignore_size = true,
+                    host = "../",
+                    scale = undefined,
+                    is_gene = true
                 );
                 dag_chart.then((chart) => {
                     chart.dispatchAction({
