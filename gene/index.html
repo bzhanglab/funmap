@@ -185,7 +185,12 @@
                 for (let i = 0; i < data.columns.length; i++) {
                     const th = document.createElement("th");
                     const val = data.columns[i];
-                    th.innerHTML = val;
+                    if (val == "Fold Change") {
+                      th.innerHTML = val.replace("Fold Change", "log2 Fold Change");
+                    }
+                    else {
+                      th.innerHTML = val;
+                    }
                     header.appendChild(th);
                 }
                 thead.appendChild(header);
