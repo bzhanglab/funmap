@@ -146,7 +146,9 @@
                 <!-- <button id="download_button">Download Neighborhood</button> -->
             </div>
             <div style="flex-grow:1;">
-                <div id="dag" style="width: 100%; height: 100%; border: 1px solid black"></div>
+                <div id="dag" style="width: 100%; height: 100%; border: 1px solid black">
+                    <div id="inner_dag" style="width: 100%; height: 100%;"></div>
+                </div>
                 <p style="color: var(--color-body-light); font-size: var(--unit); text-align: center">
                     Gene significance across 5 cohorts (signed -log<sub>10</sub> meta-<i>p</i>).<br>Scroll to zoom,
                     click and drag to move nodes.
@@ -186,10 +188,10 @@
                     const th = document.createElement("th");
                     const val = data.columns[i];
                     if (val == "Fold Change") {
-                      th.innerHTML = val.replace("Fold Change", "log2 Fold Change");
+                        th.innerHTML = val.replace("Fold Change", "log2 Fold Change");
                     }
                     else {
-                      th.innerHTML = val;
+                        th.innerHTML = val;
                     }
                     header.appendChild(th);
                 }
@@ -255,12 +257,13 @@
                     }
                 });
             function get_dag(gene_id) {
+                document.getElementById("dag").innerHTML = `<div id="inner_dag" style="width: 100%; height: 100%;"></div>`
                 let clique_type = "gene";
                 let dag_chart = create_dag(
                     echarts,
                     clique_type,
                     gene_id,
-                    "dag",
+                    "inner_dag",
                     ignore_size = true,
                     host = "../",
                     scale = undefined,
@@ -271,6 +274,14 @@
                         type: "highlight",
                         seriesIndex: 0,
                         name: gene_id,
+                    });
+                    chart.setOption({
+                        toolbox: {
+                            show: true,
+                            feature: {
+                                restore: {}
+                            }
+                        }
                     });
                     displayed_chart = chart;
                     window.addEventListener("resize", () => {
