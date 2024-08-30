@@ -5,7 +5,6 @@ results_dir: 'results'  # if not provided, the result will be saved in "results"
 cor_type: 'pearson'
 feature_type: 'cc' # 'cc' (correlation coefficient)or 'mr' (mutual rank)
 n_jobs: 8
-n_chunk: 4
 # when evaluating the LLR for each indiviual data set, where to begin to evaluate
 start_edge_num: 100
 # minimum number of valid data point when computing correlation

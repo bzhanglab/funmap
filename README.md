@@ -46,7 +46,7 @@ Commands:
 
 ### Data quality check
 
-Before running the experiment, user can check the quality of the input data using the following command
+Before running the experiment, user can check the quality of the input data using the following command in the project directory
 
 ```sh
 funmap qc -c test_config.yml
@@ -56,7 +56,7 @@ User needs to prepare configuration file and an input data file. The configurati
 
 ### Run the experiment
 
-To run the experiment, use the following command
+To run the experiment, use the following command in the project directory
 
 ```sh
 funmap run -c test_config.yml
@@ -66,21 +66,88 @@ The run time of the experiment depends on the size of the input data file. The a
 
 #### Configuration file
 
-| Field             | Description                                                                                       | Example Value     |
-|-------------------|---------------------------------------------------------------------------------------------------|-------------------|
-| task              | protein or kinase function, can be 'protein_func' or 'kinase_func'                                | protein_func      |
-| name              | experiment name                                                                                   | test              |
-| seed              | Seed for random number generation.                                                                | 42                |
-| cor_type          | Type of correlation, can be 'pearson' or 'spearman'.                                              | pearson           |
-| feature_type      | Type of features used for training a model, can be 'cc' (correlation coefficient) or 'mr' (mutual rank). | cc         |
-| n_jobs            | Number of parallel jobs to run.                                                                   | 8                 |
-| n_chunk           | Number of chunks to split the data for parallel processing.                                      | 4                 |
-| start_edge_num    | The starting number for evaluating the Log-Likelihood Ratio (LLR) for each individual data set.  | 100               |
-| min_sample_count  | Minimum number of valid data points required when computing correlation.                         | 15                |
-| max_num_edges     | Maximum number of edges to consider.                                                              | 25000             |
-| step_size         | Step size for the evaluation of LLR.                                                              | 1                 |
-| lr_cutoff         | Likelihood Ratio (LR) cutoff value.                                                          | 10                |
-| data_files        | List of data files with their name, type, and path.                                               | See the example   |
+| Item                     | Description                                                                                          | Example Value        |
+|--------------------------|------------------------------------------------------------------------------------------------------|----------------------|
+| `task`                   | For now always set to `protein_func`                                                                 | `protein_func`       |
+| `name`                   | Unique identifier for the experiment.                                                                | `experiment_name`    |
+| `seed`                   | Random seed for reproducibility.                                                                     | `42`                 |
+| `results_dir`            | Directory where output results will be stored.                                                       | `results`            |
+| `filter_noncoding_genes` | Setting to exclude non-coding genes from analysis (`True` or `False`).                               | `True`               |
+| `cor_type`               | Type of correlation, can be `pearson` or `spearman`.                                                 | `pearson`            |
+| `feature_type`           | Type of features to be used in the analysis. `mr` (mutual rank) or `cc` (correlation coefficient).   | `mr`                 |
+| `n_jobs`                 | Number of parallel jobs or threads to use for processing.                                            | `40`                 |
+| `min_sample_count`       | Minimum number of samples required for calculating correlation.                                      | `15`                 |
+| `start_edge_num`         | Starting number of edges for calculating LR.                                                         | `1000`               |
+| `max_num_edges`          | Maximum number of edges to consider in network analysis.                                             | `250000`             |
+| `step_size`              | Step size for incrementing edges in LR analysis.                                                     | `100`                |
+| `lr_cutoff`              | Cutoff threshold for LR (likelihood ratio) in LR analysis.                                           | `50`                 |
+| `data_path`              | Name of the compressed dataset file containing all necessary data files.                             | `Dataset_Name.tgz`   |
+
+Note: `data_path` should be the name of the tar gzipped file that contains all the data files. It should be placed in the same directory as the configuration file.
+
+```
+project_directory/
+│
+├── config.yml
+│
+└── dataset_name/
+    ├── protein_data_1.tsv
+    ├── protein_data_2.tsv
+    ├── rna_data_1.tsv
+    └── rna_data_2.tsv
+```
+
+When in the project_directory, run the following command to compress the dataset:
+```sh
+tar -czvf Dataset_Name.tgz dataset_name/
+```
+
+**`data_files` Section**
+
+The `data_files` section specifies the list of data files used in the analysis. Each entry includes a unique name, the type of data (protein or RNA), and the path to the data file.
+
+| Field        | Description                                | Example Value                        |
+|--------------|--------------------------------------------|---------------------------------------|
+| `name`       | Unique identifier for the data file.       | `'protein_data_file_1'`              |
+| `type`       | Type of data (`'protein'` or `'rna'`).     | `'protein'`                          |
+| `path`       | the data file name within the dataset.     | `'protein_data_1.tsv'`               |
+
+Example Entries for `data_files`:
+
+```yaml
+data_files:
+  - name: 'protein_data_file_1'
+    type: 'protein'
+    path: 'protein_data_1.tsv'
+  - name: 'protein_data_file_2'
+    type: 'protein'
+    path: 'protein_data_2.tsv'
+  - name: 'rna_data_file_1'
+    type: 'rna'
+    path: 'rna_data_1.tsv'
+```
+
+**`rp_pairs` Section** (Optional)
+
+The `rp_pairs` section defines RNA-protein pairs for analysis. Each entry should include a unique identifier for the pair, along with the corresponding RNA and protein data file names from the `data_files` section.
+
+| Field      | Description                                           | Example Value                      |
+|------------|-------------------------------------------------------|-------------------------------------|
+| `name`     | Unique identifier for the RNA-protein pair.           | `'rna_protein_pair_1'`             |
+| `rna`      | Identifier of the RNA data file from `data_files`.    | `'rna_data_file_1'`                |
+| `protein`  | Identifier of the protein data file from `data_files`.| `'protein_data_file_1'`            |
+
+### Example Entries for `rp_pairs`:
+
+```yaml
+rp_pairs:
+  - name: 'rna_protein_pair_1'
+    rna: 'rna_data_file_1'
+    protein: 'protein_data_file_1'
+  - name: 'rna_protein_pair_2'
+    rna: 'rna_data_file_2'
+    protein: 'protein_data_file_2'
+```
 
 
 
