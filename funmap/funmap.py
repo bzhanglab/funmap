@@ -313,30 +313,25 @@ def extract_features(
 
     # TODO: add extra features if provided
     if extra_feature is not None:
-        if check_extra_feature_file(extra_feature):
-            log.info(f"Loading extra features from {extra_feature}")
-            extra_feature_df = pd.read_csv(extra_feature, sep="\t")
-            log.info(
-                f"Extra Features: {len(extra_feature_df.columns) - 2}\nGene Pairs: {extra_feature_df.shape[0]}"
-            )
-            extra_feature_df.columns.values[0] = "P1"
-            extra_feature_df.columns.values[0] = "P2"
-            extra_feature_df[["P1", "P2"]] = extra_feature_df.apply(
-                lambda row: sorted([row["P1"], row["P2"]])
-                if row["P1"] > row["P2"]
-                else [row["P1"], row["P2"]],
-                axis=1,
-                result_type="expand",
-            )
-            old_feature_count = feature_df.shape[0]
-            feature_df = pd.merge(
-                feature_df, extra_feature_df, on=["P1", "P2"], how="outer"
-            )
-            log.info(f"Added gene pairs: {feature_df.shape[0] - old_feature_count}")
-        else:
-            log.warning(
-                "File format verification failed. Skipping adding extra feature."
-            )
+        log.info(f"Loading extra features from {extra_feature}")
+        extra_feature_df = pd.read_csv(extra_feature, sep="\t")
+        log.info(
+            f"Extra Features: {len(extra_feature_df.columns) - 2}\nGene Pairs: {extra_feature_df.shape[0]}"
+        )
+        extra_feature_df.columns.values[0] = "P1"
+        extra_feature_df.columns.values[0] = "P2"
+        extra_feature_df[["P1", "P2"]] = extra_feature_df.apply(
+            lambda row: sorted([row["P1"], row["P2"]])
+            if row["P1"] > row["P2"]
+            else [row["P1"], row["P2"]],
+            axis=1,
+            result_type="expand",
+        )
+        old_feature_count = feature_df.shape[0]
+        feature_df = pd.merge(
+            feature_df, extra_feature_df, on=["P1", "P2"], how="outer"
+        )
+        log.info(f"Added gene pairs: {feature_df.shape[0] - old_feature_count}")
     # move 'label' column to the end of the dataframe if it exists
     if "label" in feature_df.columns:
         feature_df = feature_df[
