@@ -319,7 +319,7 @@ def extract_features(
             f"Extra Features: {len(extra_feature_df.columns) - 2}\nGene Pairs: {extra_feature_df.shape[0]}"
         )
         extra_feature_df.columns.values[0] = "P1"
-        extra_feature_df.columns.values[0] = "P2"
+        extra_feature_df.columns.values[1] = "P2"
         extra_feature_df[["P1", "P2"]] = extra_feature_df.apply(
             lambda row: sorted([row["P1"], row["P2"]])
             if row["P1"] > row["P2"]
