@@ -26,7 +26,9 @@ from funmap.logger import setup_logger
 log = setup_logger(__name__)
 
 
-def get_valid_gs_data(gs_path: str, valid_gene_list: List[str], md5=None):
+def get_valid_gs_data(
+    gs_path: str, valid_gene_list: List[str], md5=None
+):  # TODO: Add error message if there is no overlap between valid_gene_list and the gold standard set
     log.info(f'Loading gold standard feature file "{gs_path}" ...')
     if is_url_scheme(gs_path):
         gs_edge_df = read_csv_with_md5_check(
@@ -271,6 +273,26 @@ def assemble_feature_df(h5_file_mapping, df, dataset="cc"):
 def extract_features(
     df, feature_type, cc_dict, ppi_feature=None, extra_feature=None, mr_dict=None
 ):
+    """
+      extract_features - creates the final feature `pandas` dataframe used by xgboost
+
+      Params:
+      df: pd.DataFrame
+      feature_type: str - Type of feature used. Currently supporting pearson correlation or mutual rank. Accepted values: 'cc' or 'mr'.
+      cc_dict: dict[str, str] - dictionary containing paths to the pre-calculated features.
+      ...
+      extra_feature: str - path for file containing extra features
+
+      Extra Features:
+
+      This is a TSV file with the following format:
+
+     Gene A   Gene B   Feature X   Feature Y
+    -------- -------- ----------- -----------
+     ABC1     DEF2     0.12        34.5
+     GHI3     JKLM4    -0.6        NA
+     …        …        …           …
+    """
     if feature_type == "mr":
         if not mr_dict:
             raise ValueError("mr dict is empty")
