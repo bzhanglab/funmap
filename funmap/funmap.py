@@ -350,10 +350,10 @@ def extract_features(
         log.info("before merge")
         log.info(str(feature_df.head()))
         log.info(feature_df.size)
-        feature_df = pd.concat([feature_df, merged_df], axis=1)
+        feature_df = pd.merge(feature_df, merged_df, left_index=True, right_index=True)
         log.info("After merge")
         log.info(
-            f"Row count for merge_df: {merge_df.shape[0]}\nRow count for features: {feature_df.shape[0]}"
+            f"Row count for merge_df: {merged_df.shape[0]}\nRow count for features: {feature_df.shape[0]}"
         )
         log.info(str(feature_df.head()))
         log.info(feature_df.size)
