@@ -327,37 +327,11 @@ def extract_features(
             axis=1,
             result_type="expand",
         )
-        log.info(str(feature_df.head()))
-        log.info("Extra feature:\n" + str(extra_feature_df.head()))
-        old_feature_count = feature_df.shape[0]
-
-        # Get gene indices for P1 and P2
-        # df.reset_index(drop=True, inplace=True)
-        log.info("df head")
-        log.info(str(df.head()))
-        # gene_to_index = {gene.astype(str): idx for idx, gene in enumerate(gene_ids)}
-        # p1_indices = np.array([gene_to_index.get(gene, -1) for gene in df.iloc[:, 0]])
-        # p2_indices = np.array([gene_to_index.get(gene, -1) for gene in df.iloc[:, 1]])
-        #
-        # f_dataset = h5_file[dataset]
-        # f_values = np.empty(len(df), dtype=float)
-        # valid_indices = (p1_indices != -1) & (p2_indices != -1)
-        #
-        # linear_indices_func = (
-        #     lambda row_indices, col_indices, n: np.array(col_indices)
-        #     - np.array(row_indices)
-        #     + (2 * n - np.array(row_indices) + 1) * np.array(row_indices) // 2
-        # )
-        # linear_indices = linear_indices_func(
-        #     p1_indices[valid_indices], p2_indices[valid_indices], len(gene_ids)
-        # )
-        feature_df = pd.merge(
-            feature_df, extra_feature_df, on=["P1", "P2"], how="outer"
+        merged_df = pd.merge(
+            df[["P1", "P2"]], extra_feature_df, on=["P1", "P2"], how="left"
         )
-        f_values[valid_indices] = f_dataset[:][linear_indices]
-        f_values[~valid_indices] = np.nan
-        log.info("Merged Data Frame:\n" + str(feature_df.head()))
-        log.info(f"Added gene pairs: {feature_df.shape[0] - old_feature_count}")
+        merged_df = merged_df.drop(columns=["P1", "P2", "label"])
+        feature_df = pd.concat([feature_df, merged_df], axis=1)
     # move 'label' column to the end of the dataframe if it exists
     if "label" in feature_df.columns:
         feature_df = feature_df[
