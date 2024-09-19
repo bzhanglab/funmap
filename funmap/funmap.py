@@ -559,7 +559,7 @@ def extract_dataset_feature(all_pairs, feature_file, feature_type="cc"):
 def extract_extra_features(all_pairs, ef_df):
     # convert all_pairs to a dataframe
     df = pd.DataFrame(all_pairs, columns=["P1", "P2"])
-    pd.merge(df, ef_df, on=["P1", "P2"], how="left")
+    return pd.merge(df, ef_df, on=["P1", "P2"], how="left")
 
 
 def dataset_llr(
