@@ -67,7 +67,7 @@ def normalize_filename(filename):
     return cleaned_filename
 
 
-def get_data_dict(config, min_sample_count=15):
+    def get_data_dict(config, min_sample_count=15):
     """
     Returns a dictionary of data from the provided data configuration, filtered to only include genes that are
     coding and have at least `min_sample_count` samples.
@@ -121,7 +121,18 @@ def get_data_dict(config, min_sample_count=15):
         # valid_count = np.sum(is_valid)
         valid_p = cur_data.columns[is_valid].values
         all_valid_ids = all_valid_ids.union(set(valid_p))
-
+    if config["extra_feature_file"] is not None:
+        log.info("Importing extra feature file")
+        # TODO: Import extra feature file
+        extra_feature_df = pd.read_csv(extra_feature, sep="\t")
+        if config['filter_noncoding_genes']:
+            col1 = extra_feature_df.columns.values[0]
+            col2 = extra_feature_df.columns.values[1]
+            coding = mapping.loc[mapping['coding'] == 'coding', ['gene_name']]
+            coding_genes = list(set(coding['gene_name'].to_list()))
+            extra_feature_df = extra_feature_df[extra_feature_df[col1].isin(coding_genes) & extra_feature_df[col2].isin(coding_genes)]
+        genes = set(extra_feature_df.iloc[:, :2].values.flatten().tolist())
+        all_valid_ids = all_valid_ids.union(genes)
     all_valid_ids = list(all_valid_ids)
     all_valid_ids.sort()
     log.info(f'total number of valid ids: {len(all_valid_ids)}')
