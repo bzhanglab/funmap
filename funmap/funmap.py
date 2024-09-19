@@ -327,6 +327,12 @@ def extract_features(
             axis=1,
             result_type="expand",
         )
+        extra_feature_df = extra_feature_df[
+            extra_feature_df.duplicated(subset=["P1", "P2"], keep="first")
+        ]
+        log.info(
+            f"Row count for df: {df.shape[0]}\nRow count for features: {feature_df.shape[0]}"
+        )
         df.reset_index(drop=True, inplace=True)
         merged_df = pd.merge(
             df[["P1", "P2"]], extra_feature_df, on=["P1", "P2"], how="left"
@@ -346,6 +352,9 @@ def extract_features(
         log.info(feature_df.size)
         feature_df = pd.concat([feature_df, merged_df], axis=1)
         log.info("After merge")
+        log.info(
+            f"Row count for merge_df: {merge_df.shape[0]}\nRow count for features: {feature_df.shape[0]}"
+        )
         log.info(str(feature_df.head()))
         log.info(feature_df.size)
     # move 'label' column to the end of the dataframe if it exists
