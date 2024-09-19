@@ -327,10 +327,13 @@ def extract_features(
             axis=1,
             result_type="expand",
         )
+        log.info(str(feature_df.head()))
+        log.info("Extra feature:\n" + str(extra_feature_df.head()))
         old_feature_count = feature_df.shape[0]
         feature_df = pd.merge(
             feature_df, extra_feature_df, on=["P1", "P2"], how="outer"
         )
+        log.info("Merged Data Frame:\n" + str(feature_df.head()))
         log.info(f"Added gene pairs: {feature_df.shape[0] - old_feature_count}")
     # move 'label' column to the end of the dataframe if it exists
     if "label" in feature_df.columns:
