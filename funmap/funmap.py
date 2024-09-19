@@ -327,17 +327,38 @@ def extract_features(
             axis=1,
             result_type="expand",
         )
+        df.reset_index(drop=True, inplace=True)
         merged_df = pd.merge(
             df[["P1", "P2"]], extra_feature_df, on=["P1", "P2"], how="left"
         )
         merged_df = merged_df.drop(columns=["P1", "P2"])
+        log.info("Merged_df")
+        log.info(str(merged_df.head()))
+        non_nan_values_exist = merged_df.notna().any().any()
+
+        if non_nan_values_exist:
+            print("There are non-NaN values in the merged_df.")
+        else:
+            print("All values in merged_df are NaN.")
+
+        log.info("before merge")
+        log.info(str(feature_df.head()))
+        log.info(feature_df.size)
         feature_df = pd.concat([feature_df, merged_df], axis=1)
+        log.info("After merge")
+        log.info(str(feature_df.head()))
+        log.info(feature_df.size)
     # move 'label' column to the end of the dataframe if it exists
     if "label" in feature_df.columns:
         feature_df = feature_df[
             [col for col in feature_df.columns if col != "label"] + ["label"]
         ]
+        nan_rows = feature_df[feature_df["label"].isna()]
+        print("NAN ROWS:")
+        print(nan_rows)
 
+    log.info("Final DF")
+    log.info(str(feature_df.head()))
     return feature_df
 
 
