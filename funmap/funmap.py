@@ -315,9 +315,6 @@ def extract_features(
     if extra_feature is not None:
         log.info(f"Loading extra features from {extra_feature}")
         extra_feature_df = pd.read_csv(extra_feature, sep="\t")
-        log.info(
-            f"Extra Features: {len(extra_feature_df.columns) - 2}\nGene Pairs: {extra_feature_df.shape[0]}"
-        )
         extra_feature_df.columns.values[0] = "P1"
         extra_feature_df.columns.values[1] = "P2"
         extra_feature_df[["P1", "P2"]] = extra_feature_df.apply(
@@ -330,44 +327,17 @@ def extract_features(
         extra_feature_df = extra_feature_df.drop_duplicates(
             subset=["P1", "P2"], keep="last"
         )
-        log.info(
-            f"Row count for df: {df.shape[0]}\nRow count for features: {feature_df.shape[0]}"
-        )
         df.reset_index(drop=True, inplace=True)
         merged_df = pd.merge(
             df[["P1", "P2"]], extra_feature_df, on=["P1", "P2"], how="left"
         )
         merged_df = merged_df.drop(columns=["P1", "P2"])
-        log.info("Merged_df")
-        log.info(str(merged_df.head()))
-        non_nan_values_exist = merged_df.notna().any().any()
-
-        if non_nan_values_exist:
-            print("There are non-NaN values in the merged_df.")
-        else:
-            print("All values in merged_df are NaN.")
-
-        log.info("before merge")
-        log.info(str(feature_df.head()))
-        log.info(feature_df.size)
         feature_df = pd.merge(feature_df, merged_df, left_index=True, right_index=True)
-        log.info("After merge")
-        log.info(
-            f"Row count for merge_df: {merged_df.shape[0]}\nRow count for features: {feature_df.shape[0]}"
-        )
-        log.info(str(feature_df.head()))
-        log.info(feature_df.size)
     # move 'label' column to the end of the dataframe if it exists
     if "label" in feature_df.columns:
         feature_df = feature_df[
             [col for col in feature_df.columns if col != "label"] + ["label"]
         ]
-        nan_rows = feature_df[feature_df["label"].isna()]
-        print("NAN ROWS:")
-        print(nan_rows)
-
-    log.info("Final DF")
-    log.info(str(feature_df.head()))
     return feature_df
 
 
