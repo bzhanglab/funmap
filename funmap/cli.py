@@ -312,6 +312,7 @@ def run(config_file, force_rerun):
             max_num_edges,
             step_size,
             llr_dataset_file,
+            extra_feature_file,
         )
         log.info("Done.")
     else:

@@ -313,7 +313,6 @@ def extract_features(
 
     # TODO: add extra features if provided
     if extra_feature is not None:
-        log.info(f"Loading extra features from {extra_feature}")
         extra_feature_df = pd.read_csv(extra_feature, sep="\t")
         extra_feature_df.columns.values[0] = "P1"
         extra_feature_df.columns.values[1] = "P2"
