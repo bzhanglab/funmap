@@ -327,9 +327,9 @@ def extract_features(
             axis=1,
             result_type="expand",
         )
-        extra_feature_df = extra_feature_df[
-            extra_feature_df.duplicated(subset=["P1", "P2"], keep="first")
-        ]
+        extra_feature_df = extra_feature_df.drop_duplicates(
+            subset=["P1", "P2"], keep="last"
+        )
         log.info(
             f"Row count for df: {df.shape[0]}\nRow count for features: {feature_df.shape[0]}"
         )
