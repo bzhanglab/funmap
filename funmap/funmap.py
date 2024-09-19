@@ -330,7 +330,7 @@ def extract_features(
         merged_df = pd.merge(
             df[["P1", "P2"]], extra_feature_df, on=["P1", "P2"], how="left"
         )
-        merged_df = merged_df.drop(columns=["P1", "P2", "label"])
+        merged_df = merged_df.drop(columns=["P1", "P2"])
         feature_df = pd.concat([feature_df, merged_df], axis=1)
     # move 'label' column to the end of the dataframe if it exists
     if "label" in feature_df.columns:
