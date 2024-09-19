@@ -31,7 +31,7 @@ from funmap.logger import setup_logger
 log = setup_logger(__name__)
 
 
-def get_valid_gs_dat(
+def get_valid_gs_data(
     gs_path: str, valid_gene_list: List[str], md5=None
 ):  # TODO: Add error message if there is no overlap between valid_gene_list and the gold standard set
     log.info(f'Loading gold standard feature file "{gs_path}" ...')
