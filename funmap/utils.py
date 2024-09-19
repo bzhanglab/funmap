@@ -130,7 +130,7 @@ def get_data_dict(config, min_sample_count=15):
     if config["extra_feature_file"] is not None:
         log.info("Importing extra feature file")
         # TODO: Import extra feature file
-        extra_feature_df = pd.read_csv(extra_feature, sep="\t")
+        extra_feature_df = pd.read_csv(config["extra_feature_file"], sep="\t")
         if config["filter_noncoding_genes"]:
             col1 = extra_feature_df.columns.values[0]
             col2 = extra_feature_df.columns.values[1]
