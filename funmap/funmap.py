@@ -1,32 +1,33 @@
-import os
 import glob
-import math
-import h5py
 import gzip
+import itertools
+import math
+import os
 import pickle
+from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import List
+
+import h5py
+import numpy as np
+import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
-from sklearn.utils import resample
-import itertools
-from typing import List
-from pathlib import Path
-from collections import defaultdict, Counter
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import StratifiedKFold
 import xgboost as xgb
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
+from sklearn.utils import resample
+from tqdm import tqdm
+
+from funmap.data_urls import misc_urls as urls
+from funmap.data_urls import network_info
+from funmap.logger import setup_logger
 from funmap.utils import (
+    check_extra_feature_file,
     get_data_dict,
     is_url_scheme,
     read_csv_with_md5_check,
-    check_extra_feature_file,
 )
-from funmap.data_urls import network_info, misc_urls as urls
-from funmap.logger import setup_logger
 
 log = setup_logger(__name__)
 
@@ -232,6 +233,24 @@ def assemble_feature_df(h5_file_mapping, df, dataset="cc"):
     file_keys = list(h5_file_mapping.keys())
     feature_df = pd.DataFrame(columns=file_keys + ["label"])
 
+    def get_1d_indices(i_array, j_array, n):
+        # Ensure i and j are within bounds
+        mask = (i_array < n) & (j_array < n)
+        i = np.minimum(i_array[mask], j_array[mask])
+        j = np.maximum(i_array[mask], j_array[mask])
+
+        # Calculate 1D indices
+        return i * n - i * (i - 1) // 2 + (j - i)
+
+    def get_1d_indices(i_array, j_array, n):
+        # Ensure i and j are within bounds
+        mask = (i_array < n) & (j_array < n)
+        i = np.minimum(i_array[mask], j_array[mask])
+        j = np.maximum(i_array[mask], j_array[mask])
+
+        # Calculate 1D indices
+        return i * n - i * (i - 1) // 2 + (j - i)
+
     # Iterate over HDF5 files and load feature values
     for key, file_path in h5_file_mapping.items():
         with h5py.File(file_path, "r") as h5_file:
@@ -250,12 +269,7 @@ def assemble_feature_df(h5_file_mapping, df, dataset="cc"):
             f_values = np.empty(len(df), dtype=float)
             valid_indices = (p1_indices != -1) & (p2_indices != -1)
 
-            linear_indices_func = (
-                lambda row_indices, col_indices, n: np.array(col_indices)
-                - np.array(row_indices)
-                + (2 * n - np.array(row_indices) + 1) * np.array(row_indices) // 2
-            )
-            linear_indices = linear_indices_func(
+            linear_indices = get_1d_indices(
                 p1_indices[valid_indices], p2_indices[valid_indices], len(gene_ids)
             )
 
@@ -533,6 +547,19 @@ def prepare_gs_data(**kwargs):
 def extract_dataset_feature(all_pairs, feature_file, feature_type="cc"):
     # convert all_pairs to a dataframe
     df = pd.DataFrame(all_pairs, columns=["P1", "P2"])
+
+    def get_1d_indices(i_array, j_array, n):
+        # Ensure i and j are within bounds
+        mask = (i_array < n) & (j_array < n)
+        i = np.minimum(i_array[mask], j_array[mask])
+        j = np.maximum(i_array[mask], j_array[mask])
+
+        # Calculate 1D indices
+        return i * n - i * (i - 1) // 2 + (j - i)
+
+    with h5py.File(feature_file, "r") as h5_file:
+        gene_ids = h5_file["ids"][:]
+    df = pd.DataFrame(all_pairs, columns=["P1", "P2"])
     with h5py.File(feature_file, "r") as h5_file:
         gene_ids = h5_file["ids"][:]
         gene_to_index = {gene.astype(str): idx for idx, gene in enumerate(gene_ids)}
@@ -545,12 +572,7 @@ def extract_dataset_feature(all_pairs, feature_file, feature_type="cc"):
         f_values = np.empty(len(df), dtype=float)
         valid_indices = (p1_indices != -1) & (p2_indices != -1)
 
-        linear_indices_func = (
-            lambda row_indices, col_indices, n: np.array(col_indices)
-            - np.array(row_indices)
-            + (2 * n - np.array(row_indices) + 1) * np.array(row_indices) // 2
-        )
-        linear_indices = linear_indices_func(
+        linear_indices = get_1d_indices(
             p1_indices[valid_indices], p2_indices[valid_indices], len(gene_ids)
         )
 
@@ -606,47 +628,22 @@ def dataset_llr(
         log.info(f"Calculating llr for {dataset} ... done")
 
     # calculate llr for all datasets based on the average prediction
-    log.info(f"Calculating llr for all datasets average ...")
+    log.info("Calculating llr for all datasets average ...")
     all_ds_pred_df = pd.DataFrame(all_pairs, columns=["P1", "P2"])
-    all_ds_pred_avg = np.nanmean(all_ds_pred, axis=0)
+    if all_ds_pred.ndim == 1:
+        all_ds_pred_avg = all_ds_pred
+    elif all_ds_pred.ndim == 2:
+        all_ds_pred_avg = np.nanmean(all_ds_pred, axis=0)
+    else:
+        raise ValueError(f"Invalid dimension for all_ds_pred: {all_ds_pred.ndim}")
     all_ds_pred_df["prediction"] = all_ds_pred_avg
     cur_llr_res = compute_llr(
         all_ds_pred_df, None, start_edge_num, max_num_edge, step_size, gs_test
     )
     cur_llr_res["dataset"] = "all_average"
     llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
-    log.info(f"Calculating llr for all datasets average ... done")
+    log.info("Calculating llr for all datasets average ... done")
     llr_ds.to_csv(llr_dataset_file, sep="\t", index=False)
-    if extra_feature is not None:
-        log.info("Calculating LLR for extra features")
-        extra_feature_df = pd.read_csv(extra_feature, sep="\t")
-        extra_feature_df.columns.values[0] = "P1"
-        extra_feature_df.columns.values[1] = "P2"
-        extra_feature_df[["P1", "P2"]] = extra_feature_df.apply(
-            lambda row: sorted([row["P1"], row["P2"]])
-            if row["P1"] > row["P2"]
-            else [row["P1"], row["P2"]],
-            axis=1,
-            result_type="expand",
-        )
-        extra_feature_df = extra_feature_df.drop_duplicates(
-            subset=["P1", "P2"], keep="last"
-        )
-        extra_feature_df = extract_extra_features(
-            all_pairs, extra_feature_df
-        )  # filter out unused pairs
-        features = extra_feature_df.columns.values[2:]
-        for f in features:
-            subset_df = extra_feature_df[["P1", "P2", f]]
-            subset_df.columns.values[-1] = "prediction"
-            log.info(f"Calculating llr for extra feature {f} ...")
-            cur_llr_res = compute_llr(
-                subset_df, None, start_edge_num, max_num_edge, step_size, gs_test, True
-            )
-            cur_llr_res["dataset"] = f + "_EXTRAFEAT"
-            llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
-            llr_ds.to_csv(llr_dataset_file, sep="\t", index=False)
-            log.info(f"Calculating llr for {dataset} ... done")
 
     return llr_ds
 

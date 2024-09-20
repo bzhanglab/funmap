@@ -1,19 +1,33 @@
-import os
-import click
-import pandas as pd
-import numpy as np
 import gzip
+import os
 import pickle
 from pathlib import Path
-from funmap.funmap import compute_llr, predict_all_pairs, dataset_llr, predict_all_pairs
-from funmap.plotting import explore_data, plot_results, merge_and_delete
-from funmap.funmap import train_ml_model, prepare_gs_data, get_cutoff, get_ppi_feature
-from funmap.funmap import compute_features, predict_network
-from funmap.data_urls import misc_urls as urls
-from funmap.logger import setup_logging, setup_logger
-from funmap.utils import setup_experiment, cleanup_experiment, check_gold_standard_file
-from funmap.utils import check_extra_feature_file
+
+import click
+import numpy as np
+import pandas as pd
+
 from funmap import __version__
+from funmap.data_urls import misc_urls as urls
+from funmap.funmap import (
+    compute_features,
+    compute_llr,
+    dataset_llr,
+    get_cutoff,
+    get_ppi_feature,
+    predict_all_pairs,
+    predict_network,
+    prepare_gs_data,
+    train_ml_model,
+)
+from funmap.logger import setup_logger, setup_logging
+from funmap.plotting import explore_data, merge_and_delete, plot_results
+from funmap.utils import (
+    check_extra_feature_file,
+    check_gold_standard_file,
+    cleanup_experiment,
+    setup_experiment,
+)
 
 log = setup_logger(__name__)
 
@@ -87,7 +101,7 @@ def qc(config_file, force_rerun):
     help="if set, will remove results from previous run first",
 )
 def run(config_file, force_rerun):
-    click.echo(f"Running funmap...")
+    click.echo("Running funmap...")
     if force_rerun:
         while True:
             confirmation = input(
@@ -204,7 +218,7 @@ def run(config_file, force_rerun):
                 with gzip.open(ml_model_file[feature], "rb") as fh:
                     ml_model = pickle.load(fh)
                     ml_model_dict[feature] = ml_model
-            log.info(f"Loading model(s) ... done")
+            log.info("Loading model(s) ... done")
             if not gs_df_file.exists():
                 log.error(
                     f"Trained models found but gold standard data file {gs_df_file} "
@@ -319,12 +333,12 @@ def run(config_file, force_rerun):
         llr_ds = pd.read_csv(llr_dataset_file, sep="\t")
 
     if not ml_model_dict:
-        log.info(f"Trained model(s) exists. Loading model(s) ...")
+        log.info("Trained model(s) exists. Loading model(s) ...")
         for feature in ml_model_file:
             with gzip.open(ml_model_file[feature], "rb") as fh:
                 ml_model = pickle.load(fh)
                 ml_model_dict[feature] = ml_model
-        log.info(f"Loading model(s) ... done")
+        log.info("Loading model(s) ... done")
 
     all_fig_names = []
     if cutoff_llr is None:

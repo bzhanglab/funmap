@@ -2,7 +2,7 @@
 
 """The setup script."""
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 requirements = [
     "pyyaml==6.0.1",
@@ -47,6 +47,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/bzhanglab/funmap",
-    version="0.1.21",
+    version="0.2.0",
     zip_safe=False,
 )
