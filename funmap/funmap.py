@@ -644,7 +644,36 @@ def dataset_llr(
     llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
     log.info("Calculating llr for all datasets average ... done")
     llr_ds.to_csv(llr_dataset_file, sep="\t", index=False)
-
+    if extra_feature is not None:
+        log.info("Calculating LLR for extra features")
+        extra_feature_df = pd.read_csv(extra_feature, sep="\t")
+        extra_feature_df.columns.values[0] = "P1"
+        extra_feature_df.columns.values[1] = "P2"
+        extra_feature_df[["P1", "P2"]] = extra_feature_df.apply(
+            lambda row: sorted([row["P1"], row["P2"]])
+            if row["P1"] > row["P2"]
+            else [row["P1"], row["P2"]],
+            axis=1,
+            result_type="expand",
+        )
+        extra_feature_df = extra_feature_df.drop_duplicates(
+            subset=["P1", "P2"], keep="last"
+        )
+        extra_feature_df = extract_extra_features(
+            all_pairs, extra_feature_df
+        )  # filter out unused pairs
+        features = extra_feature_df.columns.values[2:]
+        for f in features:
+            subset_df = extra_feature_df[["P1", "P2", f]]
+            subset_df.columns.values[-1] = "prediction"
+            log.info(f"Calculating llr for extra feature {f} ...")
+            cur_llr_res = compute_llr(
+                subset_df, None, start_edge_num, max_num_edge, step_size, gs_test, True
+            )
+            cur_llr_res["dataset"] = f + "_EXTRAFEAT"
+            llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
+            llr_ds.to_csv(llr_dataset_file, sep="\t", index=False)
+            log.info(f"Calculating llr for {dataset} ... done")
     return llr_ds
 
 
