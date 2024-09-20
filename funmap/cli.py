@@ -63,7 +63,7 @@ def qc(config_file, force_rerun):
 @click.option('--force-rerun', '-f', is_flag=True, default=False,
             help='if set, will remove results from previous run first')
 def run(config_file, force_rerun):
-    click.echo(f'Running funmap...')
+    click.echo('Running funmap...')
     if force_rerun:
         while True:
             confirmation = input("Do you want to remove results from previous run? (y/n): ")
@@ -165,7 +165,7 @@ def run(config_file, force_rerun):
                 with gzip.open(ml_model_file[feature], 'rb') as fh:
                     ml_model = pickle.load(fh)
                     ml_model_dict[feature] = ml_model
-            log.info(f'Loading model(s) ... done')
+            log.info('Loading model(s) ... done')
             if not gs_df_file.exists():
                 log.error(f'Trained models found but gold standard data file {gs_df_file} '
                         f'does not exist.')
@@ -255,12 +255,12 @@ def run(config_file, force_rerun):
         llr_ds = pd.read_csv(llr_dataset_file, sep='\t')
 
     if not ml_model_dict:
-        log.info(f'Trained model(s) exists. Loading model(s) ...')
+        log.info('Trained model(s) exists. Loading model(s) ...')
         for feature in ml_model_file:
             with gzip.open(ml_model_file[feature], 'rb') as fh:
                 ml_model = pickle.load(fh)
                 ml_model_dict[feature] = ml_model
-        log.info(f'Loading model(s) ... done')
+        log.info('Loading model(s) ... done')
 
     all_fig_names = []
     if cutoff_llr is None:

@@ -208,6 +208,15 @@ def assemble_feature_df(h5_file_mapping, df, dataset='cc'):
     file_keys = list(h5_file_mapping.keys())
     feature_df = pd.DataFrame(columns=file_keys + ['label'])
 
+    def get_1d_indices(i_array, j_array, n):
+        # Ensure i and j are within bounds
+        mask = (i_array < n) & (j_array < n)
+        i = np.minimum(i_array[mask], j_array[mask])
+        j = np.maximum(i_array[mask], j_array[mask])
+
+        # Calculate 1D indices
+        return i * n - i * (i - 1) // 2 + (j - i)
+
     # Iterate over HDF5 files and load feature values
     for key, file_path in h5_file_mapping.items():
         with h5py.File(file_path, 'r') as h5_file:
@@ -222,8 +231,7 @@ def assemble_feature_df(h5_file_mapping, df, dataset='cc'):
             f_values = np.empty(len(df), dtype=float)
             valid_indices = (p1_indices != -1) & (p2_indices != -1)
 
-            linear_indices_func = lambda row_indices, col_indices, n: np.array(col_indices) - np.array(row_indices) + (2*n - np.array(row_indices) + 1) * np.array(row_indices) // 2
-            linear_indices = linear_indices_func(p1_indices[valid_indices], p2_indices[valid_indices], len(gene_ids))
+            linear_indices = get_1d_indices(p1_indices[valid_indices], p2_indices[valid_indices], len(gene_ids))
 
             f_values[valid_indices] = f_dataset[:][linear_indices]
             f_values[~valid_indices] = np.nan
@@ -337,7 +345,7 @@ def compute_llr(predicted_all_pairs, llr_res_file, start_edge_num, max_num_edges
                 gs_test):
     # make sure max_num_edges is smaller than the number of non-NA values
     assert max_num_edges < np.count_nonzero(~np.isnan(predicted_all_pairs.iloc[:, -1].values)), \
-        f'max_num_edges should be smaller than the number of non-NA values'
+        'max_num_edges should be smaller than the number of non-NA values'
 
     cur_col_name = 'prediction'
     cur_results = predicted_all_pairs.nlargest(max_num_edges, cur_col_name)
@@ -409,7 +417,6 @@ def prepare_gs_data(**kwargs):
     # store both the ids with gs_test_df for later use
     # add the first two column of gs_test to gs_test_df at the beginning
     gs_test_df = pd.concat([gs_test.iloc[:, :2], gs_test_df], axis=1)
-
     log.info('Preparing gs data ... done')
     return gs_train_df, gs_test_df
 
@@ -417,6 +424,16 @@ def prepare_gs_data(**kwargs):
 def extract_dataset_feature(all_pairs, feature_file, feature_type='cc'):
     # convert all_pairs to a dataframe
     df = pd.DataFrame(all_pairs, columns=['P1', 'P2'])
+
+    def get_1d_indices(i_array, j_array, n):
+        # Ensure i and j are within bounds
+        mask = (i_array < n) & (j_array < n)
+        i = np.minimum(i_array[mask], j_array[mask])
+        j = np.maximum(i_array[mask], j_array[mask])
+
+        # Calculate 1D indices
+        return i * n - i * (i - 1) // 2 + (j - i)
+
     with h5py.File(feature_file, 'r') as h5_file:
         gene_ids = h5_file['ids'][:]
         gene_to_index = {gene.astype(str): idx for idx, gene in enumerate(gene_ids)}
@@ -429,8 +446,7 @@ def extract_dataset_feature(all_pairs, feature_file, feature_type='cc'):
         f_values = np.empty(len(df), dtype=float)
         valid_indices = (p1_indices != -1) & (p2_indices != -1)
 
-        linear_indices_func = lambda row_indices, col_indices, n: np.array(col_indices) - np.array(row_indices) + (2*n - np.array(row_indices) + 1) * np.array(row_indices) // 2
-        linear_indices = linear_indices_func(p1_indices[valid_indices], p2_indices[valid_indices], len(gene_ids))
+        linear_indices = get_1d_indices(p1_indices[valid_indices], p2_indices[valid_indices], len(gene_ids))
 
         f_values[valid_indices] = f_dataset[:][linear_indices]
         f_values[~valid_indices] = np.nan
@@ -464,14 +480,19 @@ def dataset_llr(all_ids, feature_dict, feature_type, gs_test, start_edge_num,
         log.info(f'Calculating llr for {dataset} ... done')
 
     # calculate llr for all datasets based on the average prediction
-    log.info(f'Calculating llr for all datasets average ...')
+    log.info('Calculating llr for all datasets average ...')
     all_ds_pred_df = pd.DataFrame(all_pairs, columns=['P1', 'P2'])
-    all_ds_pred_avg = np.nanmean(all_ds_pred, axis=0)
+    if all_ds_pred.ndim == 1:
+        all_ds_pred_avg = all_ds_pred
+    elif all_ds_pred.ndim == 2:
+        all_ds_pred_avg = np.nanmean(all_ds_pred, axis=0)
+    else:
+        raise ValueError(f'Invalid dimension for all_ds_pred: {all_ds_pred.ndim}')
     all_ds_pred_df['prediction'] = all_ds_pred_avg
     cur_llr_res = compute_llr(all_ds_pred_df, None, start_edge_num, max_num_edge, step_size, gs_test)
     cur_llr_res['dataset'] = 'all_average'
     llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
-    log.info(f'Calculating llr for all datasets average ... done')
+    log.info('Calculating llr for all datasets average ... done')
     llr_ds.to_csv(llr_dataset_file, sep='\t', index=False)
 
     return llr_ds
