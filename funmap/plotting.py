@@ -58,13 +58,13 @@ def plot_llr_comparison(
     for ds in datasets:
         start = -1
         cur_df = llr_ds[llr_ds["dataset"] == ds]
-        if name_type_dict[ds].upper() == "RNA":
+        if ds.endswith("_EXTRAFEAT"):
+            ds = ds.replace("_EXTRAFEAT", "")
+            ltype = "-."
+        elif name_type_dict[ds].upper() == "RNA":
             ltype = "--"
         elif name_type_dict[ds].upper() == "PROTEIN":
             ltype = ":"
-        elif ds.endswith("_EXTRAFEAT"):
-            ds = ds.replace("_EXTRAFEAT", "")
-            ltype = "-."
         else:
             ltype = "-"
         ax.plot(cur_df["k"], cur_df["llr"], linestyle=ltype, label=ds)
