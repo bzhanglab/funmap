@@ -419,12 +419,18 @@ def train_model(X, y, seed, n_jobs, feature_mapping, model_dir):
 
 
 def compute_llr(
-    predicted_all_pairs, llr_res_file, start_edge_num, max_num_edges, step_size, gs_test
+    predicted_all_pairs,
+    llr_res_file,
+    start_edge_num,
+    max_num_edges,
+    step_size,
+    gs_test,
+    is_extra_feat=False,
 ):
     # make sure max_num_edges is smaller than the number of non-NA values
-    assert max_num_edges < np.count_nonzero(
+    assert is_extra_feat or max_num_edges < np.count_nonzero(
         ~np.isnan(predicted_all_pairs.iloc[:, -1].values)
-    ), f"max_num_edges should be smaller than the number of non-NA values"
+    ), "max_num_edges should be smaller than the number of non-NA values"
 
     cur_col_name = "prediction"
     cur_results = predicted_all_pairs.nlargest(max_num_edges, cur_col_name)
@@ -635,12 +641,7 @@ def dataset_llr(
             subset_df.columns.values[-1] = "prediction"
             log.info(f"Calculating llr for extra feature {f} ...")
             cur_llr_res = compute_llr(
-                subset_df,
-                None,
-                start_edge_num,
-                max_num_edge,
-                step_size,
-                gs_test,
+                subset_df, None, start_edge_num, max_num_edge, step_size, gs_test, True
             )
             cur_llr_res["dataset"] = f + "_EXTRAFEAT"
             llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
