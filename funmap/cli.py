@@ -26,6 +26,7 @@ from funmap.utils import (
     check_extra_feature_file,
     check_gold_standard_file,
     cleanup_experiment,
+    process_extra_feature,
     setup_experiment,
 )
 
@@ -120,6 +121,11 @@ def run(config_file, force_rerun):
     setup_logging(config_file)
     cfg = setup_experiment(config_file)
     extra_feature_file = cfg["extra_feature_file"]
+    if extra_feature_file is not None:
+        log.info("Loading extra feature file into dataframe")
+        extra_feature_df = process_extra_feature(extra_feature_file)
+    else:
+        extra_feature_df = None
     # if (extra_feature_file is not None) and (not check_extra_feature_file(extra_feature_file)):
     #     return
     gs_file = cfg["gs_file"]
@@ -192,7 +198,7 @@ def run(config_file, force_rerun):
         "mr_dict": mr_dict,
         "feature_type": feature_type,
         "gs_file": gs_file,
-        "extra_feature_file": extra_feature_file,
+        "extra_feature_df": extra_feature_df,
         "valid_id_list": all_valid_ids,
         "test_size": test_size,
         "seed": seed,
@@ -255,7 +261,7 @@ def run(config_file, force_rerun):
                 "ppi_feature": ppi_feature,
                 "cc_dict": cc_dict,
                 "mr_dict": mr_dict,
-                "extra_feature_file": extra_feature_file,
+                "extra_feature_df": extra_feature_df,
                 "prediction_dir": prediction_dir,
                 "output_file": predicted_all_pairs_file,
                 "n_jobs": n_jobs,
@@ -326,7 +332,7 @@ def run(config_file, force_rerun):
             max_num_edges,
             step_size,
             llr_dataset_file,
-            extra_feature_file,
+            extra_feature_df,
         )
         log.info("Done.")
     else:
@@ -356,7 +362,7 @@ def run(config_file, force_rerun):
             "feature_type": "cc",
             "gs_file": gs_file,
             # no extra feature for plotting
-            "extra_feature_file": None,
+            "extra_feature_df": None,
             "valid_id_list": all_valid_ids,
             "test_size": test_size,
             "seed": seed,

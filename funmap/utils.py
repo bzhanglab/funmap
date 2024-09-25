@@ -1,14 +1,16 @@
 import csv
-import yaml
-import os
-import tarfile
-import re
 import hashlib
-import urllib
-from urllib.parse import urlparse
-from pathlib import Path
-import pandas as pd
+import os
+import re
 import shutil
+import tarfile
+import urllib
+from pathlib import Path
+from urllib.parse import urlparse
+
+import pandas as pd
+import yaml
+
 from funmap.data_urls import misc_urls as urls
 from funmap.logger import setup_logger
 
@@ -553,3 +555,19 @@ def check_extra_feature_file(file_path, missing_value="NA"):
                         return False
 
     return True
+
+
+def process_extra_feature(extra_feature_file) -> pd.DataFrame:
+    extra_feature_df = pd.read_csv(extra_feature_file, sep="\t")
+    extra_feature_df.columns.values[0] = "P1"
+    extra_feature_df.columns.values[1] = "P2"
+    extra_feature_df[["P1", "P2"]] = extra_feature_df.apply(
+        lambda row: sorted([row["P1"], row["P2"]])
+        if row["P1"] > row["P2"]
+        else [row["P1"], row["P2"]],
+        axis=1,
+        result_type="expand",
+    )
+    extra_feature_df = extra_feature_df.drop_duplicates(
+        subset=["P1", "P2"], keep="last"
+    )

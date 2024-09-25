@@ -23,7 +23,6 @@ from funmap.data_urls import misc_urls as urls
 from funmap.data_urls import network_info
 from funmap.logger import setup_logger
 from funmap.utils import (
-    check_extra_feature_file,
     get_data_dict,
     is_url_scheme,
     read_csv_with_md5_check,
@@ -290,7 +289,7 @@ def assemble_feature_df(h5_file_mapping, df, dataset="cc"):
 
 
 def extract_features(
-    df, feature_type, cc_dict, ppi_feature=None, extra_feature=None, mr_dict=None
+    df, feature_type, cc_dict, ppi_feature=None, extra_feature_df=None, mr_dict=None
 ):
     """
       extract_features - creates the final feature `pandas` dataframe used by xgboost
@@ -326,20 +325,7 @@ def extract_features(
             )
 
     # TODO: add extra features if provided
-    if extra_feature is not None:
-        extra_feature_df = pd.read_csv(extra_feature, sep="\t")
-        extra_feature_df.columns.values[0] = "P1"
-        extra_feature_df.columns.values[1] = "P2"
-        extra_feature_df[["P1", "P2"]] = extra_feature_df.apply(
-            lambda row: sorted([row["P1"], row["P2"]])
-            if row["P1"] > row["P2"]
-            else [row["P1"], row["P2"]],
-            axis=1,
-            result_type="expand",
-        )
-        extra_feature_df = extra_feature_df.drop_duplicates(
-            subset=["P1", "P2"], keep="last"
-        )
+    if extra_feature_df is not None:
         df.reset_index(drop=True, inplace=True)
         merged_df = pd.merge(
             df[["P1", "P2"]], extra_feature_df, on=["P1", "P2"], how="left"
@@ -506,7 +492,7 @@ def prepare_gs_data(**kwargs):
     gs_file = kwargs["gs_file"]
     gs_file_md5 = None
     feature_type = kwargs["feature_type"]
-    extra_feature_file = kwargs["extra_feature_file"]
+    extra_feature_df = kwargs["extra_feature_df"]
     valid_id_list = kwargs["valid_id_list"]
     test_size = kwargs["test_size"]
     seed = kwargs["seed"]
@@ -530,10 +516,10 @@ def prepare_gs_data(**kwargs):
     else:
         ppi_feature = None
     gs_train_df = extract_features(
-        gs_train, feature_type, cc_dict, ppi_feature, extra_feature_file, mr_dict
+        gs_train, feature_type, cc_dict, ppi_feature, extra_feature_df, mr_dict
     )
     gs_test_df = extract_features(
-        gs_test, feature_type, cc_dict, ppi_feature, extra_feature_file, mr_dict
+        gs_test, feature_type, cc_dict, ppi_feature, extra_feature_df, mr_dict
     )
 
     # store both the ids with gs_test_df for later use
@@ -599,7 +585,7 @@ def dataset_llr(
     max_num_edge,
     step_size,
     llr_dataset_file,
-    extra_feature,
+    extra_feature_df,
 ):
     llr_ds = pd.DataFrame()
     all_ids_sorted = sorted(all_ids)
@@ -644,21 +630,8 @@ def dataset_llr(
     llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
     log.info("Calculating llr for all datasets average ... done")
     llr_ds.to_csv(llr_dataset_file, sep="\t", index=False)
-    if extra_feature is not None:
+    if extra_feature_df is not None:
         log.info("Calculating LLR for extra features")
-        extra_feature_df = pd.read_csv(extra_feature, sep="\t")
-        extra_feature_df.columns.values[0] = "P1"
-        extra_feature_df.columns.values[1] = "P2"
-        extra_feature_df[["P1", "P2"]] = extra_feature_df.apply(
-            lambda row: sorted([row["P1"], row["P2"]])
-            if row["P1"] > row["P2"]
-            else [row["P1"], row["P2"]],
-            axis=1,
-            result_type="expand",
-        )
-        extra_feature_df = extra_feature_df.drop_duplicates(
-            subset=["P1", "P2"], keep="last"
-        )
         extra_feature_df = extract_extra_features(
             all_pairs, extra_feature_df
         )  # filter out unused pairs
@@ -751,7 +724,7 @@ def predict_all_pairs(
     ppi_feature,
     cc_dict,
     mr_dict,
-    extra_feature_file,
+    extra_feature_df,
     prediction_dir,
     output_file,
     n_jobs=1,
@@ -784,7 +757,7 @@ def predict_all_pairs(
                 feature_type,
                 cc_dict,
                 cur_ppi_feature,
-                extra_feature_file,
+                extra_feature_df,
                 mr_dict,
             )
             predictions = model.predict_proba(feature_df)
