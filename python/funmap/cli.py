@@ -6,7 +6,7 @@ from pathlib import Path
 import click
 import numpy as np
 import pandas as pd
-
+from funmap import _lib as funmap_lib
 from funmap import __version__
 from funmap.data_urls import misc_urls as urls
 from funmap.funmap import (
@@ -84,6 +84,11 @@ def qc(config_file, force_rerun):
     merge_and_delete(figure_dir, all_fig_names, "qc.pdf")
     log.info("figure qc.pdf saved to {}".format(figure_dir))
     log.info("QC complete")
+
+
+@cli.command()
+def rust():
+    print(f"sum: {funmap_lib.sum_as_string(5, 10)}")
 
 
 @cli.command(help="run funmap")
