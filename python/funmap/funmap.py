@@ -147,53 +147,59 @@ def compute_features(cfg, feature_type, min_sample_count, output_dir):
     """Compute the pearson correlation coefficient for each edge in the list of edges and for each"""
     data_dict, all_valid_ids = get_data_dict(cfg, min_sample_count)
     cc_dict = {}
-    for i in data_dict:
-        cc_file = os.path.join(output_dir, f"cc_{i}.h5")
-        cc_dict[i] = cc_file
-
     mr_dict = {}
-    for i in data_dict:
-        mr_file = os.path.join(output_dir, f"mr_{i}.h5")
-        mr_dict[i] = mr_file
+    if not cfg["only_extra_features"]:
+        for i in data_dict:
+            cc_file = os.path.join(output_dir, f"cc_{i}.h5")
+            cc_dict[i] = cc_file
 
-    all_cc_exist = all(os.path.exists(file_path) for file_path in cc_dict.values())
-    if all_cc_exist:
-        log.info("All cc files exist. Skipping feature computation.")
-        if feature_type == "cc":
-            return cc_dict, mr_dict, all_valid_ids
+        mr_dict = {}
+        for i in data_dict:
+            mr_file = os.path.join(output_dir, f"mr_{i}.h5")
+            mr_dict[i] = mr_file
 
-    if feature_type == "mr":
-        all_mr_exist = all(os.path.exists(file_path) for file_path in mr_dict.values())
-        if all_cc_exist and all_mr_exist:
-            log.info("All mr files exist. Skipping feature computation.")
-            return cc_dict, mr_dict, all_valid_ids
+        all_cc_exist = all(os.path.exists(file_path) for file_path in cc_dict.values())
+        if all_cc_exist:
+            log.info("All cc files exist. Skipping feature computation.")
+            if feature_type == "cc":
+                return cc_dict, mr_dict, all_valid_ids
 
-    log.debug(f"Computing {feature_type} features")
-    for i in data_dict:
-        cc_file = cc_dict[i]
-        if os.path.exists(cc_file):
-            continue
-        log.info(f"Computing pearson correlation coefficient matrix for {i}")
-        x = data_dict[i].values.astype(np.float32)
-        df = pd.DataFrame(x)
-        corr_matrix = df.corr(method="pearson", min_periods=min_sample_count)
-        arr = corr_matrix.values
-        upper_indices = np.triu_indices(arr.shape[0])
-        with h5py.File(cc_dict[i], "w") as hf:
-            # only store the upper triangle part
-            hf.create_dataset("cc", data=arr[upper_indices])
-            hf.create_dataset("ids", data=data_dict[i].columns.values.astype("S"))
-        cc_dict[i] = cc_file
-
-        # compute pairwise mutual rank features
         if feature_type == "mr":
-            log.info(f"Computing mutual rank matrix for {i}")
-            arr_mr = pairwise_mutual_rank(arr)
-            upper_indices = np.triu_indices(arr_mr.shape[0])
-            with h5py.File(mr_dict[i], "w") as hf:
+            all_mr_exist = all(
+                os.path.exists(file_path) for file_path in mr_dict.values()
+            )
+            if all_cc_exist and all_mr_exist:
+                log.info("All mr files exist. Skipping feature computation.")
+                return cc_dict, mr_dict, all_valid_ids
+
+        log.debug(f"Computing {feature_type} features")
+        for i in data_dict:
+            cc_file = cc_dict[i]
+            if os.path.exists(cc_file):
+                continue
+            log.info(f"Computing pearson correlation coefficient matrix for {i}")
+            x = data_dict[i].values.astype(np.float32)
+            df = pd.DataFrame(x)
+            corr_matrix = df.corr(method="pearson", min_periods=min_sample_count)
+            arr = corr_matrix.values
+            upper_indices = np.triu_indices(arr.shape[0])
+            with h5py.File(cc_dict[i], "w") as hf:
                 # only store the upper triangle part
-                hf.create_dataset("mr", data=arr_mr[upper_indices])
+                hf.create_dataset("cc", data=arr[upper_indices])
                 hf.create_dataset("ids", data=data_dict[i].columns.values.astype("S"))
+            cc_dict[i] = cc_file
+
+            # compute pairwise mutual rank features
+            if feature_type == "mr":
+                log.info(f"Computing mutual rank matrix for {i}")
+                arr_mr = pairwise_mutual_rank(arr)
+                upper_indices = np.triu_indices(arr_mr.shape[0])
+                with h5py.File(mr_dict[i], "w") as hf:
+                    # only store the upper triangle part
+                    hf.create_dataset("mr", data=arr_mr[upper_indices])
+                    hf.create_dataset(
+                        "ids", data=data_dict[i].columns.values.astype("S")
+                    )
 
     return cc_dict, mr_dict, all_valid_ids
 
@@ -231,15 +237,6 @@ def assemble_feature_df(h5_file_mapping, df, dataset="cc"):
     # Initialize feature_df with columns for HDF5 file keys and 'label'
     file_keys = list(h5_file_mapping.keys())
     feature_df = pd.DataFrame(columns=file_keys + ["label"])
-
-    def get_1d_indices(i_array, j_array, n):
-        # Ensure i and j are within bounds
-        mask = (i_array < n) & (j_array < n)
-        i = np.minimum(i_array[mask], j_array[mask])
-        j = np.maximum(i_array[mask], j_array[mask])
-
-        # Calculate 1D indices
-        return i * n - i * (i - 1) // 2 + (j - i)
 
     def get_1d_indices(i_array, j_array, n):
         # Ensure i and j are within bounds

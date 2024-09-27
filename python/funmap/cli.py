@@ -222,7 +222,7 @@ def run(config_file, force_rerun):
             os.path.exists(file_path) for file_path in ml_model_file.values()
         )
         if all_model_exist:
-            log.info(f"Trained model(s) exists. Loading model(s) ...")
+            log.info("Trained model(s) exists. Loading model(s) ...")
             ml_model_dict = {}
             # feature: ex or ei
             for feature in ml_model_file:

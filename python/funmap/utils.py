@@ -86,49 +86,50 @@ def get_data_dict(config, min_sample_count=15):
         the data from the corresponding file.
 
     """
-    data_file = config["data_path"]
-    data_dict = {}
-    if "filter_noncoding_genes" in config and config["filter_noncoding_genes"]:
-        mapping = pd.read_csv(urls["mapping_file"], sep="\t")
-    # extract the data file from the tar.gz file
-    tmp_dir = "tmp_data"
-    if not os.path.exists(tmp_dir):
-        os.mkdir(tmp_dir)
-    os.system(f"tar -xzf {data_file} --strip-components=1 -C {tmp_dir}")
-    # gene ids are gene symbols
-    for dt in config["data_files"]:
-        log.info(f"processing ... {dt['name']}")
-        cur_feature = dt["name"]
-        # cur_file = get_obj_from_tgz(data_file, dt['path'])
-        # extract the data file from the tar.gz file
-        # cur_data= get_obj_from_tgz(data_file, dt['path'])
-        cur_data = pd.read_csv(
-            os.path.join(tmp_dir, dt["path"]), sep="\t", index_col=0, header=0
-        )
-        if cur_data.shape[1] < min_sample_count:
-            log.info(f"... {dt['name']} ... not enough samples, skipped")
-            continue
-        cur_data = cur_data.T
-        # exclude cohort with sample number < min_sample_count
-        # remove noncoding genes first
-        if config["filter_noncoding_genes"]:
-            coding = mapping.loc[mapping["coding"] == "coding", ["gene_name"]]
-            coding_genes = list(set(coding["gene_name"].to_list()))
-            cur_data = cur_data[[c for c in cur_data.columns if c in coding_genes]]
-        # duplicated columns, for now select the last column
-        cur_data = cur_data.loc[:, ~cur_data.columns.duplicated(keep="last")]
-        data_dict[cur_feature] = cur_data
-
-    shutil.rmtree(tmp_dir)
-
-    log.info("filtering out non valid ids ...")
     all_valid_ids = set()
-    for i in data_dict:
-        cur_data = data_dict[i]
-        is_valid = cur_data.notna().sum() >= min_sample_count
-        # valid_count = np.sum(is_valid)
-        valid_p = cur_data.columns[is_valid].values
-        all_valid_ids = all_valid_ids.union(set(valid_p))
+    data_dict = {}
+    if not config["only_extra_features"]:
+        data_file = config["data_path"]
+        if "filter_noncoding_genes" in config and config["filter_noncoding_genes"]:
+            mapping = pd.read_csv(urls["mapping_file"], sep="\t")
+        # extract the data file from the tar.gz file
+        tmp_dir = "tmp_data"
+        if not os.path.exists(tmp_dir):
+            os.mkdir(tmp_dir)
+        os.system(f"tar -xzf {data_file} --strip-components=1 -C {tmp_dir}")
+        # gene ids are gene symbols
+        for dt in config["data_files"]:
+            log.info(f"processing ... {dt['name']}")
+            cur_feature = dt["name"]
+            # cur_file = get_obj_from_tgz(data_file, dt['path'])
+            # extract the data file from the tar.gz file
+            # cur_data= get_obj_from_tgz(data_file, dt['path'])
+            cur_data = pd.read_csv(
+                os.path.join(tmp_dir, dt["path"]), sep="\t", index_col=0, header=0
+            )
+            if cur_data.shape[1] < min_sample_count:
+                log.info(f"... {dt['name']} ... not enough samples, skipped")
+                continue
+            cur_data = cur_data.T
+            # exclude cohort with sample number < min_sample_count
+            # remove noncoding genes first
+            if config["filter_noncoding_genes"]:
+                coding = mapping.loc[mapping["coding"] == "coding", ["gene_name"]]
+                coding_genes = list(set(coding["gene_name"].to_list()))
+                cur_data = cur_data[[c for c in cur_data.columns if c in coding_genes]]
+            # duplicated columns, for now select the last column
+            cur_data = cur_data.loc[:, ~cur_data.columns.duplicated(keep="last")]
+            data_dict[cur_feature] = cur_data
+
+        shutil.rmtree(tmp_dir)
+
+        log.info("filtering out non valid ids ...")
+        for i in data_dict:
+            cur_data = data_dict[i]
+            is_valid = cur_data.notna().sum() >= min_sample_count
+            # valid_count = np.sum(is_valid)
+            valid_p = cur_data.columns[is_valid].values
+            all_valid_ids = all_valid_ids.union(set(valid_p))
     if config["extra_feature_file"] is not None:
         log.info("Importing extra feature file")
         # TODO: Import extra feature file
@@ -342,6 +343,7 @@ def get_config(cfg_file: Path):
         "max_num_edges": 250000,
         "step_size": 1000,
         "lr_cutoff": 50,
+        "only_extra_features": False,
     }
 
     with open(cfg_file, "r") as fh:
@@ -352,6 +354,12 @@ def get_config(cfg_file: Path):
         cfg["task"] = cfg_dict["task"]
         assert cfg["task"] in ["protein_func", "kinase_func"]
 
+    if "only_extra_features" in cfg_dict:
+        cfg["only_extra_features"] = cfg_dict["only_extra_features"]
+        if cfg["only_extra_features"] and "extra_feature_file" not in cfg_dict:
+            msg = "Extra feature file is not defined when only_extra_features = True"
+            print(msg)
+            raise ValueError(msg)
     if "seed" in cfg_dict:
         cfg["seed"] = cfg_dict["seed"]
 
@@ -404,21 +412,24 @@ def get_config(cfg_file: Path):
     if "results_dir" in cfg_dict:
         cfg["results_dir"] = cfg_dict["results_dir"] + "/" + cfg_dict["name"]
 
-    if "data_files" not in cfg_dict:
+    if "data_files" not in cfg_dict and not cfg.get("only_extra_features", False):
         raise ValueError("data_files not specified in config file")
 
     # Check all files listed under data_files are also in the tar.gz file
-    data_files = cfg_dict["data_files"]
-    # List all the files in the tar.gz file
-    with tarfile.open(cfg["data_path"], "r:gz") as tar:
-        tar_files = {Path(file).name for file in tar.getnames()}
+    if not cfg["only_extra_features"]:
+        data_files = cfg_dict["data_files"]
+        # List all the files in the tar.gz file
+        with tarfile.open(cfg["data_path"], "r:gz") as tar:
+            tar_files = {Path(file).name for file in tar.getnames()}
 
-    # Check if all files in data_files are in tar_files
-    if not all(file["path"] in tar_files for file in data_files):
-        print("Files listed under data_files are not in the tar.gz file!")
-        raise ValueError("Files listed under data_files are not in the tar.gz file!")
+        # Check if all files in data_files are in tar_files
+        if not all(file["path"] in tar_files for file in data_files):
+            print("Files listed under data_files are not in the tar.gz file!")
+            raise ValueError(
+                "Files listed under data_files are not in the tar.gz file!"
+            )
 
-    cfg["data_files"] = cfg_dict["data_files"]
+        cfg["data_files"] = cfg_dict["data_files"]
 
     if "rp_pairs" in cfg_dict:
         cfg["rp_pairs"] = cfg_dict["rp_pairs"]
