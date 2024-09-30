@@ -126,13 +126,10 @@ def run(config_file, force_rerun):
     setup_logging(config_file)
     cfg = setup_experiment(config_file)
     extra_feature_file = cfg["extra_feature_file"]
+    extra_feature_df = None
     if extra_feature_file is not None:
         log.info("Loading extra feature file into dataframe")
         extra_feature_df = process_extra_feature(extra_feature_file)
-    else:
-        extra_feature_df = None
-    # if (extra_feature_file is not None) and (not check_extra_feature_file(extra_feature_file)):
-    #     return
     gs_file = cfg["gs_file"]
     if (gs_file is not None) and (not check_gold_standard_file(gs_file)):
         return
@@ -367,7 +364,7 @@ def run(config_file, force_rerun):
             "feature_type": "cc",
             "gs_file": gs_file,
             # no extra feature for plotting
-            "extra_feature_df": None,
+            "extra_feature_df": extra_feature_df,
             "valid_id_list": all_valid_ids,
             "test_size": test_size,
             "seed": seed,

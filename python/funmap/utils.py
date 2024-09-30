@@ -582,3 +582,4 @@ def process_extra_feature(extra_feature_file) -> pd.DataFrame:
     extra_feature_df = extra_feature_df.drop_duplicates(
         subset=["P1", "P2"], keep="last"
     )
+    return extra_feature_df
