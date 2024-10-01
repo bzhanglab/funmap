@@ -643,7 +643,7 @@ def dataset_llr(
             cur_llr_res["dataset"] = f + "_EXTRAFEAT"
             llr_ds = pd.concat([llr_ds, cur_llr_res], axis=0, ignore_index=True)
             llr_ds.to_csv(llr_dataset_file, sep="\t", index=False)
-            log.info(f"Calculating llr for {dataset} ... done")
+            log.info(f"Calculating llr for {f} ... done")
     return llr_ds
 
 

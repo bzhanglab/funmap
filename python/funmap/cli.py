@@ -152,7 +152,7 @@ def run(config_file, force_rerun):
     max_num_edges = cfg["max_num_edges"]
     step_size = cfg["step_size"]
     start_edge_num = cfg["start_edge_num"]
-
+    only_extra_features = cfg["only_extra_features"]
     results_dir = Path(cfg["results_dir"])
     saved_data_dir = results_dir / cfg["subdirs"]["saved_data_dir"]
     model_dir = results_dir / cfg["subdirs"]["saved_model_dir"]
