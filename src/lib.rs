@@ -1,5 +1,5 @@
 use ahash::{HashSet, HashSetExt};
-use pyo3::prelude::*;
+use pyo3::{exceptions::PyValueError, prelude::*};
 use std::{
     fs::File,
     io::{BufRead, BufReader},
@@ -29,6 +29,7 @@ use std::{
 fn process_files(
     expression_paths: Vec<String>,
     extra_feature_paths: Vec<String>,
+    output_folder: String,
 ) -> PyResult<bool> {
     // Step 1: Identify all unique genes
     // Across both expression and extra_feature_paths
@@ -46,6 +47,13 @@ fn process_files(
             if has_header {
                 // skip header
                 has_header = false;
+                let row: Vec<&str> = line.split('\t').collect();
+                if row.len() < 2 {
+                    return Err(PyValueError::new_err(format!(
+                        "Expression data file at {} does not have enough columns.",
+                        file_path
+                    )));
+                }
                 continue;
             }
             let row: Vec<&str> = line.split('\t').collect();
@@ -65,6 +73,13 @@ fn process_files(
             if has_header {
                 // skip header
                 has_header = false;
+                let row: Vec<&str> = line.split('\t').collect();
+                if row.len() < 3 {
+                    return Err(PyValueError::new_err(format!(
+                        "Extra feature file at {} does not have enough columns.",
+                        file_path
+                    )));
+                }
                 continue;
             }
             let row: Vec<&str> = line.split('\t').collect();
@@ -74,6 +89,9 @@ fn process_files(
             }
         }
     }
+
+    // Save to pickle
+
     Ok(true)
 }
 
