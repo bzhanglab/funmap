@@ -1,11 +1,13 @@
 use ahash::{HashSet, HashSetExt};
 use pyo3::{exceptions::PyValueError, prelude::*};
+use serde_pickle::SerOptions;
 use std::{
     fs::File,
     io::{BufRead, BufReader},
+    path::Path,
 };
 
-/// funmap_lib
+/// process_files
 ///
 /// Supports the addition of extra features in the format of gene pairs
 ///
@@ -91,7 +93,16 @@ fn process_files(
     }
 
     // Save to pickle
+    // TODO: Look at other file formats
 
+    let mut uniq_gene: Vec<String> = uniq_gene.iter().cloned().collect();
+
+    // Sort genes alphabetically
+    uniq_gene.sort();
+    let folder_path = Path::new(&output_folder);
+    let uniq_gene_file_path = folder_path.join("uniq_gene.pkl");
+    let mut w = File::create(uniq_gene_file_path)?;
+    serde_pickle::to_writer(&mut w, &uniq_gene, SerOptions::default()).unwrap();
     Ok(true)
 }
 
