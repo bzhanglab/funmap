@@ -24,9 +24,15 @@ use std::{
 ///
 /// # Step 2: Align extra features
 ///
-/// WARN: May need to re-align the regular data files
-///
 /// For each extra feature file, re-index the rows according to the order of genes in Step 1.
+///
+/// Then save each column as a separate pkl file
+///
+/// Input: unique genes from Step 1, extra feature files.
+/// Output: One pkl file for each feature across all extra feature files
+///
+/// Function
+/// Output: list of all output feature pkl files
 #[pyfunction]
 fn process_files(
     expression_paths: Vec<String>,
@@ -103,6 +109,33 @@ fn process_files(
     let uniq_gene_file_path = folder_path.join("uniq_gene.pkl");
     let mut w = File::create(uniq_gene_file_path)?;
     serde_pickle::to_writer(&mut w, &uniq_gene, SerOptions::default()).unwrap();
+    Ok(true)
+
+    // Re-align each file
+}
+
+fn align_file(path: &String, uniq_gene: &Vec<String>) -> PyResult<bool> {
+    // Read extra feature data, where first and second column are genes
+    let file = File::open(path)?;
+    let reader = BufReader::new(file);
+    let mut has_header = true;
+    for line in reader.lines() {
+        let line = line?;
+        if has_header {
+            // skip header
+            has_header = false;
+            let row: Vec<&str> = line.split('\t').collect();
+            if row.len() < 3 {
+                return Err(PyValueError::new_err(format!(
+                    "Extra feature file at {} does not have enough columns.",
+                    file_path
+                )));
+            }
+            continue;
+        }
+        let row: Vec<&str> = line.split('\t').collect();
+        if row.len() > 2 {}
+    }
     Ok(true)
 }
 
