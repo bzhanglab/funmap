@@ -128,7 +128,7 @@ fn align_file(path: &String, uniq_gene: &Vec<String>) -> PyResult<bool> {
             if row.len() < 3 {
                 return Err(PyValueError::new_err(format!(
                     "Extra feature file at {} does not have enough columns.",
-                    file_path
+                    path
                 )));
             }
             continue;
