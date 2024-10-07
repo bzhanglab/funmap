@@ -88,7 +88,7 @@ def qc(config_file, force_rerun):
 
 @cli.command()
 def rust():
-    print(f"sum: {funmap_lib.sum_as_string(5, 10)}")
+    funmap_lib.process_files(["test_data/dia.tsv"], [], "test_data")
 
 
 @cli.command(help="run funmap")

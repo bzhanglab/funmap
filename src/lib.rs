@@ -1,4 +1,4 @@
-use ahash::{HashSet, HashSetExt};
+use ahash::{AHashMap, HashSet, HashSetExt};
 use pyo3::{exceptions::PyValueError, prelude::*};
 use serde_pickle::SerOptions;
 use std::{
@@ -109,16 +109,24 @@ fn process_files(
     let uniq_gene_file_path = folder_path.join("uniq_gene.pkl");
     let mut w = File::create(uniq_gene_file_path)?;
     serde_pickle::to_writer(&mut w, &uniq_gene, SerOptions::default()).unwrap();
-    Ok(true)
-
+    let n = uniq_gene.len();
     // Re-align each file
+    // Create a HashMap to store the indices of each string
+    let mut gene_index_map: AHashMap<&String, usize> = AHashMap::new();
+    for (index, gene) in uniq_gene.iter().enumerate() {
+        gene_index_map.insert(gene, index);
+    }
+
+    // One column of indices, and one column of values. Separated by file
+    Ok(true)
 }
 
-fn align_file(path: &String, uniq_gene: &Vec<String>) -> PyResult<bool> {
+fn align_file(path: &String, uniq_gene: &AHashMap<&String, usize>, n: usize) -> PyResult<bool> {
     // Read extra feature data, where first and second column are genes
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     let mut has_header = true;
+    let mut indices: Vec<usize> = Vec::new();
     for line in reader.lines() {
         let line = line?;
         if has_header {
@@ -134,7 +142,16 @@ fn align_file(path: &String, uniq_gene: &Vec<String>) -> PyResult<bool> {
             continue;
         }
         let row: Vec<&str> = line.split('\t').collect();
-        if row.len() > 2 {}
+        if row.len() > 2 {
+            let index1 = uniq_gene.get(&row[0].to_string()).unwrap();
+            let index2 = uniq_gene.get(&row[1].to_string()).unwrap();
+            let (i, j) = if index1 <= index2 {
+                (index1, index2)
+            } else {
+                (index2, index1)
+            };
+            let new_index = i * n - i * (i - 1) / 2 + (j - i);
+        }
     }
     Ok(true)
 }

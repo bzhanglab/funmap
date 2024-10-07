@@ -120,3 +120,4 @@ wheels/
 
 # venv
 .venv
+test_data
