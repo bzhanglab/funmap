@@ -540,8 +540,6 @@ def extract_dataset_feature(all_pairs, feature_file, feature_type="cc"):
         # Calculate 1D indices
         return i * n - i * (i - 1) // 2 + (j - i)
 
-    with h5py.File(feature_file, "r") as h5_file:
-        gene_ids = h5_file["ids"][:]
     df = pd.DataFrame(all_pairs, columns=["P1", "P2"])
     with h5py.File(feature_file, "r") as h5_file:
         gene_ids = h5_file["ids"][:]
