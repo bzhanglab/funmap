@@ -88,7 +88,9 @@ def qc(config_file, force_rerun):
 
 @cli.command()
 def rust():
-    funmap_lib.process_files(["test_data/dia.tsv"], [], "test_data")
+    funmap_lib.process_files(
+        ["test_data/dia.tsv"], ["test_data/all_no_methyl.tsv"], "test_data"
+    )
 
 
 @cli.command(help="run funmap")

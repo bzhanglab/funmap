@@ -3,7 +3,7 @@ use pyo3::{exceptions::PyValueError, prelude::*};
 use serde_pickle::SerOptions;
 use std::{
     fs::File,
-    io::{BufRead, BufReader},
+    io::{BufRead, BufReader, BufWriter, Write},
     path::Path,
 };
 
@@ -117,16 +117,26 @@ fn process_files(
         gene_index_map.insert(gene, index);
     }
 
+    for file_path in extra_feature_paths {
+        align_file(&file_path, &gene_index_map, n as i32, folder_path)?;
+    }
     // One column of indices, and one column of values. Separated by file
     Ok(true)
 }
 
-fn align_file(path: &String, uniq_gene: &AHashMap<&String, usize>, n: usize) -> PyResult<bool> {
+fn align_file(
+    path: &String,
+    uniq_gene: &AHashMap<&String, usize>,
+    n: i32,
+    output_folder: &Path,
+) -> PyResult<bool> {
     // Read extra feature data, where first and second column are genes
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     let mut has_header = true;
     let mut indices: Vec<usize> = Vec::new();
+    let mut feature_count = 0;
+    let mut writers = Vec::new();
     for line in reader.lines() {
         let line = line?;
         if has_header {
@@ -139,6 +149,13 @@ fn align_file(path: &String, uniq_gene: &AHashMap<&String, usize>, n: usize) -> 
                     path
                 )));
             }
+            feature_count = row.len() - 2;
+            for i in 0..feature_count {
+                let file_path = output_folder.join(format!("{}.col", row[i + 2]));
+                let f = File::create(file_path)?;
+                let bf = BufWriter::new(f);
+                writers.push(bf);
+            }
             continue;
         }
         let row: Vec<&str> = line.split('\t').collect();
@@ -146,11 +163,16 @@ fn align_file(path: &String, uniq_gene: &AHashMap<&String, usize>, n: usize) -> 
             let index1 = uniq_gene.get(&row[0].to_string()).unwrap();
             let index2 = uniq_gene.get(&row[1].to_string()).unwrap();
             let (i, j) = if index1 <= index2 {
-                (index1, index2)
+                (*index1 as i32, *index2 as i32)
             } else {
-                (index2, index1)
+                (*index2 as i32, *index1 as i32)
             };
-            let new_index = i * n - i * (i - 1) / 2 + (j - i);
+            let new_index = (i * n - i * (i - 1) / 2 + (j - i)) as usize;
+            indices.push(new_index);
+            for i in 0..feature_count {
+                writers[i].write_all(row[i + 2].as_bytes())?;
+                writers[i].write_all(b"\n")?;
+            }
         }
     }
     Ok(true)
