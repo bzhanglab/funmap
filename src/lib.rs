@@ -137,6 +137,12 @@ fn align_file(
     let mut indices: Vec<usize> = Vec::new();
     let mut feature_count = 0;
     let mut writers = Vec::new();
+    let original_file = Path::new(path).file_name().unwrap().to_str().unwrap();
+    let index_file_path = output_folder.join(format!("{}.index", original_file));
+    let f = File::create(index_file_path)?;
+    let bf = BufWriter::new(f);
+    writers.push(bf);
+
     for line in reader.lines() {
         let line = line?;
         if has_header {
@@ -169,9 +175,11 @@ fn align_file(
             };
             let new_index = (i * n - i * (i - 1) / 2 + (j - i)) as usize;
             indices.push(new_index);
+            writers[0].write_all(new_index.to_string().as_bytes())?;
+            writers[0].write_all(b"\n")?;
             for i in 0..feature_count {
-                writers[i].write_all(row[i + 2].as_bytes())?;
-                writers[i].write_all(b"\n")?;
+                writers[i + 1].write_all(row[i + 2].as_bytes())?;
+                writers[i + 1].write_all(b"\n")?;
             }
         }
     }
