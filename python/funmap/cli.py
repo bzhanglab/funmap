@@ -139,12 +139,12 @@ def run(config_file, force_rerun):
 
     setup_logging(config_file)
     cfg = setup_experiment(config_file)
-    extra_feature_file = cfg["extra_feature_folder"]
+    extra_feature_foler = cfg["extra_feature_folder"]
     extra_feature_df = None
     uniq_gene = None
     if extra_feature_folder is not None:
         log.info("Loading extra feature file into dataframe")
-        (uniq_gene, extra_feature_df) = new_extra_feature(extra_feature_file)
+        (uniq_gene, extra_feature_df) = new_extra_feature(extra_feature_folder)
     gs_file = cfg["gs_file"]
     if (gs_file is not None) and (not check_gold_standard_file(gs_file)):
         return
