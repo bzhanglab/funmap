@@ -6,8 +6,9 @@ from pathlib import Path
 import click
 import numpy as np
 import pandas as pd
-from funmap import _lib as funmap_lib
+
 from funmap import __version__
+from funmap import _lib as funmap_lib
 from funmap.data_urls import misc_urls as urls
 from funmap.funmap import (
     compute_features,
@@ -88,8 +89,14 @@ def qc(config_file, force_rerun):
 
 @cli.command()
 def rust():
+    mapping = pd.read_csv(urls["mapping_file"], sep="\t")
+    coding = mapping.loc[mapping["coding"] == "coding", ["gene_name"]]
+    coding_genes = list(set(coding["gene_name"].to_list()))
     funmap_lib.process_files(
-        ["test_data/dia.tsv"], ["test_data/all_no_methyl.tsv"], "test_data"
+        ["test_data/dia.tsv"],
+        ["test_data/all_no_methyl.tsv"],
+        "test_data",
+        coding_genes,
     )
 
 
@@ -127,11 +134,12 @@ def run(config_file, force_rerun):
 
     setup_logging(config_file)
     cfg = setup_experiment(config_file)
-    extra_feature_file = cfg["extra_feature_file"]
+    extra_feature_file = cfg["extra_feature_folder"]
     extra_feature_df = None
-    if extra_feature_file is not None:
+    uniq_gene = None
+    if extra_feature_folder is not None:
         log.info("Loading extra feature file into dataframe")
-        extra_feature_df = process_extra_feature(extra_feature_file)
+        (uniq_gene, extra_feature_df) = new_extra_feature(extra_feature_file)
     gs_file = cfg["gs_file"]
     if (gs_file is not None) and (not check_gold_standard_file(gs_file)):
         return
@@ -195,6 +203,10 @@ def run(config_file, force_rerun):
     cc_dict, mr_dict, all_valid_ids = compute_features(
         cfg, feature_type, min_sample_count, saved_data_dir
     )
+
+    if uniq_gene is not None:
+        all_valid_ids = uniq_gene
+
     gs_args = {
         "task": task,
         "saved_data_dir": saved_data_dir,

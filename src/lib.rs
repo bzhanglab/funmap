@@ -1,4 +1,4 @@
-use ahash::{AHashMap, HashSet, HashSetExt};
+use ahash::{AHashMap, AHashSet, HashSet, HashSetExt};
 use pyo3::{exceptions::PyValueError, prelude::*};
 use serde_pickle::SerOptions;
 use std::{
@@ -33,11 +33,15 @@ use std::{
 ///
 /// Function
 /// Output: list of all output feature pkl files
+///
+/// TODO: Protein-coding gene filtering
 #[pyfunction]
+#[pyo3(signature = (expression_paths, extra_feature_paths, output_folder, valid_ids=None))]
 fn process_files(
     expression_paths: Vec<String>,
     extra_feature_paths: Vec<String>,
     output_folder: String,
+    valid_ids: Option<Vec<String>>,
 ) -> PyResult<bool> {
     // Step 1: Identify all unique genes
     // Across both expression and extra_feature_paths
@@ -98,10 +102,15 @@ fn process_files(
         }
     }
 
+    let mut uniq_gene: Vec<String> = if let Some(valid_ids) = valid_ids {
+        let valid_ids = AHashSet::from_iter(valid_ids);
+        uniq_gene.union(&valid_ids).cloned().collect()
+    } else {
+        uniq_gene.iter().cloned().collect()
+    };
+
     // Save to pickle
     // TODO: Look at other file formats
-
-    let mut uniq_gene: Vec<String> = uniq_gene.iter().cloned().collect();
 
     // Sort genes alphabetically
     uniq_gene.sort();

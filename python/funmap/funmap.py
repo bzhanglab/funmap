@@ -286,7 +286,13 @@ def assemble_feature_df(h5_file_mapping, df, dataset="cc"):
 
 
 def extract_features(
-    df, feature_type, cc_dict, ppi_feature=None, extra_feature_df=None, mr_dict=None
+    df,
+    feature_type,
+    cc_dict,
+    ppi_feature=None,
+    extra_feature_df=None,
+    mr_dict=None,
+    chunk_data: tuple[int, int] | None = None,
 ):
     """
       extract_features - creates the final feature `pandas` dataframe used by xgboost
@@ -323,12 +329,17 @@ def extract_features(
 
     # TODO: add extra features if provided
     if extra_feature_df is not None:
-        df.reset_index(drop=True, inplace=True)
-        merged_df = pd.merge(
-            df[["P1", "P2"]], extra_feature_df, on=["P1", "P2"], how="left"
-        )
-        merged_df = merged_df.drop(columns=["P1", "P2"])
-        feature_df = pd.merge(feature_df, merged_df, left_index=True, right_index=True)
+        if chunk_data is not None:
+            (start_idx, chunk_size) = chunk_data
+            feature_df = pd.concat(
+                [feature_df, extra_feature_df[start_idx : start_idx + chunk_size]],
+                axis=1,
+            )
+        else:
+            feature_df = pd.concat(
+                [feature_df, extra_feature_df],
+                axis=1,
+            )
     # move 'label' column to the end of the dataframe if it exists
     if "label" in feature_df.columns:
         feature_df = feature_df[
@@ -513,10 +524,10 @@ def prepare_gs_data(**kwargs):
     else:
         ppi_feature = None
     gs_train_df = extract_features(
-        gs_train, feature_type, cc_dict, ppi_feature, extra_feature_df, mr_dict
+        gs_train, feature_type, cc_dict, ppi_feature, extra_feature_df, mr_dict, None
     )
     gs_test_df = extract_features(
-        gs_test, feature_type, cc_dict, ppi_feature, extra_feature_df, mr_dict
+        gs_test, feature_type, cc_dict, ppi_feature, extra_feature_df, mr_dict, None
     )
 
     # store both the ids with gs_test_df for later use
@@ -754,6 +765,7 @@ def predict_all_pairs(
                 cur_ppi_feature,
                 extra_feature_df,
                 mr_dict,
+                (start_idx, chunk_size),
             )
             predictions = model.predict_proba(feature_df)
             prediction_df = pd.DataFrame(predictions[:, 1], columns=["prediction"])

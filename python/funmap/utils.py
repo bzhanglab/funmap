@@ -7,7 +7,8 @@ import tarfile
 import urllib
 from pathlib import Path
 from urllib.parse import urlparse
-
+import glob
+import pickle
 import pandas as pd
 import yaml
 
@@ -566,6 +567,39 @@ def check_extra_feature_file(file_path, missing_value="NA"):
                         return False
 
     return True
+
+
+def read_files_to_dataframe(file_paths):
+    # Read each file into a DataFrame and concatenate
+    dataframes = []
+    for file_path in file_paths:
+        # Read file into DataFrame; each line becomes a row in a single column
+        df = pd.read_csv(file_path, header=None, names=["data"])
+        dataframes.append(df)
+
+    # Concatenate all DataFrames into one
+    final_df = pd.concat(dataframes, ignore_index=True)
+    return final_df
+
+
+def reorder_dataframe(final_df, index_file_path):
+    # Read the index file
+    with open(index_file_path, "r") as f:
+        indices = [int(line.strip()) for line in f.readlines()]
+
+    # Reorder the DataFrame using the indices
+    reordered_df = final_df.iloc[indices].reset_index(drop=True)
+    return reordered_df
+
+
+def new_extra_feature(extra_feature_folder):
+    index_file = list(glob.glob(f"{extra_feature_folder}/*.index"))[0]
+    features = list(glob.glob(f"{extra_feature_folder}/*.col"))
+    with open(f"{extra_feature_folder}/uniq_gene.pkl", "rb") as r:
+        uniq_gene = pickle.load(r)
+    df = read_files_to_dataframe(features)
+    df = read_files_to_dataframe(df, index_file)
+    return (uniq_gene, index_file)
 
 
 def process_extra_feature(extra_feature_file) -> pd.DataFrame:
