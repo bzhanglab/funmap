@@ -601,7 +601,7 @@ def new_extra_feature(extra_feature_folder):
     with open(f"{extra_feature_folder}/uniq_gene.pkl", "rb") as r:
         uniq_gene = pickle.load(r)
     df = read_files_to_dataframe(features)
-    df = read_files_to_dataframe(df, index_file)
+    df = reorder_dataframe(df, index_file)
     return (uniq_gene, index_file)
 
 
