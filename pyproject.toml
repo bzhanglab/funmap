@@ -1,0 +1,50 @@
+[project]
+name = "funmap"
+version = "0.2.0"
+description = "generate gene co-function networks using omics data"
+authors = [{ name = "Zhiao Shi", email = "zhiao.shi@gmail.com" }]
+readme = "README.md"
+license = { text = "MIT license" }
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+    "h5py>=3.12.1",
+    "numpy>=2.1.1",
+    "seaborn>=0.13.2",
+    "tqdm>=4.66.5",
+    "xgboost>=2.1.1",
+    "pyyaml>=6.0.2",
+    "scipy>=1.14.1",
+    "pyarrow>=17.0.0",
+    "pandas>=2.2.3",
+    "joblib>=1.4.2",
+    "matplotlib>=3.9.2",
+    "scikit-learn>=1.5.2",
+    "imbalanced-learn>=0.12.3",
+    "pypdf2>=3.0.1",
+    "matplotlib-venn>=1.1.1",
+    "networkx>=3.3",
+    "powerlaw>=1.5",
+    "click>=8.1.7",
+    "tables>=3.10.1",
+]
+
+[project.scripts]
+funmap = "funmap.cli:cli"
+
+[build-system]
+requires = ["maturin>=1,<2"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+python-source = "python"
+module-name = "funmap._lib"
+
+[tool.rye]
+managed = true
+dev-dependencies = ["maturin>=1.7.4"]
