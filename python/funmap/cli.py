@@ -27,7 +27,7 @@ from funmap.utils import (
     check_extra_feature_file,
     check_gold_standard_file,
     cleanup_experiment,
-    process_extra_feature,
+    new_extra_feature,
     setup_experiment,
 )
 
