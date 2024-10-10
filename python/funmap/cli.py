@@ -139,7 +139,7 @@ def run(config_file, force_rerun):
 
     setup_logging(config_file)
     cfg = setup_experiment(config_file)
-    extra_feature_foler = cfg["extra_feature_folder"]
+    extra_feature_folder = cfg["extra_feature_folder"]
     extra_feature_df = None
     uniq_gene = None
     if extra_feature_folder is not None:
