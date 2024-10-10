@@ -51,7 +51,7 @@ fn process_files(
 
     // Read expression data where first column is gene information;
     for file_path in expression_paths.iter() {
-        let file = File::open(file_path)?;
+        let file = File::open(file_path).expect("Could not read expression data");
         let reader = BufReader::new(file);
         let mut has_header = true;
         for line in reader.lines() {
@@ -77,7 +77,7 @@ fn process_files(
 
     // Read extra feature data, where first and second column are genes
     for file_path in extra_feature_paths.iter() {
-        let file = File::open(file_path)?;
+        let file = File::open(file_path).expect("Could not read extra feature file");
         let reader = BufReader::new(file);
         let mut has_header = true;
         for line in reader.lines() {
@@ -116,7 +116,7 @@ fn process_files(
     uniq_gene.sort();
     let folder_path = Path::new(&output_folder);
     let uniq_gene_file_path = folder_path.join("uniq_gene.pkl");
-    let mut w = File::create(uniq_gene_file_path)?;
+    let mut w = File::create(uniq_gene_file_path).expect("Could not cread uniq_gene.pkl");
     serde_pickle::to_writer(&mut w, &uniq_gene, SerOptions::default()).unwrap();
     let n = uniq_gene.len();
     // Re-align each file
@@ -127,7 +127,8 @@ fn process_files(
     }
 
     for file_path in extra_feature_paths {
-        align_file(&file_path, &gene_index_map, n as i32, folder_path)?;
+        align_file(&file_path, &gene_index_map, n as i32, folder_path)
+            .expect("Error aligning file");
     }
     // One column of indices, and one column of values. Separated by file
     Ok(true)
