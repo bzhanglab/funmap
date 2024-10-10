@@ -577,7 +577,11 @@ def read_files_to_dataframe(file_paths):
     dataframes = []
     for file_path in file_paths:
         # Read file into DataFrame; each line becomes a row in a single column
-        df = pd.read_csv(file_path, header=None, names=["data"])
+        df = pd.read_csv(
+            file_path,
+            header=None,
+            names=[os.path.basename(file_path).replace(".col", "")],
+        )
         dataframes.append(df)
 
     # Concatenate all DataFrames into one
