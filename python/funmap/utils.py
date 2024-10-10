@@ -619,7 +619,7 @@ def new_extra_feature(extra_feature_folder):
     df = read_files_to_dataframe(features)
     log.info(df.head())
     df = reorder_dataframe(df, index_file, max_len)
-    return (uniq_gene, index_file)
+    return (uniq_gene, df)
 
 
 def process_extra_feature(extra_feature_file) -> pd.DataFrame:
