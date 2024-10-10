@@ -93,8 +93,13 @@ def rust():
     coding = mapping.loc[mapping["coding"] == "coding", ["gene_name"]]
     coding_genes = list(set(coding["gene_name"].to_list()))
     funmap_lib.process_files(
-        ["test_data/dia.tsv"],
-        ["test_data/all_no_methyl.tsv"],
+        [
+            "dummy/dia.tsv",
+            "dummy/methyl.tsv",
+            "dummy/RNAseq.tsv",
+            "dummy/tmt_abundance",
+        ],
+        ["dummy/all_no_methyl.tsv"],
         "test_data",
         coding_genes,
     )
