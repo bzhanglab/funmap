@@ -585,13 +585,21 @@ def read_files_to_dataframe(file_paths):
     return final_df
 
 
-def reorder_dataframe(final_df, index_file_path):
+def reorder_dataframe(final_df, index_file_path, max_length):
+    reordered_df = pd.DataFrame(index=range(max_length), columns=final_df.columns)
     # Read the index file
     with open(index_file_path, "r") as f:
         indices = [int(line.strip()) for line in f.readlines()]
 
-    # Reorder the DataFrame using the indices
-    reordered_df = final_df.iloc[indices].reset_index(drop=True)
+    # Ensure the length of the indices is less than or equal to max_length
+    if len(indices) > max_length:
+        raise ValueError("More indices provided than the max_length.")
+
+    # Fill in the reordered DataFrame based on the provided indices
+    for i, index in enumerate(indices):
+        if index < max_length:
+            reordered_df.iloc[index] = final_df.iloc[i]
+
     return reordered_df
 
 
@@ -600,8 +608,12 @@ def new_extra_feature(extra_feature_folder):
     features = list(glob.glob(f"{extra_feature_folder}/*.col"))
     with open(f"{extra_feature_folder}/uniq_gene.pkl", "rb") as r:
         uniq_gene = pickle.load(r)
+    i = j = len(uniq_gene) - 1
+    n = i + 1
+    max_len = i * n - i * (i - 1) // 2 + (j - i)
+
     df = read_files_to_dataframe(features)
-    df = reorder_dataframe(df, index_file)
+    df = reorder_dataframe(df, index_file, max_len)
     return (uniq_gene, index_file)
 
 
