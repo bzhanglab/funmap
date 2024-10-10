@@ -613,6 +613,7 @@ def new_extra_feature(extra_feature_folder):
     max_len = i * n - i * (i - 1) // 2 + (j - i)
 
     df = read_files_to_dataframe(features)
+    log.info(df.head())
     df = reorder_dataframe(df, index_file, max_len)
     return (uniq_gene, index_file)
 
