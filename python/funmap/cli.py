@@ -97,7 +97,7 @@ def rust():
             "dummy/dia.tsv",
             "dummy/methyl.tsv",
             "dummy/RNAseq.tsv",
-            "dummy/tmt_abundance",
+            "dummy/tmt_abundance.tsv",
         ],
         ["dummy/all_no_methyl.tsv"],
         "test_data",

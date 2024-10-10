@@ -345,6 +345,7 @@ def get_config(cfg_file: Path):
         "step_size": 1000,
         "lr_cutoff": 50,
         "only_extra_features": False,
+        "extra_feature_folder": None,
     }
 
     with open(cfg_file, "r") as fh:
@@ -370,6 +371,8 @@ def get_config(cfg_file: Path):
 
     if "extra_feature_file" in cfg_dict:
         cfg["extra_feature_file"] = cfg_dict["extra_feature_file"]
+    if "extra_feature_folder" in cfg_dict:
+        cfg["extra_feature_folder"] = cfg_dict["extra_feature_folder"]
 
     if "gs_file" in cfg_dict:
         cfg["gs_file"] = cfg_dict["gs_file"]
