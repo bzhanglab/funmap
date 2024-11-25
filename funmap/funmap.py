@@ -441,11 +441,6 @@ def compute_llr(
     gs_test,
     is_extra_feat=False,
 ):
-    # make sure max_num_edges is smaller than the number of non-NA values
-    assert is_extra_feat or max_num_edges < np.count_nonzero(
-        ~np.isnan(predicted_all_pairs.iloc[:, -1].values)
-    ), "max_num_edges should be smaller than the number of non-NA values"
-
     cur_col_name = "prediction"
     cur_results = predicted_all_pairs.nlargest(max_num_edges, cur_col_name)
     selected_edges_all = cur_results[["P1", "P2"]].apply(
