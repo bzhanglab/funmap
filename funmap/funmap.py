@@ -421,7 +421,7 @@ def train_model(X, y, seed, n_jobs, feature_mapping, model_dir):
             Xtrain = X.loc[:, ~X.columns.str.endswith("_PPI")]
         else:
             Xtrain = X
-        pickle.dump([Xtrain, y], open(model_dir / f"training_data_{ft}.pkl"))
+        pickle.dump([Xtrain, y], open(model_dir / f"training_data_{ft}.pkl", "wb"))
         model = clf.fit(Xtrain, y)
         models[ft] = model
         ml_model_file = model_dir / f"model_{ft}.pkl.gz"
