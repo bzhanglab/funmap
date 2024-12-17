@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = [
+#     "markdown2",
+# ]
+# ///
+
 import glob
 import os
 from datetime import datetime
@@ -34,3 +41,4 @@ with open("index.html", "r") as f:
 
 with open("index.html", "w") as f:
     f.write(index)
+
