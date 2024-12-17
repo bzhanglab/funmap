@@ -755,7 +755,7 @@ def predict_all_pairs(
     chunk_size = 1000000
     log.info("Genearating all pairs ...")
     all_ids = sorted(all_ids)
-    all_id_file = prediction_dir / "all_ids.pkl"
+    all_id_file = prediction_dir / "all_ids.pkl.gz"
     with gzip.open(all_id_file, "wb") as fh:
         pickle.dump(all_ids, fh)
     all_pairs = list(itertools.combinations(all_ids, 2))
