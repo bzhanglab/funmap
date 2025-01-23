@@ -23,7 +23,7 @@ requirements = [
     "powerlaw==1.5",
     "click==8.1.7",
     "h5py==3.10.0",
-    "tables==3.8.0",
+    "tables==3.10.1",
 ]
 
 test_requirements = []
