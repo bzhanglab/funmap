@@ -427,7 +427,7 @@ def train_model(X, y, seed, n_jobs, feature_mapping, model_dir):
         ml_model_file = model_dir / f"model_{ft}.pkl.gz"
         with gzip.open(ml_model_file, "wb") as fh:
             pickle.dump(model, fh)
-
+        model.best_estimator_.save_model(model_dir / f"model_{ft}_best_estimator.json")
         log.info(f"Training model for {ft} ... done")
 
     return models
@@ -760,7 +760,7 @@ def predict_all_pairs(
         pickle.dump(all_ids, fh)
     all_pairs = list(itertools.combinations(all_ids, 2))
     log.info("Genearating all pairs ... done")
-    log.info(f'Number of valid ids {format(len(all_ids), ",")}')
+    log.info(f"Number of valid ids {format(len(all_ids), ',')}")
     # remove all "chunk_*.parquet" files in prediction_dir if they exist
     pattern = os.path.join(prediction_dir, "chunk_*.parquet")
     matching_files = glob.glob(pattern)
@@ -768,7 +768,7 @@ def predict_all_pairs(
         os.remove(file)
 
     for ft in model_dict:
-        log.info(f'Predicting all pairs ({format(len(all_pairs), ",")}) for {ft} ...')
+        log.info(f"Predicting all pairs ({format(len(all_pairs), ',')}) for {ft} ...")
         model = model_dict[ft]
 
         def process_and_save_chunk(start_idx, chunk_id):
@@ -813,4 +813,4 @@ def predict_all_pairs(
         for file in matching_files:
             os.remove(file)
 
-        log.info(f'Predicting all {format(len(all_pairs), ",")} pairs for {ft} done.')
+        log.info(f"Predicting all {format(len(all_pairs), ',')} pairs for {ft} done.")
