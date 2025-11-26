@@ -233,6 +233,11 @@ def run(config_file, force_rerun):
                 log.error(f'Predicted all pairs file {predicted_all_pairs_file[ft]} does not exist.')
                 return
             predicted_all_pairs = pd.read_parquet(predicted_all_pairs_file[ft])
+            # Check max_num_edges before computing LLR
+            num_valid = np.count_nonzero(~np.isnan(predicted_all_pairs.iloc[:, -1].values))
+            if max_num_edges >= num_valid:
+                log.warning(f'max_num_edges ({max_num_edges:,}) is >= number of valid predictions '
+                          f'({num_valid:,}). This will cause an error.')
             # also save the llr results to file
             compute_llr(predicted_all_pairs, llr_res_file[ft], start_edge_num, max_num_edges, step_size,
                         gs_test)

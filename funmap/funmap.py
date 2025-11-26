@@ -344,8 +344,21 @@ def train_model(X, y, seed, n_jobs, feature_mapping, model_dir):
 def compute_llr(predicted_all_pairs, llr_res_file, start_edge_num, max_num_edges, step_size,
                 gs_test):
     # make sure max_num_edges is smaller than the number of non-NA values
-    assert max_num_edges < np.count_nonzero(~np.isnan(predicted_all_pairs.iloc[:, -1].values)), \
-        'max_num_edges should be smaller than the number of non-NA values'
+    num_valid_predictions = np.count_nonzero(~np.isnan(predicted_all_pairs.iloc[:, -1].values))
+    total_predictions = len(predicted_all_pairs)
+    log.info(f'Total predictions: {total_predictions:,}, Valid (non-NaN) predictions: '
+             f'{num_valid_predictions:,}')
+
+    if max_num_edges >= num_valid_predictions:
+        suggested_value = min(max_num_edges, int(num_valid_predictions * 0.9))
+        raise ValueError(
+            f'max_num_edges ({max_num_edges}) must be smaller than the number of valid '
+            f'predictions ({num_valid_predictions:,}).\n'
+            f'Please reduce max_num_edges in your config file to a value less than '
+            f'{num_valid_predictions:,} (e.g., {suggested_value:,}).\n'
+            f'Alternatively, you can check the number of valid predictions by loading your '
+            f'prediction file and counting non-NaN values in the prediction column.'
+        )
 
     cur_col_name = 'prediction'
     cur_results = predicted_all_pairs.nlargest(max_num_edges, cur_col_name)
