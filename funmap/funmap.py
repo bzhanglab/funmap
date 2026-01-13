@@ -4,6 +4,8 @@ import math
 import h5py
 import gzip
 import pickle
+import urllib
+import urllib.request
 import pyarrow as pa
 import pyarrow.parquet as pq
 from concurrent.futures import ThreadPoolExecutor
@@ -294,7 +296,9 @@ def get_ppi_feature():
     ppi_features = {}
     # use pandas to read the file
     for (i, url) in enumerate(urls):
-        data = pd.read_csv(url, sep='\t', header=None)
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (compatible; funmap/1.0)'})
+        response = urllib.request.urlopen(req)
+        data = pd.read_csv(response, sep='\t', header=None)
         data = data.apply(lambda x: tuple(sorted(x)), axis=1)
         ppi_name = f'{feature_names[i]}_PPI'
         ppi_features[ppi_name] = data.tolist()

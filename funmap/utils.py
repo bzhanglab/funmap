@@ -24,7 +24,8 @@ def is_url_scheme(path):
 
 def read_csv_with_md5_check(url, expected_md5=None, local_path='downloaded_file.csv', **kwargs):
     try:
-        response = urllib.request.urlopen(url)
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (compatible; funmap/1.0)'})
+        response = urllib.request.urlopen(req)
         content = response.read()
 
         if expected_md5:
