@@ -1,14 +1,16 @@
 import csv
-import yaml
-import os
-import tarfile
-import re
 import hashlib
-import urllib
-from urllib.parse import urlparse
-from pathlib import Path
-import pandas as pd
+import os
+import re
 import shutil
+import tarfile
+import urllib
+from pathlib import Path
+from urllib.parse import urlparse
+
+import pandas as pd
+import yaml
+
 from funmap.data_urls import misc_urls as urls
 from funmap.logger import setup_logger
 
@@ -73,8 +75,7 @@ def normalize_filename(filename):
 
 
 def get_data_dict(config, min_sample_count=15):
-    """
-    Returns a dictionary of data from the provided data configuration, filtered to only include genes that are
+    """Returns a dictionary of data from the provided data configuration, filtered to only include genes that are
     coding and have at least `min_sample_count` samples.
 
     Returns
@@ -147,8 +148,7 @@ def get_data_dict(config, min_sample_count=15):
 
 
 def get_node_edge(edge_list):
-    """
-    Calculate the number of nodes and edges, and the ratio of edges per node,
+    """Calculate the number of nodes and edges, and the ratio of edges per node,
     and return the results in a dictionary format.
 
     Parameters
@@ -193,8 +193,7 @@ def get_node_edge(edge_list):
 
 
 def get_node_edge_overlap(network_info):
-    """
-    Computes the node and edge overlap between networks.
+    """Computes the node and edge overlap between networks.
 
     Parameters
     ----------
@@ -205,6 +204,7 @@ def get_node_edge_overlap(network_info):
     -------
     overlap : dict
         A dictionary with the node and edge overlap between networks.
+
     """
     networks = pd.DataFrame(
         columns=["name", "type", "n_node", "n_edge", "edge_per_node", "nodes", "edges"]
@@ -411,9 +411,8 @@ def get_config(cfg_file: Path):
 
 
 def check_gold_standard_file(file_path, min_count=10000):
-    """
-    min_threshold : int
-        The minimum threshold for the lesser of '0' and '1' counts in the 'Class' column.
+    """min_threshold : int
+    The minimum threshold for the lesser of '0' and '1' counts in the 'Class' column.
 
     """
     try:
@@ -461,8 +460,7 @@ def check_gold_standard_file(file_path, min_count=10000):
 
 
 def check_extra_feature_file(file_path, missing_value="NA"):
-    """
-    Notes
+    """Notes
     -----
     This function checks the following criteria for the measurement TSV file:
     - The file must have a header row.
@@ -474,6 +472,7 @@ def check_extra_feature_file(file_path, missing_value="NA"):
     If any of the checks fail, the function will print informative error messages and return False.
 
     The TSV file should be tab-separated.
+
     """
     try:
         with open(file_path, "r", newline="") as tsv_file:

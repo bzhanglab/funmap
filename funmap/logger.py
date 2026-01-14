@@ -1,7 +1,8 @@
-import yaml
 import logging
 import logging.config
 from pathlib import Path
+
+import yaml
 
 from .saving import log_path
 
@@ -9,8 +10,7 @@ LOG_LEVEL = logging.INFO
 
 
 def setup_logging(run_config, log_config="logging.yml") -> None:
-    """
-    Setup ``logging.config``
+    """Setup ``logging.config``.
 
     Parameters
     ----------
@@ -19,6 +19,7 @@ def setup_logging(run_config, log_config="logging.yml") -> None:
 
     log_config : str
         Path to configuration file for logging
+
     """
     log_config = Path(log_config)
 

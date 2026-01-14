@@ -1,19 +1,33 @@
-import os
-import click
-import pandas as pd
-import numpy as np
 import gzip
+import os
 import pickle
 from pathlib import Path
-from funmap.funmap import compute_llr, predict_all_pairs, dataset_llr, predict_all_pairs
-from funmap.plotting import explore_data, plot_results, merge_and_delete
-from funmap.funmap import train_ml_model, prepare_gs_data, get_cutoff, get_ppi_feature
-from funmap.funmap import compute_features, predict_network
-from funmap.data_urls import misc_urls as urls
-from funmap.logger import setup_logging, setup_logger
-from funmap.utils import setup_experiment, cleanup_experiment, check_gold_standard_file
-from funmap.utils import check_extra_feature_file
+
+import click
+import numpy as np
+import pandas as pd
+
 from funmap import __version__
+from funmap.data_urls import misc_urls as urls
+from funmap.funmap import (
+    compute_features,
+    compute_llr,
+    dataset_llr,
+    get_cutoff,
+    get_ppi_feature,
+    predict_all_pairs,
+    predict_network,
+    prepare_gs_data,
+    train_ml_model,
+)
+from funmap.logger import setup_logger, setup_logging
+from funmap.plotting import explore_data, merge_and_delete, plot_results
+from funmap.utils import (
+    check_extra_feature_file,
+    check_gold_standard_file,
+    cleanup_experiment,
+    setup_experiment,
+)
 
 log = setup_logger(__name__)
 
@@ -21,9 +35,7 @@ log = setup_logger(__name__)
 @click.group(help="funmap command line interface")
 @click.version_option(version=f"{__version__}")
 def cli():
-    """
-    Command line interface for funmap.
-    """
+    """Command line interface for funmap."""
     click.echo("====== funmap =======")
 
 

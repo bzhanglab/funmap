@@ -1,27 +1,28 @@
-import os
 import glob
-import math
-import h5py
 import gzip
+import itertools
+import math
+import os
 import pickle
+from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import List
+
+import h5py
+import numpy as np
+import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-from concurrent.futures import ThreadPoolExecutor
-from tqdm import tqdm
-from sklearn.utils import resample
-import itertools
-from typing import List
-from pathlib import Path
-from collections import defaultdict, Counter
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import StratifiedKFold
 import xgboost as xgb
-from funmap.utils import get_data_dict, is_url_scheme, read_csv_with_md5_check
-from funmap.data_urls import network_info, misc_urls as urls
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
+from sklearn.utils import resample
+from tqdm import tqdm
+
+from funmap.data_urls import misc_urls as urls
+from funmap.data_urls import network_info
 from funmap.logger import setup_logger
+from funmap.utils import get_data_dict, is_url_scheme, read_csv_with_md5_check
 
 log = setup_logger(__name__)
 
@@ -56,17 +57,16 @@ def get_valid_gs_data(gs_path: str, valid_gene_list: List[str], md5=None):
 
 
 def pairwise_mutual_rank(pcc_matrix):
-    """
-    Calculate the pairwise mutual rank matrix based on the given Pearson correlation coefficient matrix.
+    """Calculate the pairwise mutual rank matrix based on the given Pearson correlation coefficient matrix.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     pcc_matrix : numpy.ndarray
         The Pearson correlation coefficient matrix. It should be a square matrix where
         pcc_matrix[i, j] represents the correlation coefficient between variables i and j.
 
-    Returns:
-    --------
+    Returns
+    -------
     numpy.ndarray
         A matrix containing the pairwise mutual ranks between variables based on the
         provided Pearson correlation coefficient matrix. The matrix has the same shape
@@ -109,6 +109,7 @@ def pairwise_mutual_rank(pcc_matrix):
     The resulting matrix contains the mutual ranks between all pairs of variables based on their
     Pearson correlation coefficients. Higher mutual rank values indicate stronger and more consistent
     correlations between variables.
+
     """
     valid_a = ~np.isnan(pcc_matrix)
     valid_b = valid_a.T
@@ -137,7 +138,7 @@ def pairwise_mutual_rank(pcc_matrix):
 
 
 def compute_features(cfg, feature_type, min_sample_count, output_dir):
-    """Compute the pearson correlation coefficient for each edge in the list of edges and for each"""
+    """Compute the pearson correlation coefficient for each edge in the list of edges and for each."""
     data_dict, all_valid_ids = get_data_dict(cfg, min_sample_count)
     cc_dict = {}
     for i in data_dict:
@@ -302,8 +303,7 @@ def extract_features(
 
 
 def get_ppi_feature():
-    """
-    Returns a dictionary of protein-protein interaction (PPI) features.
+    """Returns a dictionary of protein-protein interaction (PPI) features.
 
     The PPI features are extracted from data in the "network_info" dictionary and are specified by the
     "feature_names" list. The URLs of the relevant data are extracted from "network_info" and read
@@ -314,6 +314,7 @@ def get_ppi_feature():
     ppi_features: dict
         A dictionary with PPI features, where the keys are the feature names and the values are lists of tuples
         representing the protein interactions.
+
     """
     feature_names = ["BioGRID", "BioPlex", "HI-union"]
     urls = [

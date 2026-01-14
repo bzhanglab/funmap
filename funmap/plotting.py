@@ -1,30 +1,31 @@
-from typing import List, Dict
 import os
+import warnings
 from pathlib import Path
-import pandas as pd
-import numpy as np
-from funmap.utils import get_data_dict, get_node_edge_overlap
+from typing import Dict, List
+
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.cbook import flatten
-from matplotlib.ticker import MaxNLocator
 import matplotlib.ticker as mticker
+import networkx as nx
+import numpy as np
+import pandas as pd
+import powerlaw
+import PyPDF2
+import seaborn as sns
+from matplotlib.cbook import flatten
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
-import seaborn as sns
-import PyPDF2
+from matplotlib.ticker import MaxNLocator
 from matplotlib_venn import venn2, venn2_circles
-import networkx as nx
-import warnings
-import powerlaw
-from funmap.logger import setup_logging, setup_logger
+
+from funmap.logger import setup_logger, setup_logging
+from funmap.utils import get_data_dict, get_node_edge_overlap
 
 log = setup_logger(__name__)
 
 
 def edge_number(x, pos):
-    """
-    Formatter function to format the x-axis tick labels
+    """Formatter function to format the x-axis tick labels.
 
     Parameters
     ----------
@@ -37,6 +38,7 @@ def edge_number(x, pos):
     -------
     s : str
         The formatted string of the value.
+
     """
     if x >= 1e6:
         s = "{:1.1f}M".format(x * 1e-6)
@@ -113,8 +115,7 @@ def plot_llr_comparison(
 
 
 def explore_data(data_config: Path, min_sample_count: int, output_dir: Path):
-    """
-    Generate plots to explore and visualize data
+    """Generate plots to explore and visualize data.
 
     Parameters
     ----------
@@ -313,8 +314,7 @@ def plot_results(cfg, validation_results, llr_ds, gs_dict, cutoff_llr, figure_di
 
 
 def plot_1d_llr(ax, feature_df, feature_name, feature_type, data_type, n_bins):
-    """
-    Plot the 1D histogram of the likelihood ratio for each feature
+    """Plot the 1D histogram of the likelihood ratio for each feature.
 
     Parameters
     ----------
@@ -334,6 +334,7 @@ def plot_1d_llr(ax, feature_df, feature_name, feature_type, data_type, n_bins):
     Returns
     -------
     None
+
     """
     df = feature_df.loc[:, [feature_name]]
     cur_df = df.dropna()
@@ -390,8 +391,7 @@ def plot_1d_llr(ax, feature_df, feature_name, feature_type, data_type, n_bins):
 def plot_2d_llr(
     ax, feature_df, feature_type, pair_name, rna_feature, pro_feature, n_bins
 ):
-    """
-    Plots a 2D log likelihood ratio between two features in a scatter plot.
+    """Plots a 2D log likelihood ratio between two features in a scatter plot.
 
     Parameters
     ----------
@@ -702,8 +702,7 @@ def plot_llr_compare_networks(validaton_results, cutoff, cutoff_llr, output_file
 
 
 def plot_overlap_venn(network_name, overlap, node_or_edge, color, output_dir):
-    """
-    Plot the Venn diagrams for the overlap between different datasets.
+    """Plot the Venn diagrams for the overlap between different datasets.
 
     Parameters
     ----------
@@ -911,8 +910,7 @@ def plot_network_stats(network_info, feature_type, output_dir):
 
 
 def merge_and_delete(fig_dir, file_list, output_file):
-    """
-    Merge multiple PDF files into one and delete the original files.
+    """Merge multiple PDF files into one and delete the original files.
 
     Parameters
     ----------
