@@ -12,6 +12,7 @@ min_sample_count: 15
 max_num_edges: 25000
 step_size: 1
 lr_cutoff: 10
+data_path: "aml_test.tgz"
 # path to the root directory of the data files
 data_files:
   - name: 'BeatAMl-T'
