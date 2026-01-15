@@ -1,15 +1,16 @@
-import yaml
 import logging
 import logging.config
 from pathlib import Path
+
+import yaml
 
 from .saving import log_path
 
 LOG_LEVEL = logging.INFO
 
+
 def setup_logging(run_config, log_config="logging.yml") -> None:
-    """
-    Setup ``logging.config``
+    """Setup ``logging.config``.
 
     Parameters
     ----------
@@ -18,6 +19,7 @@ def setup_logging(run_config, log_config="logging.yml") -> None:
 
     log_config : str
         Path to configuration file for logging
+
     """
     log_config = Path(log_config)
 
@@ -44,7 +46,7 @@ def setup_logging(run_config, log_config="logging.yml") -> None:
         handler_critical.setLevel(logging.CRITICAL)
 
         # Create formatters (if needed)
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
         handler_debug.setFormatter(formatter)
         handler_info.setFormatter(formatter)
         handler_warning.setFormatter(formatter)
@@ -69,7 +71,9 @@ def setup_logging(run_config, log_config="logging.yml") -> None:
         logger.addHandler(console_handler)
 
         # Log a warning message to the console
-        logger.warning(f'"{log_config}" not found. Using basicConfig with custom log files.')
+        logger.warning(
+            f'"{log_config}" not found. Using basicConfig with custom log files.'
+        )
         return
 
     with open(log_config, "rt") as f:
@@ -85,6 +89,6 @@ def setup_logging(run_config, log_config="logging.yml") -> None:
 
 
 def setup_logger(name):
-    log = logging.getLogger(f'funmap.{name}')
+    log = logging.getLogger(f"funmap.{name}")
     log.setLevel(LOG_LEVEL)
     return log

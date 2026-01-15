@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "funmap"
+version = "0.2.2"
+authors = [{name = "Zhiao Shi", email = "zhiao.shi@gmail.com"}]
+license = {text = "MIT license"}
+description = "generate gene co-function networks using omics data"
+keywords = [
+    "funmap",
+    "bioinformatics",
+    "biological-network",
+]
+urls = {Homepage = "https://github.com/bzhanglab/funmap"}
+requires-python = ">=3.8"
+dependencies = [
+    "pyyaml==6.0.1",
+    "xgboost==2.0.0",
+    "numpy==1.24.4",
+    "scipy==1.10.1",
+    "pyarrow==13.0.0",
+    "pandas==2.0.3",
+    "joblib==1.3.2",
+    "matplotlib==3.7.3",
+    "seaborn==0.13.0",
+    "scikit-learn==1.3.2",
+    "imbalanced-learn==0.11.0",
+    "tqdm==4.66.1",
+    "PyPDF2==3.0.1",
+    "matplotlib_venn==0.11.9",
+    "networkx==3.1",
+    "powerlaw==1.5",
+    "click==8.1.7",
+    "h5py==3.10.0",
+    "tables>=3.8.0",
+]
+
+[project.scripts]
+funmap = "funmap.cli:cli"
+
+[project.optional-dependencies]
+testing = []
+
+[tool.flake8]
+exclude = "docs"
+
+[tool.bumpversion]
+current_version = "0.2.1"
+commit = "True"
+tag = "True"
+
+[tool.bumpversion.file.setup.py]
+search = "version='{current_version}'"
+replace = "version='{new_version}'"
+
+[tool.bumpversion.file."funmap/__init__".py]
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"
+
+[tool.ruff.lint]
+external = [
+    "DOC", # pydoclint
+]
+select = ["D"]
+
+[tool.distutils.bdist_wheel]
+universal = 1
