@@ -278,10 +278,10 @@ def plot_results(cfg, validation_results, llr_ds, gs_dict, cutoff_llr, figure_di
             "name": ["BioGRID", "BioPlex", "HI-union", "STRING"],
             "type": ["BioGRID", "BioPlex", "HI", "STRING"],
             "url": [
-                "https://figshare.com/ndownloader/files/39125054",
-                "https://figshare.com/ndownloader/files/39125051",
-                "https://figshare.com/ndownloader/files/39125093",
-                "https://figshare.com/ndownloader/files/39125090",
+                "https://api.figshare.com/v2/file/download/39125054",
+                "https://api.figshare.com/v2/file/download/39125051",
+                "https://api.figshare.com/v2/file/download/39125093",
+                "https://api.figshare.com/v2/file/download/39125090",
             ],
         }
         # convert the info to a data frame where the url is read as a dataframe
